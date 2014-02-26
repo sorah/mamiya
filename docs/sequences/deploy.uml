@@ -1,0 +1,57 @@
+@startuml
+== Building ==
+Master --> Master: Build package
+note right of Master: e.g. assets precompile
+Master --> Storage: Upload package
+
+== Distributing ==
+Master --> Client: Download request
+activate Master
+Master --> Master: Wait all clients to have package to deploy
+
+alt if doesn't have package
+    activate Client
+    Client --> Client: Set status serf tag
+    Client --> Storage: HTTP request
+    Storage --> Client: Response package
+    Client --> Client: Set packages serf tag
+    Client --> Master: Report download finish
+    deactivate Client
+end
+
+deactivate Master
+
+== Preparing ==
+
+Master --> Client: Request to prepare package
+activate Master
+Master --> Master: Wait all clients to have package to deploy
+activate Client
+Client --> Client: Set status serf tag
+Client --> Client: Unpack package
+Client --> Client: Run prepare phase
+note left of Client: e.g. bundle install, config files
+Client --> Client: Set prepared serf tag
+Client --> Client: Set status serf tag
+Client --> Master: Report preparation finish
+deactivate Client
+deactivate Master
+
+== Restarting ==
+
+Master --> Client: Request restarting
+activate Master
+Master --> Master: Wait all clients restarted
+activate Client
+Client --> Client: Set status serf tag
+Client --> Client: Run restart phase
+Client --> Master: Report restart complete
+Client --> Client: Set status serf tag
+Client --> Client: Wait to be reloaded
+Client --> Client: Set status serf tag
+Client --> Client: Set deployed serf tag
+Client --> Master: Report deploy complete
+deactivate Client
+deactivate Master
+
+@enduml

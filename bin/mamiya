@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require 'mamiya'
+require 'mamiya/cli'
+
+Mamiya::CLI.start(ARGV).run
