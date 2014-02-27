@@ -37,15 +37,16 @@ Client --> Master: Report preparation finish
 deactivate Client
 deactivate Master
 
-== Restarting ==
+== Finalize ==
 
-Master --> Client: Request restarting
+Master --> Client: Request finalize
 activate Master
 Master --> Master: Wait all clients restarted
 activate Client
 Client --> Client: Set status serf tag
-Client --> Client: Run restart phase
-Client --> Master: Report restart complete
+Client --> Client: Run finalize phase
+note left of Client: e.g. restart web server
+Client --> Master: Report finalize complete
 Client --> Client: Set status serf tag
 Client --> Client: Wait to be reloaded
 Client --> Client: Set status serf tag
