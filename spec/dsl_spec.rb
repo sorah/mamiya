@@ -251,6 +251,19 @@ describe Mamiya::DSL do
         end
       end
     end
+
+    context "with chain option" do
+      before do
+        klass.add_hook(:testchain, chain: true)
+      end
+
+      it "injects the result of blocks" do
+        dsl.testchain { |result, arg| result += arg * 3 }
+        dsl.testchain { |result, arg| result -= arg }
+
+        expect(dsl.testchain[2, 5]).to eq 12
+      end
+    end
   end
 
   describe "#servers" do

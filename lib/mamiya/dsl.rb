@@ -31,7 +31,7 @@ module Mamiya
       self.define_variable_accessor(k)
     end
 
-    def self.add_hook(name)
+    def self.add_hook(name, attributes={})
       define_method(name) do |*args, &block|
         @hooks[name] ||= []
 
@@ -48,11 +48,26 @@ module Mamiya
         else
           matcher = Mamiya::Util::LabelMatcher::Simple.new(args)
           Proc.new { |*args|
-            @hooks[name].each do |(hook, options)|
-              options ||= {}
-              next if options[:only] && !matcher.match?(*options[:only])
-              next if options[:except] && matcher.match?(*options[:except])
-              hook.call *args
+            filtered_hooks = @hooks[name].reject { |(hook, options)|
+              if options
+                (options[:only]   && !matcher.match?(*options[:only]  )) ||
+                (options[:except] &&  matcher.match?(*options[:except]))
+              else
+                false
+              end
+            }
+
+            if attributes[:chain]
+              init = args.shift
+              filtered_hooks.inject(init) do |result, (hook, options)|
+                options ||= {}
+                hook.call(result, *args)
+              end
+            else
+              filtered_hooks.each do |(hook, options)|
+                options ||= {}
+                hook.call *args
+              end
             end
           }
         end
