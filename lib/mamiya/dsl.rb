@@ -37,36 +37,34 @@ module Mamiya
 
         if block
           options = args.pop if args.last.kind_of?(Hash)
+          hook = {block: block, options: options || {}}
           case args.first
           when :overwrite
-            @hooks[name] = [[block, options]]
+            @hooks[name] = [hook]
           when :prepend
-            @hooks[name][0,0] = [[block, options]]
+            @hooks[name][0,0] = [hook]
           else
-            @hooks[name] << [block, options]
+            @hooks[name] << hook
           end
+
         else
           matcher = Mamiya::Util::LabelMatcher::Simple.new(args)
           Proc.new { |*args|
-            filtered_hooks = @hooks[name].reject { |(hook, options)|
-              if options
-                (options[:only]   && !matcher.match?(*options[:only]  )) ||
-                (options[:except] &&  matcher.match?(*options[:except]))
-              else
-                false
-              end
+            filtered_hooks = @hooks[name].reject { |hook|
+              options = hook[:options]
+
+              (options[:only]   && !matcher.match?(*options[:only]  )) ||
+              (options[:except] &&  matcher.match?(*options[:except]))
             }
 
             if attributes[:chain]
               init = args.shift
-              filtered_hooks.inject(init) do |result, (hook, options)|
-                options ||= {}
-                hook.call(result, *args)
+              filtered_hooks.inject(init) do |result, hook|
+                hook[:block].call(result, *args)
               end
             else
-              filtered_hooks.each do |(hook, options)|
-                options ||= {}
-                hook.call *args
+              filtered_hooks.each do |hook|
+                hook[:block].call *args
               end
             end
           }
@@ -94,6 +92,7 @@ module Mamiya
           @file = nil
         end
       }
+      self
     end
 
     def load!(file)
