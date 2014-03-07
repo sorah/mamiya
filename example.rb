@@ -1,25 +1,26 @@
-set :deploy_to, "/home/app/app"
+# Setting variables
+set :application, 'myapp'
 set :repository, "some@where:repo.git"
-set :branch, "master"
+set :ref, "master"
+
 set :build_on, "/tmp/app-build"
 set :package_under, 'suffix'
 
-servers ec2.instances
-servers ec2.instances
-
-use_servers :app, stage
-use_servers :web, stage
-
+set :prepare_to, "/home/app/app-prepare"
+set :deploy_to, "/home/app/app"
 
 set :discover_servers, false
 set :on_client_failure, :warn
+
+servers ec2.instances
+filter_servers application, :production # to restrict where server to be used
 
 use :git, skip_naming: true
 use :rails
 
 # chainable
-package_meta_handler do |meta|
-  meta.merge(...)
+package_name do
+  "#{full_ref}"
 end
 
 build(:prepend) do
