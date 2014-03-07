@@ -6,6 +6,7 @@ set :ref, "master"
 set :build_on, "/tmp/app-build"
 set :package_under, 'suffix'
 
+set :package_to, "#{__dir__}/pkg"
 set :prepare_to, "/home/app/app-prepare"
 set :deploy_to, "/home/app/app"
 
