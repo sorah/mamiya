@@ -252,7 +252,7 @@ describe Mamiya::DSL do
       end
     end
 
-    context "with chain option" do
+    describe "chain hooks" do
       before do
         klass.add_hook(:testchain, chain: true)
       end
