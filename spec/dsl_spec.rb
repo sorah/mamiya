@@ -264,6 +264,21 @@ describe Mamiya::DSL do
         expect(dsl.testchain[2, 5]).to eq 12
       end
     end
+
+    describe "naming" do
+      it "ables to name defined hooks" do
+        dsl.testhook('the-name') { }
+        expect(dsl.hooks[:testhook].first[:name]).to eq 'the-name'
+      end
+
+      context "with other option" do
+        it "ables to name defined hooks" do
+          dsl.testhook('the-name2', :prepend) { }
+          dsl.testhook('the-name', :prepend) { }
+          expect(dsl.hooks[:testhook].first[:name]).to eq 'the-name'
+        end
+      end
+    end
   end
 
   describe "#servers" do

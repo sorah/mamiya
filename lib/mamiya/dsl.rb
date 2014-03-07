@@ -14,6 +14,8 @@ module Mamiya
       @use_lock = Mutex.new
     end
 
+    attr_reader :hooks, :tasks
+
     def self.defaults
       @defaults ||= {}
     end
@@ -36,8 +38,10 @@ module Mamiya
         @hooks[name] ||= []
 
         if block
+          hook_name = args.shift if args.first.kind_of?(String)
           options = args.pop if args.last.kind_of?(Hash)
-          hook = {block: block, options: options || {}}
+
+          hook = {block: block, options: options || {}, name: hook_name}
           case args.first
           when :overwrite
             @hooks[name] = [hook]
