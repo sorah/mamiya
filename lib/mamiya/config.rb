@@ -41,6 +41,10 @@ module Mamiya
     set_default :deploy_to, nil
     set_default :prepare_to, nil
 
+    def run(*args)
+      system *args
+    end
+
     def servers
     end
 
