@@ -68,107 +68,11 @@ describe Mamiya::Steps::Build do
       expect(pwd).to eq config.build_from
     end
 
-    describe "packaging" do
-      subject(:build) { build_step.run! }
-      let(:package) { build; Dir[package_dir.join('*.tar.bz2').to_s].first }
+    it "builds package"
+    it "builds package after :build called"
 
-      def extract!
-        expect(package).not_to be_nil
-        expect(Pathname.new(package)).to be_exist
-
-        Dir.chdir(extract_dir) do
-          system "tar", "xf", package
-        end
-      end
-
-      it "creates a package to :build_to dir" do
-        expect {
-          build_step.run!
-        }.to change {
-          Dir[package_dir.join('*.tar.bz2').to_s].size
-        }.from(0).to(1)
-      end
-
-      it "includes file in build_dir" do
-        extract!
-        expect(extract_dir.join('greeting').read).to eq 'hello'
-      end
-
-      it "excludes SCM directories" do
-        build_dir.join('.git', 'test').write("test\n")
-        build; extract!
-
-        expect(extract_dir.join('.git')).not_to be_exist
-      end
-
-      context "with exclude_from_package option" do
-        let(:exclude_from_package) { ['foo', 'hoge*'] }
-
-        before do
-          build_dir.join('foo').write("test\n")
-          build_dir.join('hogefuga').write("test\n")
-
-          build; extract!
-        end
-
-        it "excludes matched files from package" do
-          expect(extract_dir.join('foo')).not_to be_exist
-          expect(extract_dir.join('hogefuga')).not_to be_exist
-          expect(extract_dir.join('greeting').read).to eq 'hello'
-        end
-      end
-
-      context "with package_under option" do
-        let(:package_under) { 'dir' }
-
-        before do
-          build_dir.join('dir').mkdir
-
-          build_dir.join('root').write("shouldnt-be-included\n")
-          build_dir.join('dir', 'greeting').write("hola\n")
-
-          build; extract!
-        end
-
-        it "packages under specified directory" do
-          expect(extract_dir.join('root')).not_to be_exist
-          expect(extract_dir.join('greeting').read).to eq "hola\n"
-        end
-      end
-
-      context "with dereference_symlinks option" do
-        before do
-          build_dir.join('target').write("I am target\n")
-          build_dir.join('alias').make_symlink('target')
-
-          build; extract!
-        end
-
-        context "when the option is true" do
-          let(:dereference_symlinks) { true }
-
-          it "dereferences symlinks for package" do
-            expect(extract_dir.join('alias')).to be_exist
-            expect(extract_dir.join('alias')).not_to be_symlink
-            expect(extract_dir.join('alias').read).to eq "I am target\n"
-          end
-        end
-
-        context "when the option is false" do
-          let(:dereference_symlinks) { false }
-
-          it "doesn't dereference symlinks" do
-            expect(extract_dir.join('alias')).to be_exist
-            expect(extract_dir.join('alias')).to be_symlink
-            realpath = extract_dir.join('alias').realpath.relative_path_from(extract_dir).to_s
-            expect(realpath).to eq './target'
-          end
-        end
-      end
-
-      context "with package name determiner" do
-        it "delegates package naming to the determiner"
-      end
+    context "with package name determiner" do
+      it "delegates package naming to the determiner"
     end
 
     context "when build_from directory exist" do
@@ -206,6 +110,8 @@ describe Mamiya::Steps::Build do
         }.to raise_error(Errno::ENOENT)
       end
     end
+
+    it "creates package using Package"
 
     context "with skip_prepare_build option" do
       context "when the option is false" do
