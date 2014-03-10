@@ -71,6 +71,8 @@ describe Mamiya::Package do
       expect(extract_dir.join('.git')).not_to be_exist
     end
 
+    it "includes deploy script itself"
+
     context "with exclude_from_package option" do
       let(:exclude_from_package) { ['foo', 'hoge*'] }
 
