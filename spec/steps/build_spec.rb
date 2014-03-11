@@ -3,8 +3,9 @@ require 'tmpdir'
 require 'pathname'
 require 'fileutils'
 
-require 'mamiya/steps/build'
+require 'mamiya/package'
 
+require 'mamiya/steps/build'
 
 describe Mamiya::Steps::Build do
   let!(:tmpdir) { Dir.mktmpdir("mamiya-steps-build-spec") }
@@ -16,11 +17,12 @@ describe Mamiya::Steps::Build do
 
   let(:exclude_from_package) { [] }
   let(:package_under) { nil }
-  let(:solve_symlinks) { false }
+  let(:dereference_symlinks) { false }
   let(:skip_prepare_build) { false }
 
   let(:config) do
     double('config',
+      application: 'app',
       build_from: build_dir,
       build_to: package_dir,
       before_build: proc {},
@@ -28,7 +30,7 @@ describe Mamiya::Steps::Build do
       build: proc {},
       after_build: proc {},
       package_under: package_under,
-      solve_symlinks: solve_symlinks,
+      dereference_symlinks: dereference_symlinks,
       exclude_from_package: exclude_from_package,
       skip_prepare_build: skip_prepare_build,
     )
@@ -50,7 +52,7 @@ describe Mamiya::Steps::Build do
 
       flags = []
       hooks.each do |sym|
-        config.stub(sym, proc { flags << sym })
+        allow(config).to receive(sym).and_return(proc { flags << sym })
       end
 
       expect { build_step.run! }.
@@ -65,11 +67,27 @@ describe Mamiya::Steps::Build do
 
       build_step.run!
 
-      expect(pwd).to eq config.build_from
+      expect(File.realpath(pwd)).to eq config.build_from.realpath.to_s
     end
 
-    it "builds package"
-    it "builds package after :build called"
+    it "creates package using Package after :build called" do
+      built = false
+      allow(config).to receive(:build).and_return(proc { built = true })
+      allow(config).to receive(:exclude_from_package).and_return(['test'])
+      allow(config).to receive(:dereference_symlinks).and_return(true)
+      allow(config).to receive(:package_under).and_return('foo')
+
+      expect_any_instance_of(Mamiya::Package).to \
+        receive(:build!).with(
+          build_dir,
+          exclude_from_package: ['test'],
+          dereference_symlinks: true,
+          package_under: 'foo') {
+        expect(built).to be_true
+      }
+
+      build_step.run!
+    end
 
     context "with package name determiner" do
       it "delegates package naming to the determiner"
@@ -78,7 +96,7 @@ describe Mamiya::Steps::Build do
     context "when build_from directory exist" do
       it "calls prepare_build with update=true" do
         arg = nil
-        config.stub(:prepare_build, proc { |update| arg = update })
+        allow(config).to receive(:prepare_build).and_return(proc { |update| arg = update })
 
         expect {
           build_step.run!
@@ -94,7 +112,7 @@ describe Mamiya::Steps::Build do
 
       it "calls prepare_build with update=false" do
         arg = nil
-        config.stub(:prepare_build, proc { |update| arg = update })
+        allow(config).to receive(:prepare_build).and_return(proc { |update| arg = update })
 
         expect {
           begin
@@ -111,7 +129,6 @@ describe Mamiya::Steps::Build do
       end
     end
 
-    it "creates package using Package"
 
     context "with skip_prepare_build option" do
       context "when the option is false" do
@@ -119,7 +136,7 @@ describe Mamiya::Steps::Build do
 
         it "calls prepare_build" do
           flag = false
-          config.stub(:prepare_build, proc { flag = true })
+          allow(config).to receive(:prepare_build).and_return(proc { flag = true })
 
           expect { build_step.run! }.to change { flag }.
             from(false).to(true)
@@ -131,7 +148,7 @@ describe Mamiya::Steps::Build do
 
         it "doesn't call prepare_build" do
           flag = false
-          config.stub(:prepare_build, proc { flag = true })
+          allow(config).to receive(:prepare_build).and_return(proc { flag = true })
 
           expect { build_step.run! }.not_to change { flag }
         end
