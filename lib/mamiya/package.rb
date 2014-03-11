@@ -1,5 +1,6 @@
 require 'pathname'
 require 'digest/sha2'
+require 'json'
 
 module Mamiya
   class Package
