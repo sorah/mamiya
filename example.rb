@@ -3,8 +3,10 @@ set :application, 'myapp'
 set :repository, "some@where:repo.git"
 set :ref, "master"
 
-set :build_on, "/tmp/app-build"
+set :build_from, "/tmp/app-working-copy"
+set :build_to, "/tmp/app-build"
 set :package_under, 'suffix'
+set :dereference_symlinks, true
 
 set :package_to, "#{__dir__}/pkg"
 set :prepare_to, "/home/app/app-prepare"
