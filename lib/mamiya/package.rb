@@ -88,11 +88,10 @@ module Mamiya
       raise NotExists unless exist?
       Dir.mkdir(path) unless File.directory?(path)
 
-      Dir.chdir(path) do
-        cmd = ["tar", "xf", @path.to_s]
-        result = system(*cmd)
-        raise InternalError, "Failed to run: #{cmd.inspect}" unless result
-      end
+      cmd = ["tar", "xf", @path.to_s, "-C", path.to_s]
+      result = system(*cmd)
+      raise InternalError, "Failed to run: #{cmd.inspect}" unless result
+
       nil
     end
 

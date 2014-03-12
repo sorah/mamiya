@@ -195,9 +195,7 @@ describe Mamiya::Package do
 
       expect(Pathname.new(package_path)).not_to be_nil
 
-      Dir.chdir(extract_dir) do
-        system "tar", "xf", package_path
-      end
+      system "tar", "xf", package_path, "-C", extract_dir.to_s
     end
 
     it "creates a package to path" do
