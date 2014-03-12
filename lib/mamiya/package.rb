@@ -6,7 +6,7 @@ module Mamiya
   class Package
     class NotExists < Exception; end
     class InternalError < Exception; end
-    TARBALL_EXT = '.tar.bz2'
+    TARBALL_EXT = '.tar.gz'
 
     def initialize(path)
       @path = Pathname.new(path)
@@ -67,7 +67,7 @@ module Mamiya
         excludes = exclude_from_package.flat_map { |exclude| ['--exclude', exclude] }
         dereference = dereference_symlinks ? ['-h'] : []
 
-        cmd = ["tar", "cjf", self.path.to_s,
+        cmd = ["tar", "czf", self.path.to_s,
                *dereference,
                *excludes,
                "."]

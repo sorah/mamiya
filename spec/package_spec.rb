@@ -17,8 +17,8 @@ describe Mamiya::Package do
     extract_dir.mkdir
   end
 
-  let(:package_path) { File.join(tmpdir, 'test.tar.bz2') }
-  let(:meta_path)    { package_path.sub(/tar\.bz2$/, "json") }
+  let(:package_path) { File.join(tmpdir, 'test.tar.gz') }
+  let(:meta_path)    { package_path.sub(/tar\.gz$/, "json") }
 
   subject(:package) {
     Mamiya::Package.new(package_path)

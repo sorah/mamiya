@@ -20,7 +20,7 @@ module Mamiya
           config.build[]
         end
 
-        package_path = File.join(config.build_to, Time.now.strftime("%Y-%m-%d_%H.%M.%S-#{config.application}.tar.bz2"))
+        package_path = File.join(config.build_to, Time.now.strftime("%Y-%m-%d_%H.%M.%S-#{config.application}.tar.gz"))
         package = Mamiya::Package.new(package_path)
 
         package.build!(config.build_from,
