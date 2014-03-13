@@ -13,7 +13,10 @@ module Mamiya
       def push(package)
       end
 
-      def fetch(package_name)
+      def fetch(package_name, dir)
+      end
+
+      def meta(package_name)
       end
 
       def remove(package)
