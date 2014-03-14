@@ -13,7 +13,7 @@ module Mamiya
 
       attr_reader :config, :application
 
-      def applications
+      def self.find(config={})
         {}
       end
 

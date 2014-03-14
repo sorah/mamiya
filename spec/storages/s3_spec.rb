@@ -219,7 +219,7 @@ describe Mamiya::Storages::S3 do
     end
   end
 
-  describe "#applications" do
+  describe ".find" do
     before do
       allow(s3).to receive(:list_objects).with(bucket: 'testbucket', delimiter: '/') \
         .and_return(
@@ -232,7 +232,7 @@ describe Mamiya::Storages::S3 do
         )
     end
 
-    subject(:applications) { storage.applications }
+    subject(:applications) { described_class.find(config.dup.tap{|_| _.delete(:application) }) }
 
     it "lists applications in S3" do
       expect(applications).to be_a_kind_of(Hash)

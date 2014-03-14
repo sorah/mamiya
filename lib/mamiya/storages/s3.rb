@@ -6,10 +6,11 @@ require 'json'
 module Mamiya
   module Storages
     class S3 < Mamiya::Storages::Abstract
-      def applications
-        Hash[s3.list_objects(bucket: @config[:bucket], delimiter: '/').common_prefixes.map { |prefix|
+      def self.find(config={})
+        s3 = initiate_s3_with_config(config)
+        Hash[s3.list_objects(bucket: config[:bucket], delimiter: '/').common_prefixes.map { |prefix|
           app = prefix.prefix.gsub(%r{/$},'')
-          [app, self.class.new(@config.merge(application: app))]
+          [app, self.new(config.merge(application: app))]
         }]
       end
 
@@ -87,14 +88,17 @@ module Mamiya
         s3.delete_objects(bucket: @config[:bucket], objects: objs_to_delete)
       end
 
+      def self.initiate_s3_with_config(config) # :nodoc:
+        s3_config = config.dup
+        s3_config.delete(:bucket)
+        s3_config.delete(:application)
+        Aws::S3.new(s3_config)
+      end
+
       private
 
       def s3
-        return @s3 if @s3
-        s3_config = @config.dup
-        s3_config.delete(:bucket)
-        s3_config.delete(:application)
-        @s3 = Aws::S3.new(s3_config)
+        @s3 ||= self.class.initiate_s3_with_config(@config)
       end
 
       def package_and_meta_key_for(package_name)
