@@ -1,14 +1,9 @@
+require 'mamiya/steps/abstract'
 require 'mamiya/package'
 
 module Mamiya
   module Steps
-    class Build
-      def initialize(script)
-        @script = script
-      end
-
-      attr_reader :script
-
+    class Build < Abstract
       def run!
         script.before_build[]
 
