@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'mamiya/storages'
 
 require 'mamiya/config'
 
@@ -28,5 +29,22 @@ describe Mamiya::Config do
   it "symbolizes keys" do
     expect(config[:test][:a][0][:b][:c][:d]).to eq "e"
     expect(config[:test2]).to eq :hello
+  end
+
+  describe "#storage_class" do
+    let(:source) do
+      {storage: {type: :foobar, conf: :iguration}}
+    end
+    let(:klass) { Class.new }
+
+    before do
+      allow(Mamiya::Storages).to receive(:find).with(:foobar).and_return(klass)
+    end
+
+    subject(:storage_class) { config.storage_class }
+
+    it "finds class using Storages.find" do
+      expect(storage_class).to eq klass
+    end
   end
 end

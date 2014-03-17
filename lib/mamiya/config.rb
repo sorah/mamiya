@@ -1,4 +1,5 @@
 require 'yaml'
+require 'mamiya/storages'
 
 module Mamiya
   class Config
@@ -12,6 +13,10 @@ module Mamiya
 
     def [](key)
       @config[key]
+    end
+
+    def storage_class
+      self[:storage] && Storages.find(self[:storage][:type])
     end
 
     private
