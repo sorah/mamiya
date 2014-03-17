@@ -1,7 +1,7 @@
 require 'mamiya/dsl'
 
 module Mamiya
-  class Config < DSL
+  class Script < DSL
     add_hook :before_build
     add_hook :prepare_build
     add_hook :build

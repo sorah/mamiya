@@ -3,32 +3,32 @@ require 'mamiya/package'
 module Mamiya
   module Steps
     class Build
-      def initialize(config)
-        @config = config
+      def initialize(script)
+        @script = script
       end
 
-      attr_reader :config
+      attr_reader :script
 
       def run!
-        config.before_build[]
+        script.before_build[]
 
-        unless config.skip_prepare_build
-          config.prepare_build[config.build_from.exist?]
+        unless script.skip_prepare_build
+          script.prepare_build[script.build_from.exist?]
         end
 
-        Dir.chdir(config.build_from) do
-          config.build[]
+        Dir.chdir(script.build_from) do
+          script.build[]
         end
 
-        package_path = File.join(config.build_to, Time.now.strftime("%Y-%m-%d_%H.%M.%S-#{config.application}.tar.gz"))
+        package_path = File.join(script.build_to, Time.now.strftime("%Y-%m-%d_%H.%M.%S-#{script.application}.tar.gz"))
         package = Mamiya::Package.new(package_path)
 
-        package.build!(config.build_from,
-           exclude_from_package: config.exclude_from_package || [],
-           dereference_symlinks: config.dereference_symlinks || false,
-           package_under: config.package_under || nil)
+        package.build!(script.build_from,
+           exclude_from_package: script.exclude_from_package || [],
+           dereference_symlinks: script.dereference_symlinks || false,
+           package_under: script.package_under || nil)
 
-        config.after_build[]
+        script.after_build[]
       end
     end
   end

@@ -20,8 +20,8 @@ describe Mamiya::Steps::Build do
   let(:dereference_symlinks) { false }
   let(:skip_prepare_build) { false }
 
-  let(:config) do
-    double('config',
+  let(:script) do
+    double('script',
       application: 'app',
       build_from: build_dir,
       build_to: package_dir,
@@ -36,7 +36,7 @@ describe Mamiya::Steps::Build do
     )
   end
   
-  subject(:build_step) { described_class.new(config) }
+  subject(:build_step) { described_class.new(script) }
 
   describe "#run!" do
     before do
@@ -52,7 +52,7 @@ describe Mamiya::Steps::Build do
 
       flags = []
       hooks.each do |sym|
-        allow(config).to receive(sym).and_return(proc { flags << sym })
+        allow(script).to receive(sym).and_return(proc { flags << sym })
       end
 
       expect { build_step.run! }.
@@ -63,19 +63,19 @@ describe Mamiya::Steps::Build do
 
     it "calls build hook in :build_from (pwd)" do
       pwd = nil
-      config.stub(build: proc { pwd = Dir.pwd })
+      script.stub(build: proc { pwd = Dir.pwd })
 
       build_step.run!
 
-      expect(File.realpath(pwd)).to eq config.build_from.realpath.to_s
+      expect(File.realpath(pwd)).to eq script.build_from.realpath.to_s
     end
 
     it "creates package using Package after :build called" do
       built = false
-      allow(config).to receive(:build).and_return(proc { built = true })
-      allow(config).to receive(:exclude_from_package).and_return(['test'])
-      allow(config).to receive(:dereference_symlinks).and_return(true)
-      allow(config).to receive(:package_under).and_return('foo')
+      allow(script).to receive(:build).and_return(proc { built = true })
+      allow(script).to receive(:exclude_from_package).and_return(['test'])
+      allow(script).to receive(:dereference_symlinks).and_return(true)
+      allow(script).to receive(:package_under).and_return('foo')
 
       expect_any_instance_of(Mamiya::Package).to \
         receive(:build!).with(
@@ -96,7 +96,7 @@ describe Mamiya::Steps::Build do
     context "when build_from directory exist" do
       it "calls prepare_build with update=true" do
         arg = nil
-        allow(config).to receive(:prepare_build).and_return(proc { |update| arg = update })
+        allow(script).to receive(:prepare_build).and_return(proc { |update| arg = update })
 
         expect {
           build_step.run!
@@ -112,7 +112,7 @@ describe Mamiya::Steps::Build do
 
       it "calls prepare_build with update=false" do
         arg = nil
-        allow(config).to receive(:prepare_build).and_return(proc { |update| arg = update })
+        allow(script).to receive(:prepare_build).and_return(proc { |update| arg = update })
 
         expect {
           begin
@@ -136,7 +136,7 @@ describe Mamiya::Steps::Build do
 
         it "calls prepare_build" do
           flag = false
-          allow(config).to receive(:prepare_build).and_return(proc { flag = true })
+          allow(script).to receive(:prepare_build).and_return(proc { flag = true })
 
           expect { build_step.run! }.to change { flag }.
             from(false).to(true)
@@ -148,7 +148,7 @@ describe Mamiya::Steps::Build do
 
         it "doesn't call prepare_build" do
           flag = false
-          allow(config).to receive(:prepare_build).and_return(proc { flag = true })
+          allow(script).to receive(:prepare_build).and_return(proc { flag = true })
 
           expect { build_step.run! }.not_to change { flag }
         end
