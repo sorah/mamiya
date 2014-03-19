@@ -44,7 +44,15 @@ module Mamiya
     set_default :skip_prepare_build, false
 
     def run(*args)
-      system *args
+      actual = -> do
+        system *args
+      end
+
+      if defined? Bundler
+        Bundler.with_clean_env(&actual)
+      else
+        actual.call
+      end
     end
 
     def servers
