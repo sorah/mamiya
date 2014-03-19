@@ -22,6 +22,7 @@ module Mamiya
 
         package_path = File.join(script.build_to, Time.now.strftime("%Y-%m-%d_%H.%M.%S-#{script.application}.tar.gz"))
         package = Mamiya::Package.new(package_path)
+        package.meta[:application] = script.application
 
         package.build!(script.build_from,
            exclude_from_package: script.exclude_from_package || [],

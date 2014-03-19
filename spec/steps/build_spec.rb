@@ -91,6 +91,16 @@ describe Mamiya::Steps::Build do
       build_step.run!
     end
 
+    it "creates package with metadata including application" do
+      meta = {}
+      allow_any_instance_of(Mamiya::Package).to receive(:meta).and_return(meta)
+      expect_any_instance_of(Mamiya::Package).to receive(:build!) {
+        expect(meta[:application]).to eq 'app'
+      }
+
+      build_step.run!
+    end
+
     context "with package name determiner" do
       it "delegates package naming to the determiner"
     end
