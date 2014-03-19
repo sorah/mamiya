@@ -8,7 +8,7 @@ module Mamiya
         script.before_build[]
 
         unless script.skip_prepare_build
-          script.prepare_build[script.build_from.exist?]
+          script.prepare_build[File.exists?(script.build_from)]
         end
 
         Dir.chdir(script.build_from) do
