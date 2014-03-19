@@ -92,6 +92,7 @@ module Mamiya
         s3_config = config.dup
         s3_config.delete(:bucket)
         s3_config.delete(:application)
+        s3_config.delete(:type)
         Aws::S3.new(s3_config)
       end
 
