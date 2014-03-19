@@ -55,6 +55,10 @@ module Mamiya
       end
     end
 
+    def cd(*args)
+      Dir.chdir *args
+    end
+
     def servers
     end
 
