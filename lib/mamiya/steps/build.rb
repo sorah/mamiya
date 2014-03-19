@@ -11,8 +11,13 @@ module Mamiya
           script.prepare_build[File.exists?(script.build_from)]
         end
 
-        Dir.chdir(script.build_from) do
+        old_pwd = Dir.pwd
+        begin
+          # Using without block because chdir in block shows warning
+          Dir.chdir(script.build_from)
           script.build[]
+        ensure
+          Dir.chdir old_pwd
         end
 
         package_path = File.join(script.build_to, Time.now.strftime("%Y-%m-%d_%H.%M.%S-#{script.application}.tar.gz"))

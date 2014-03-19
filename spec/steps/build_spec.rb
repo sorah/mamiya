@@ -65,7 +65,9 @@ describe Mamiya::Steps::Build do
       pwd = nil
       script.stub(build: proc { pwd = Dir.pwd })
 
-      build_step.run!
+      expect {
+        build_step.run!
+      }.not_to change { Dir.pwd }
 
       expect(File.realpath(pwd)).to eq script.build_from.realpath.to_s
     end
