@@ -95,6 +95,10 @@ describe Mamiya::Steps::Build do
       it "delegates package naming to the determiner"
     end
 
+    context "with package meta determiner" do
+      it "delegates package metadata to the determiner"
+    end
+
     context "when build_from directory exist" do
       it "calls prepare_build with update=true" do
         arg = nil
