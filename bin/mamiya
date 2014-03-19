@@ -1,6 +1,17 @@
 #!/usr/bin/env ruby
 
-require 'mamiya'
-require 'mamiya/cli'
+retried = false
+begin
+  require 'mamiya'
+  require 'mamiya/cli'
+rescue LoadError
+  $:.unshift File.expand_path(File.join(__dir__, '..', 'lib'))
+  if retried
+    raise
+  else
+    retried = true
+    retry
+  end
+end
 
 Mamiya::CLI.start(ARGV).run
