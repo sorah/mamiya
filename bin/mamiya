@@ -14,4 +14,4 @@ rescue LoadError
   end
 end
 
-Mamiya::CLI.start(ARGV).run
+Mamiya::CLI.start(ARGV)
