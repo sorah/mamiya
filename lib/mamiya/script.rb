@@ -41,6 +41,8 @@ module Mamiya
     set_default :deploy_to, nil
     set_default :prepare_to, nil
 
+    set_default :skip_prepare_build, false
+
     def run(*args)
       system *args
     end
