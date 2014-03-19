@@ -55,7 +55,7 @@ describe Mamiya::Storages::S3 do
     let(:package) { double('package', :kind_of? => true, :exists? => true, path: tarball, meta_path: metafile, name: 'test') }
 
     it "uploads package to S3" do
-      allow(s3).to receive(:head_object).and_raise(Aws::S3::Errors::NotFound)
+      allow(s3).to receive(:head_object).and_raise(Aws::S3::Errors::NotFound.new(nil, ''))
 
       expect(s3).to receive(:put_object) do |options|
         expect(options[:bucket]).to eq 'testbucket'
@@ -143,7 +143,7 @@ describe Mamiya::Storages::S3 do
 
     context "when not found" do
       before do
-        allow(s3).to receive(:get_object).and_raise(Aws::S3::Errors::NoSuchKey)
+        allow(s3).to receive(:get_object).and_raise(Aws::S3::Errors::NoSuchKey.new(nil, ''))
       end
 
       it "raises error" do
@@ -191,7 +191,7 @@ describe Mamiya::Storages::S3 do
 
     context "when not found" do
       before do
-        allow(s3).to receive(:get_object).and_raise(Aws::S3::Errors::NoSuchKey)
+        allow(s3).to receive(:get_object).and_raise(Aws::S3::Errors::NoSuchKey.new(nil, ''))
       end
 
       it "returns nil" do
@@ -210,7 +210,7 @@ describe Mamiya::Storages::S3 do
 
     context "when not found" do
       before do
-        allow(s3).to receive(:head_object).and_raise(Aws::S3::Errors::NotFound)
+        allow(s3).to receive(:head_object).and_raise(Aws::S3::Errors::NotFound.new(nil, ''))
       end
 
       it "raises error" do
