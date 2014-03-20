@@ -38,6 +38,10 @@ module Mamiya
       @meta ||= {}
     end
 
+    def application
+      meta['application'] || meta[:application]
+    end
+
     def checksum
       return nil unless exist?
       Digest::SHA2.file(path).hexdigest

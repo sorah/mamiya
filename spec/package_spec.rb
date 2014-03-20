@@ -132,6 +132,20 @@ describe Mamiya::Package do
     end
   end
 
+  describe "#application" do
+    subject { package.application }
+
+    it { should eq nil }
+
+    context "when meta['application'] exists" do
+      before do
+        package.meta['application'] = 'app'
+      end
+
+      it { should eq 'app' }
+    end
+  end
+
   describe "#checksum" do
     subject { package.checksum }
 
