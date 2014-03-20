@@ -18,7 +18,6 @@ describe Mamiya::Steps::Push do
   let(:script) do
     double('script',
       application: 'app',
-      target_package: target_package,
     )
   end
 
@@ -38,7 +37,11 @@ describe Mamiya::Steps::Push do
     end
   end
 
-  subject(:push_step) { described_class.new(script, config) }
+  let(:options) do
+    {target_package: target_package}
+  end
+
+  subject(:push_step) { described_class.new(script, config, options) }
 
   describe "#run!" do
     before do
