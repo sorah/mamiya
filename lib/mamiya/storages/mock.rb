@@ -1,5 +1,6 @@
 require 'mamiya/package'
 require 'mamiya/storages/abstract'
+require 'fileutils'
 
 module Mamiya
   module Storages
@@ -26,6 +27,22 @@ module Mamiya
         self.class.storage[application] ||= {}
         raise AlreadyExists if self.class.storage[application][package.name]
         self.class.storage[application][package.name] = {package: package, config: config}
+      end
+
+      def fetch(package_name, destination)
+        self.class.storage[application] ||= {}
+        raise NotFound unless self.class.storage[application][package_name]
+        package_path = File.join(destination, "#{package_name}.tar.gz")
+        meta_path = File.join(destination, "#{package_name}.json")
+
+        if File.exists?(package_path) || File.exists?(meta_path)
+          raise AlreadyFetched
+        end
+
+        package = self.class.storage[application][package_name][:package]
+        FileUtils.cp package.path, package_path
+        FileUtils.cp package.meta_path, meta_path
+        return package
       end
     end
   end
