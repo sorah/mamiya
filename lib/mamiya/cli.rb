@@ -38,7 +38,7 @@ module Mamiya
     def build
       %i(build_from build_to).each { |k| script.set(k, File.expand_path(options[k])) if options[k] }
 
-      Mamiya::Steps::Build.new(script).run!
+      Mamiya::Steps::Build.new(script: script).run!
     end
 
     desc "push PACKAGE", "Upload built packages to storage."

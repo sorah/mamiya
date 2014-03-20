@@ -41,7 +41,7 @@ describe Mamiya::Steps::Push do
     {target_package: target_package}
   end
 
-  subject(:push_step) { described_class.new(script, config, options) }
+  subject(:push_step) { described_class.new(script: script, config: config, **options) }
 
   describe "#run!" do
     before do

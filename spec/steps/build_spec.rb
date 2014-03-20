@@ -36,7 +36,7 @@ describe Mamiya::Steps::Build do
     )
   end
   
-  subject(:build_step) { described_class.new(script) }
+  subject(:build_step) { described_class.new(script: script) }
 
   describe "#run!" do
     before do
