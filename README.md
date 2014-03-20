@@ -1,5 +1,7 @@
 # Mamiya - Faster deploy tool using tarballs and serf
 
+[![Build Status](https://travis-ci.org/sorah/mamiya.png?branch=master)](https://travis-ci.org/sorah/mamiya)
+
 Mamiya allows you to deploy using without ssh -- tarballs in such storage (Amazon S3), and [serf](http://www.serfdom.io/).
 
 _Still developing_
