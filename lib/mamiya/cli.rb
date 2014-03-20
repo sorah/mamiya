@@ -56,8 +56,11 @@ module Mamiya
         abort "Package (#{package_atom}) couldn't find at #{candidates.join(', ')}"
       end
 
-      package = Mamiya::Package.new(package_path)
-      storage.push package
+      Mamiya::Steps::Push.new(
+        script: script,
+        config: config,
+        package: package_path,
+      ).run!
     end
 
     desc "distribute PACKAGE", "Order clients to download specified package."
