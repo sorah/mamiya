@@ -88,11 +88,11 @@ module Mamiya
       nil
     end
 
-    def extract_onto!(path)
+    def extract_onto!(destination)
       raise NotExists unless exist?
-      Dir.mkdir(path) unless File.directory?(path)
+      Dir.mkdir(destination) unless File.directory?(destination)
 
-      cmd = ["tar", "xf", @path.to_s, "-C", path.to_s]
+      cmd = ["tar", "xf", path.to_s, "-C", destination.to_s]
       result = system(*cmd)
       raise InternalError, "Failed to run: #{cmd.inspect}" unless result
 
