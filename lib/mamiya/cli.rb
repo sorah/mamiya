@@ -57,7 +57,6 @@ module Mamiya
       end
 
       Mamiya::Steps::Push.new(
-        script: script,
         config: config,
         package: package_path,
       ).run!
