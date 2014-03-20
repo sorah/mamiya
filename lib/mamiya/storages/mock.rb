@@ -8,6 +8,10 @@ module Mamiya
         @storage ||= {}
       end
 
+      def self.clear
+        @storage = {}
+      end
+
       def self.find(config={})
         storage.keys
       end
