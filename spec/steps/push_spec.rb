@@ -38,7 +38,7 @@ describe Mamiya::Steps::Push do
   end
 
   let(:options) do
-    {target_package: target_package}
+    {package: target_package}
   end
 
   subject(:push_step) { described_class.new(script: script, config: config, **options) }
