@@ -20,13 +20,69 @@ describe Mamiya::Package do
   let(:package_path) { File.join(tmpdir, 'test.tar.gz') }
   let(:meta_path)    { package_path.sub(/tar\.gz$/, "json") }
 
+  let(:arg) { package_path }
+
   subject(:package) {
-    Mamiya::Package.new(package_path)
+    Mamiya::Package.new(arg)
   }
+
+  describe "#initialize" do
+    context "without file extension" do
+      it "accepts" do
+        expect { described_class.new('foo') }.not_to raise_error
+      end
+    end
+
+    context "with .tar.gz" do
+      it "accepts" do
+        expect { described_class.new('foo.tar.gz') }.not_to raise_error
+      end
+    end
+
+    context "with .json" do
+      it "accepts" do
+        expect { described_class.new('foo.json') }.not_to raise_error
+      end
+    end
+  end
 
   describe "#path" do
     subject { package.path }
     it { should eq Pathname.new(package_path) }
+
+    context "without file extension" do
+      let(:arg) { 'test' }
+      it { should eq Pathname.new('test.tar.gz') }
+    end
+
+    context "with .tar.gz" do
+      let(:arg) { 'test.tar.gz' }
+      it { should eq Pathname.new('test.tar.gz') }
+    end
+
+    context "with .json" do
+      let(:arg) { 'test.json' }
+      it { should eq Pathname.new('test.tar.gz') }
+    end
+  end
+
+  describe "#meta_path" do
+    subject { package.meta_path }
+
+    context "without file extension" do
+      let(:arg) { 'test' }
+      it { should eq Pathname.new('test.json') }
+    end
+
+    context "with .tar.gz" do
+      let(:arg) { 'test.tar.gz' }
+      it { should eq Pathname.new('test.json') }
+    end
+
+    context "with .json" do
+      let(:arg) { 'test.json' }
+      it { should eq Pathname.new('test.json') }
+    end
   end
 
   describe "#extract_onto!(path)" do

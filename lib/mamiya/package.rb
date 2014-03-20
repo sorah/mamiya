@@ -6,10 +6,10 @@ module Mamiya
   class Package
     class NotExists < Exception; end
     class InternalError < Exception; end
-    TARBALL_EXT = '.tar.gz'
+    PATH_SUFFIXES = /\.(?:tar\.gz|json)\z/
 
     def initialize(path)
-      @path = Pathname.new(path)
+      @path_without_ext = Pathname.new(path.sub(PATH_SUFFIXES, ''))
       @meta_loaded_from_file = false
       @loaded_meta = nil
       meta # load
@@ -19,11 +19,15 @@ module Mamiya
     attr_writer :meta
 
     def name
-      meta['name'] || @path.basename(TARBALL_EXT).to_s
+      meta['name'] || @path_without_ext.basename.to_s
+    end
+
+    def path
+      @path_without_ext.sub_ext('.tar.gz')
     end
 
     def meta_path
-      @path.sub_ext('').sub_ext('.json')
+      @path_without_ext.sub_ext('.json')
     end
 
     def meta
