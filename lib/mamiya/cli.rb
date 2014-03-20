@@ -56,9 +56,15 @@ module Mamiya
         abort "Package (#{package_atom}) couldn't find at #{candidates.join(', ')}"
       end
 
+      if options[:application]
+        warn "WARNING: Overriding package's application name with given one: #{options[:application]}"
+        sleep 2
+      end
+
       Mamiya::Steps::Push.new(
         config: config,
         package: package_path,
+        application: options[:application],
       ).run!
     end
 

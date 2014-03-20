@@ -12,7 +12,15 @@ module Mamiya
                     Mamiya::Package.new(options[:package])
                   end
 
-        storage = config.storage_class.new(config[:storage].merge(application: script.application))
+        application = options[:application] || package.application
+
+        raise 'no application name given' unless application
+
+        storage = config.storage_class.new(
+          config[:storage].merge(
+            application: application
+          )
+        )
 
         storage.push(package)
       end
