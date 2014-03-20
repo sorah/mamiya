@@ -18,7 +18,7 @@ module Mamiya
         s3.list_objects(bucket: @config[:bucket], delimiter: '/', prefix: "#{self.application}/").contents.map { |content|
           content.key.sub(/\A#{Regexp.escape(self.application)}\//, '')
         }.group_by { |key|
-          key.sub(/(?:\.tar\.gz|\.json)\z/,'')
+          key.sub(Package::PATH_SUFFIXES,'')
         }.select { |key, files|
           files.find { |file| file.end_with?('.tar.gz') } && files.find { |file| file.end_with?('.json') }
         }.keys
