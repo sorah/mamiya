@@ -305,11 +305,11 @@ describe Mamiya::Package do
       package.meta = {"a" => 1, "b" => {"c" => ["d", "e"]}}
       packed_meta = package.meta.dup
 
-      build
+      build_then_extract!
 
       expect(package.meta["checksum"]).to eq Digest::SHA2.file(package_path).hexdigest
 
-      meta_path_in_build = build_dir.join('.mamiya.meta.json')
+      meta_path_in_build = extract_dir.join('.mamiya.meta.json')
       packed_meta['name'] = package.meta['name']
       json = JSON.parse(File.read(meta_path_in_build))
       expect(json).to eq JSON.parse(packed_meta.to_json)
