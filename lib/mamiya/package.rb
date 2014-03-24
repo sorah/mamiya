@@ -23,11 +23,11 @@ module Mamiya
     end
 
     def path
-      @path_without_ext.sub_ext('.tar.gz')
+      Pathname.new(@path_without_ext.to_s + '.tar.gz')
     end
 
     def meta_path
-      @path_without_ext.sub_ext('.json')
+      Pathname.new(@path_without_ext.to_s + '.json')
     end
 
     def meta

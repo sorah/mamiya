@@ -64,6 +64,11 @@ describe Mamiya::Package do
       let(:arg) { 'test.json' }
       it { should eq Pathname.new('test.tar.gz') }
     end
+
+    context "with filename containing dot" do
+      let(:arg) { 'a.b' }
+      it { should eq Pathname.new('a.b.tar.gz') }
+    end
   end
 
   describe "#meta_path" do
@@ -82,6 +87,11 @@ describe Mamiya::Package do
     context "with .json" do
       let(:arg) { 'test.json' }
       it { should eq Pathname.new('test.json') }
+    end
+
+    context "with filename containing dot" do
+      let(:arg) { 'a.b' }
+      it { should eq Pathname.new('a.b.json') }
     end
   end
 
