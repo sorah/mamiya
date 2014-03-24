@@ -12,10 +12,11 @@ module Mamiya
     class_option :config, aliases: '-C', type: :string
     class_option :script, aliases: '-S', type: :string
     class_option :application, aliases: %w(-a --app), type: :string
-    # class_option :set, aliases: '-s', type: :array
+    # TODO: class_option :set, aliases: '-s', type: :array
 
     desc "status", ""
     def status
+      # TODO:
     end
 
     desc "packages", ""
@@ -36,6 +37,7 @@ module Mamiya
     method_option :build_from, aliases: %w(--source -f), type: :string
     method_option :build_to, aliases: %w(--destination -t), type: :string
     def build
+      # TODO: overriding name
       %i(build_from build_to).each { |k| script.set(k, File.expand_path(options[k])) if options[k] }
 
       Mamiya::Steps::Build.new(script: script).run!
