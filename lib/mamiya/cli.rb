@@ -4,6 +4,7 @@ require 'mamiya/script'
 
 require 'mamiya/steps/build'
 require 'mamiya/steps/push'
+require 'mamiya/steps/fetch'
 
 require 'thor'
 
@@ -82,6 +83,17 @@ module Mamiya
       ).run!
     end
 
+    desc "fetch PACKAGE DESTINATION", "Retrieve package from storage"
+    def fetch(package_atom, destination)
+      Mamiya::Steps::Fetch.new(
+        script: script(:no_error),
+        config: config,
+        package: package_atom,
+        application: application,
+        destination: destination,
+      ).run!
+    end
+
     desc "distribute PACKAGE", "Order clients to download specified package."
     def distribute
     end
@@ -137,10 +149,14 @@ module Mamiya
       end
     end
 
+    def application
+      options[:application] || config[:application] || script.application
+    end
+
     def storage
       config.storage_class.new(
         config[:storage].merge(
-          application: options[:application] || config[:application] || script.application
+          application: application
         )
       )
     end

@@ -15,7 +15,7 @@ module Mamiya
           )
         )
 
-        storage.fetch(options[:package_name], options[:destination])
+        storage.fetch(options[:package], options[:destination])
       end
     end
   end
