@@ -73,7 +73,7 @@ describe Mamiya::Steps::Fetch do
 
     context "when options[:application] is nil" do
       let(:options) do
-        {package_name: package2_name, destination: destination_dir.to_s}
+        {package: package2_name, destination: destination_dir.to_s}
       end
 
       it "takes application name from script if available" do
