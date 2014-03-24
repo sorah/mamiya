@@ -19,8 +19,20 @@ module Mamiya
       # TODO:
     end
 
-    desc "packages", ""
-    def packages
+    desc "list-packages", "List packages in storage"
+    method_option :name_only, aliases: '-n'
+    def list_packages
+      unless options[:name_only]
+        puts "Available packages in #{application}:"
+        puts ""
+      end
+
+      puts storage.packages
+    end
+
+    desc "list-applications", "List applications in storage"
+    def list_applications
+      puts _applications.keys
     end
 
     # ---
