@@ -45,8 +45,8 @@ module Mamiya
       def fetch(package_name, dir)
         package_key, meta_key = package_and_meta_key_for(package_name)
 
-        package_path = File.join(dir, "#{package_name}.tar.gz")
-        meta_path = File.join(dir, "#{package_name}.json")
+        package_path = File.join(dir, File.basename(package_key))
+        meta_path = File.join(dir, File.basename(meta_key))
 
         if File.exists?(package_path) || File.exists?(meta_path)
           raise AlreadyFetched
@@ -103,6 +103,7 @@ module Mamiya
       end
 
       def package_and_meta_key_for(package_name)
+        package_name = package_name.sub(/\.(?:tar\.gz|json)\z/, '')
         ["#{self.application}/#{package_name}.tar.gz", "#{self.application}/#{package_name}.json"]
       end
 

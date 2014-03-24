@@ -104,7 +104,8 @@ describe Mamiya::Storages::S3 do
     let(:tarball) { File.join(tmpdir, 'test.tar.gz') }
     let(:metafile) { File.join(tmpdir, 'test.json') }
 
-    subject(:fetch) { storage.fetch('test', tmpdir) }
+    let(:package_name) { 'test' }
+    subject(:fetch) { storage.fetch(package_name, tmpdir) }
 
     it "retrieves package from S3" do
       requests = []
@@ -176,16 +177,49 @@ describe Mamiya::Storages::S3 do
         }.to raise_error(Mamiya::Storages::Abstract::AlreadyFetched)
       end
     end
+
+    context "when name has .json" do
+      let(:package_name) { 'test.json' }
+
+      it "retrieves package" do
+        expect(s3).to receive(:get_object).with(
+          hash_including(bucket: 'testbucket', key: 'myapp/test.tar.gz'), hash_including(target: an_instance_of(File)))
+        expect(s3).to receive(:get_object).with(
+          hash_including(bucket: 'testbucket', key: 'myapp/test.json'), hash_including(target: an_instance_of(File))) do
+          File.write metafile, "{}\n"
+        end
+
+        fetch
+      end
+    end
+
+    context "when name has .tar.gz" do
+      let(:package_name) { 'test.tar.gz' }
+
+      it "retrieves package" do
+        expect(s3).to receive(:get_object).with(
+          hash_including(bucket: 'testbucket', key: 'myapp/test.tar.gz'), hash_including(target: an_instance_of(File)))
+        expect(s3).to receive(:get_object).with(
+          hash_including(bucket: 'testbucket', key: 'myapp/test.json'), hash_including(target: an_instance_of(File))) do
+          File.write metafile, "{}\n"
+        end
+
+        fetch
+      end
+    end
   end
 
   describe "#meta(package_name)" do
-    subject(:meta) { storage.meta('test') }
+    let(:package_name) { 'test' }
+    subject(:meta) { storage.meta(package_name) }
 
-    it "retrieves meta JSON from S3" do
+    before do
       allow(s3).to receive(:get_object).with(bucket: 'testbucket', key: 'myapp/test.json').and_return(
         double("response", body: StringIO.new({"foo" => "bar"}.to_json, "r").tap(&:read))
       )
+    end
 
+    it "retrieves meta JSON from S3" do
       expect(meta).to eq("foo" => "bar")
     end
 
@@ -198,14 +232,53 @@ describe Mamiya::Storages::S3 do
         expect(meta).to be_nil
       end
     end
+
+    context "when name has .json" do
+      let(:package_name) { 'test.json' }
+
+      it "retrieves meta JSON from S3" do
+        expect(meta).to eq("foo" => "bar")
+      end
+    end
+
+    context "when name has .tar.gz" do
+      let(:package_name) { 'test.tar.gz' }
+
+      it "retrieves meta JSON from S3" do
+        expect(meta).to eq("foo" => "bar")
+      end
+    end
   end
 
   describe "#remove(package_name)" do
-    it "removes specified package from S3" do
-      allow(s3).to receive(:head_object).and_return(double('response'))
-      expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}])
+    let(:package_name) { 'test' }
+    subject(:remove) { storage.remove(package_name) }
 
-      storage.remove('test')
+    before do
+      allow(s3).to receive(:head_object).and_return(double('response'))
+    end
+
+    it "removes specified package from S3" do
+      expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}])
+      remove
+    end
+
+    context "with name has .tar.gz" do
+      let(:package_name) { 'test.tar.gz' }
+
+      it "removes specified package from S3" do
+        expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}])
+        remove
+      end
+    end
+
+    context "with name has .json" do
+      let(:package_name) { 'test.json' }
+
+      it "removes specified package from S3" do
+        expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}])
+        remove
+      end
     end
 
     context "when not found" do
