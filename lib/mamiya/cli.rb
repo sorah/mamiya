@@ -36,6 +36,12 @@ module Mamiya
       puts _applications.keys
     end
 
+    desc "show PACKAGE", "Show package"
+    def show(package)
+      require 'pp'
+      pp storage.meta(package)
+    end
+
     # ---
 
     desc "deploy PACKAGE", "Run build->push->distribute->prepare->finalize"
