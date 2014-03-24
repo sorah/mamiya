@@ -31,6 +31,10 @@ module Mamiya
         package = Mamiya::Package.new(package_path)
         package.meta[:application] = script.application
 
+        Dir.chdir(script.build_from) do
+          package.meta.replace script.package_meta[package.meta]
+        end
+
         package.build!(script.build_from,
            exclude_from_package: script.exclude_from_package || [],
            dereference_symlinks: script.dereference_symlinks || false,

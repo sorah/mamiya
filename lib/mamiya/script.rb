@@ -23,6 +23,7 @@ module Mamiya
     add_hook :after_rollback
 
     add_hook :package_name, chain: true
+    add_hook :package_meta, chain: true
 
     set_default :application, nil
     set_default :repository, nil

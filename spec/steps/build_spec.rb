@@ -31,6 +31,7 @@ describe Mamiya::Steps::Build do
       build: proc {},
       after_build: proc {},
       package_name: proc { |_| package_name || _ },
+      package_meta: proc { |_| _ },
       package_under: package_under,
       dereference_symlinks: dereference_symlinks,
       exclude_from_package: exclude_from_package,
@@ -143,7 +144,37 @@ describe Mamiya::Steps::Build do
     end
 
     context "with package meta determiner" do
-      it "delegates package metadata to the determiner"
+      it "calls determiners with current candidate" do
+        received = nil
+        allow(script).to receive(:package_meta).and_return(proc { |arg| received = arg })
+
+        build_step.run!
+
+        expect(received).to be_a_kind_of(Hash)
+      end
+
+      it "uses result as package metadata" do
+        meta = {}
+        allow_any_instance_of(Mamiya::Package).to receive(:meta).and_return(meta)
+        allow_any_instance_of(Mamiya::Package).to receive(:build!) { }
+
+        allow(script).to receive(:package_meta).and_return(proc { |arg| {'test' => 'hello'} })
+
+        build_step.run!
+
+        expect(meta['test']).to eq 'hello'
+      end
+
+      it "calls the determiner in build dir" do
+        pwd = nil
+        allow(script).to receive(:package_meta).and_return(proc { |arg| pwd = Dir.pwd; arg })
+
+        expect {
+          build_step.run!
+        }.not_to change { Dir.pwd }
+
+        expect(File.realpath(pwd)).to eq script.build_from.realpath.to_s
+      end
     end
 
     context "when build_from directory exist" do
