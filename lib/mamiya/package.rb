@@ -67,9 +67,10 @@ module Mamiya
 
       build_dir = Pathname.new(build_dir)
       build_dir += package_under if package_under
+      meta_in_build = build_dir.join('.mamiya.meta.json')
 
       meta['name'] = self.name
-      File.write build_dir.join('.mamiya.meta.json'), self.meta.to_json
+      File.write meta_in_build, self.meta.to_json
 
       Dir.chdir(build_dir) do
         excludes = exclude_from_package.flat_map { |exclude| ['--exclude', exclude] }
@@ -90,6 +91,10 @@ module Mamiya
 
       File.write meta_path, self.meta.to_json
       nil
+    ensure
+      if meta_in_build && meta_in_build.exist?
+        meta_in_build.delete()
+      end
     end
 
     def extract_onto!(destination)

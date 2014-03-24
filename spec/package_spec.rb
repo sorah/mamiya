@@ -318,6 +318,13 @@ describe Mamiya::Package do
       expect(json).to eq JSON.parse(package.meta.to_json)
     end
 
+    it "doesn't leave meta file in build_dir" do
+      package.meta = {"a" => 1, "b" => {"c" => ["d", "e"]}}
+      build
+
+      expect(build_dir.join('.mamiya.meta.json')).not_to be_exist
+    end
+
     context "with exclude_from_package option" do
       let(:exclude_from_package) { ['foo', 'hoge*'] }
 
