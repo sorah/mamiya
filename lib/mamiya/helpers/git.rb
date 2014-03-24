@@ -45,3 +45,10 @@ if options[:add_commit_hash_to_package_name]
     candidate + [git_head[:commit]]
   end
 end
+
+options[:include_head_commit_to_meta] = true unless options.key?(:include_head_commit_to_meta)
+if options[:include_head_commit_to_meta]
+  package_meta do |candidate|
+    candidate.merge(git: git_head())
+  end
+end
