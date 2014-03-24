@@ -44,6 +44,7 @@ module Mamiya
     set_default :skip_prepare_build, false
 
     def run(*args)
+      # TODO: Stop when fail
       actual = -> do
         system *args
       end
