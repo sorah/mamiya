@@ -20,9 +20,12 @@ module Mamiya
           Dir.chdir old_pwd
         end
 
-        package_name = script.package_name[
-          [Time.now.strftime("%Y-%m-%d_%H.%M.%S"), script.application]
-        ].join('-')
+
+        package_name = Dir.chdir(script.build_from) {
+          script.package_name[
+            [Time.now.strftime("%Y-%m-%d_%H.%M.%S"), script.application]
+          ].join('-')
+        }
 
         package_path = File.join(script.build_to, package_name)
         package = Mamiya::Package.new(package_path)

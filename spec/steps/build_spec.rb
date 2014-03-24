@@ -126,6 +126,17 @@ describe Mamiya::Steps::Build do
         expect(package_dir.join('veni-vidi-vici.tar.gz')).to be_exist
       end
 
+      it "calls the determiner in build dir" do
+        pwd = nil
+        allow(script).to receive(:package_name).and_return(proc { |arg| pwd = Dir.pwd; arg })
+
+        expect {
+          build_step.run!
+        }.not_to change { Dir.pwd }
+
+        expect(File.realpath(pwd)).to eq script.build_from.realpath.to_s
+      end
+
       context "when the determiner returned non-Array" do
         it "wraps with Array before calling next determiner"
       end
