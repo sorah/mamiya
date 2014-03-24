@@ -20,6 +20,7 @@ describe Mamiya::Steps::Build do
   let(:dereference_symlinks) { false }
   let(:skip_prepare_build) { false }
 
+  let(:package_name) { nil }
   let(:script) do
     double('script',
       application: 'app',
@@ -29,6 +30,7 @@ describe Mamiya::Steps::Build do
       prepare_build: proc {},
       build: proc {},
       after_build: proc {},
+      package_name: proc { |_| package_name || _ },
       package_under: package_under,
       dereference_symlinks: dereference_symlinks,
       exclude_from_package: exclude_from_package,
@@ -102,7 +104,31 @@ describe Mamiya::Steps::Build do
     end
 
     context "with package name determiner" do
-      it "delegates package naming to the determiner"
+      it "calls package name determiner with current candidate" do
+        received = nil
+        allow(script).to receive(:package_name).and_return(proc { |arg| received = arg })
+
+        build_step.run!
+
+        expect(received).to be_a_kind_of(Array)
+
+        # Default candidates
+        expect(received.size).to eq 2
+        expect(received[0]).to match(/\A\d{4}-\d{2}-\d{2}_\d{2}\.\d{2}\.\d{2}\z/)
+        expect(received[1]).to eq script.application
+      end
+
+      it "uses result by joining with '-' as package name to be built" do
+        allow(script).to receive(:package_name).and_return(proc { |arg| %w(veni vidi vici) })
+
+        build_step.run!
+
+        expect(package_dir.join('veni-vidi-vici.tar.gz')).to be_exist
+      end
+
+      context "when the determiner returned non-Array" do
+        it "wraps with Array before calling next determiner"
+      end
     end
 
     context "with package meta determiner" do
