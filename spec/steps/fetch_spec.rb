@@ -44,7 +44,7 @@ describe Mamiya::Steps::Fetch do
   end
 
   let(:options) do
-    {package_name: package_name, application: 'app', destination: destination_dir.to_s}
+    {package: package_name, application: 'app', destination: destination_dir.to_s}
   end
 
   subject(:fetch_step) { described_class.new(script: script, config: config, **options) }
