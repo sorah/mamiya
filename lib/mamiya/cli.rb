@@ -15,9 +15,9 @@ module Mamiya
     class_option :config, aliases: '-C', type: :string
     class_option :script, aliases: '-S', type: :string
     class_option :application, aliases: %w(-a --app), type: :string
-    class_option :debug, aliases: %w(-d)
-    class_option :color
-    class_option :no_color
+    class_option :debug, aliases: %w(-d), type: :boolean
+    class_option :color, type: :boolean
+    class_option :no_color, type: :boolean
     # TODO: class_option :set, aliases: '-s', type: :array
 
     desc "status", "Show status of servers"
