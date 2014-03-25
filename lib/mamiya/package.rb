@@ -1,3 +1,5 @@
+require 'mamiya/logger'
+
 require 'pathname'
 require 'digest/sha2'
 require 'json'
@@ -62,7 +64,9 @@ module Mamiya
     end
     alias exist? exists?
 
-    def build!(build_dir, exclude_from_package: [], dereference_symlinks: false, package_under: nil)
+    def build!(build_dir, exclude_from_package: [], dereference_symlinks: false, package_under: nil, logger: Mamiya::Logger.new)
+      logger = logger['Package']
+
       exclude_from_package.push('.svn', '.git').uniq!
 
       build_dir = Pathname.new(build_dir)
@@ -81,6 +85,7 @@ module Mamiya
                *excludes,
                "."]
 
+        logger.debug "$ #{cmd.join(' ')}"
         result = system(*cmd)
         raise InternalError, "failed to run: #{cmd.inspect}" unless result
       end
