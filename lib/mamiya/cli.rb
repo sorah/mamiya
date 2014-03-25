@@ -139,8 +139,10 @@ module Mamiya
       path = [options[:config], './mamiya.yml', './config.yml'].compact.find { |_| File.exists?(_) }
 
       if path
+        logger.debug "Using configuration: #{path}"
         @config = Mamiya::Config.load(File.expand_path(path))
       else
+        logger.debug "Couldn't find configuration file"
         return nil if dont_raise_error
         abort "Configuration File not found (try --config(-C) option or place it at ./mamiya.yml or ./config.yml)"
       end
@@ -151,11 +153,13 @@ module Mamiya
       path = [options[:script], './mamiya.rb', './deploy.rb'].compact.find { |_| File.exists?(_) }
 
       if path
+        logger.debug "Using deploy script: #{path}"
         @script = Mamiya::Script.new.load!(File.expand_path(path)).tap do |s|
           s.set :application, options[:application] if options[:application]
           s.set :logger, logger
         end
       else
+        logger.debug "Couldn't find deploy script."
         return nil if dont_raise_error
         abort "Deploy Script File not found (try --script(-S) option or place it at ./mamiya.rb or ./deploy.rb)"
       end
