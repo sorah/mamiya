@@ -64,7 +64,7 @@ module Mamiya
       # TODO: overriding name
       %i(build_from build_to).each { |k| script.set(k, File.expand_path(options[k])) if options[k] }
 
-      Mamiya::Steps::Build.new(script: script).run!
+      Mamiya::Steps::Build.new(script: script, logger: logger).run!
     end
 
     desc "push PACKAGE", "Upload built packages to storage."

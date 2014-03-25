@@ -84,10 +84,13 @@ describe Mamiya::Steps::Build do
 
       expect_any_instance_of(Mamiya::Package).to \
         receive(:build!).with(
-          build_dir,
-          exclude_from_package: ['test'],
-          dereference_symlinks: true,
-          package_under: 'foo') {
+            build_dir,
+            hash_including(
+              exclude_from_package: ['test'],
+              dereference_symlinks: true,
+              package_under: 'foo',
+            )
+          ) {
         expect(built).to be_true
       }
 
