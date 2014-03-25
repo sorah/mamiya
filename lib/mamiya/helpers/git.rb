@@ -19,17 +19,16 @@ end
 
 def git_head
   git_show = `git show --pretty=fuller -s`
-
   commit, comment = git_show.split(/\n\n/, 2)
 
   {
-    commit: commit.lines[0].match(/\Acommit (.+)\Z/)[1],
-    author: commit.lines[1].match(/\AAuthor:\s*(?<name>.+?) <(?<email>.+?)>\Z/).
+    commit: commit.match(/^commit (.+)$/)[1],
+    author: commit.match(/^Author:\s*(?<name>.+?) <(?<email>.+?)>$/).
       tap {|match| break Hash[match.names.map {|name| [name.to_sym, match[name]] }] },
-    author_date: Time.parse(commit.lines[2].split(/:\s+/, 2)[1]),
-    committer: commit.lines[3].match(/\ACommit:\s*(?<name>.+?) <(?<email>.+?)>\Z/).
+    author_date: Time.parse(commit.match(/^AuthorDate:\s*(.+)$/)[1]),
+    committer: commit.match(/^Commit:\s*(?<name>.+?) <(?<email>.+?)>$/).
       tap {|match| break Hash[match.names.map {|name| [name.to_sym, match[name]] }] },
-    commit_date: Time.parse(commit.lines[4].split(/:\s*/, 2)[1]),
+    commit_date: Time.parse(commit.match(/^CommitDate:\s*(.+)$/)[1]),
   }
 end
 
