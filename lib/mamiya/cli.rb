@@ -78,6 +78,8 @@ module Mamiya
       ]
       package_path = candidates.select { |_| _ }.find { |_| File.exists?(_) }
 
+      logger.debug "Candidates: #{candidates.inspect}"
+
       unless package_path
         abort "Package (#{package_atom}) couldn't find at #{candidates.join(', ')}"
       end

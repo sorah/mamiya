@@ -22,7 +22,11 @@ module Mamiya
           )
         )
 
+        logger.info "Pushing #{package.path} to storage(app=#{storage.application})..."
+
         storage.push(package)
+
+        logger.info "DONE!"
       end
     end
   end
