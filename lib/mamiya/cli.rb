@@ -1,6 +1,8 @@
 require 'mamiya'
+
 require 'mamiya/config'
 require 'mamiya/script'
+require 'mamiya/logger'
 
 require 'mamiya/steps/build'
 require 'mamiya/steps/push'
@@ -13,6 +15,9 @@ module Mamiya
     class_option :config, aliases: '-C', type: :string
     class_option :script, aliases: '-S', type: :string
     class_option :application, aliases: %w(-a --app), type: :string
+    class_option :debug, aliases: %w(-d)
+    class_option :color
+    class_option :no_color
     # TODO: class_option :set, aliases: '-s', type: :array
 
     desc "status", "Show status of servers"
@@ -148,6 +153,7 @@ module Mamiya
       if path
         @script = Mamiya::Script.new.load!(File.expand_path(path)).tap do |s|
           s.set :application, options[:application] if options[:application]
+          s.set :logger, logger
         end
       else
         return nil if dont_raise_error
@@ -169,6 +175,14 @@ module Mamiya
 
     def _applications
       config.storage_class.find(config[:storage])
+    end
+
+    def logger
+      Mamiya::Logger.new(
+        color: options[:no_color] ? false : (options[:color] ? true : nil),
+        outputs: [$stdout],
+        level: options[:debug] ? Mamiya::Logger::DEBUG : Mamiya::Logger.defaults[:level],
+      )
     end
   end
 end

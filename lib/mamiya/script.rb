@@ -1,4 +1,5 @@
 require 'mamiya/dsl'
+require 'mamiya/logger'
 
 module Mamiya
   class Script < DSL
@@ -41,6 +42,8 @@ module Mamiya
     set_default :package_to, nil
     set_default :deploy_to, nil
     set_default :prepare_to, nil
+
+    set_default :logger, Mamiya::Logger.new(outputs: [])
 
     set_default :skip_prepare_build, false
 
