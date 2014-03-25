@@ -15,7 +15,7 @@ module Mamiya
     class_option :application, aliases: %w(-a --app), type: :string
     # TODO: class_option :set, aliases: '-s', type: :array
 
-    desc "status", ""
+    desc "status", "Show status of servers"
     def status
       # TODO:
     end
