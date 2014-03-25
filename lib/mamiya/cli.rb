@@ -71,10 +71,10 @@ module Mamiya
     def push(package_atom)
       candidates = [
         package_atom,
-        options[:build_from] && File.join(options[:build_from], package_atom),
-        options[:build_from] && File.join(options[:build_from], "#{package_atom}.tar.gz"),
-        script(:no_error) && script.build_from && File.join(script.build_from, package_atom),
-        script(:no_error) && script.build_from && File.join(script.build_from, "#{package_atom}.tar.gz"),
+        options[:build_to] && File.join(options[:build_to], package_atom),
+        options[:build_to] && File.join(options[:build_to], "#{package_atom}.tar.gz"),
+        script(:no_error) && script.build_to && File.join(script.build_to, package_atom),
+        script(:no_error) && script.build_to && File.join(script.build_to, "#{package_atom}.tar.gz"),
       ]
       package_path = candidates.select { |_| _ }.find { |_| File.exists?(_) }
 
