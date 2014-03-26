@@ -15,6 +15,7 @@ module Mamiya
           )
         )
 
+        logger.info("Fetching package #{options[:package]} from storage(app=#{storage.application}) to #{options[:destination]}...")
         storage.fetch(options[:package], options[:destination])
       end
     end
