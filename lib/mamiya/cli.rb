@@ -7,6 +7,7 @@ require 'mamiya/logger'
 require 'mamiya/steps/build'
 require 'mamiya/steps/push'
 require 'mamiya/steps/fetch'
+require 'mamiya/steps/extract'
 
 require 'thor'
 
@@ -69,20 +70,7 @@ module Mamiya
 
     desc "push PACKAGE", "Upload built packages to storage."
     def push(package_atom)
-      candidates = [
-        package_atom,
-        options[:build_to] && File.join(options[:build_to], package_atom),
-        options[:build_to] && File.join(options[:build_to], "#{package_atom}.tar.gz"),
-        script(:no_error) && script.build_to && File.join(script.build_to, package_atom),
-        script(:no_error) && script.build_to && File.join(script.build_to, "#{package_atom}.tar.gz"),
-      ]
-      package_path = candidates.select { |_| _ }.find { |_| File.exists?(_) }
-
-      logger.debug "Candidates: #{candidates.inspect}"
-
-      unless package_path
-        abort "Package (#{package_atom}) couldn't find at #{candidates.join(', ')}"
-      end
+      package_path = package_path_from_atom(package_atom)
 
       if options[:application]
         warn "WARNING: Overriding package's application name with given one: #{options[:application]}"
@@ -104,6 +92,16 @@ module Mamiya
         package: package_atom,
         application: application,
         destination: destination,
+      ).run!
+    end
+
+    desc "extract PACKAGE DESTINATION", "Unpack package to DESTINATION"
+    def extract(package_atom, destination)
+      package_path = package_path_from_atom(package_atom)
+
+      Mamiya::Steps::Extract.new(
+        package: package_path,
+        destination: destination
       ).run!
     end
 
@@ -189,6 +187,25 @@ module Mamiya
         outputs: [$stdout],
         level: options[:debug] ? Mamiya::Logger::DEBUG : Mamiya::Logger.defaults[:level],
       )
+    end
+
+    def package_path_from_atom(package_atom)
+      candidates = [
+        package_atom,
+        options[:build_to] && File.join(options[:build_to], package_atom),
+        options[:build_to] && File.join(options[:build_to], "#{package_atom}.tar.gz"),
+        script(:no_error) && script.build_to && File.join(script.build_to, package_atom),
+        script(:no_error) && script.build_to && File.join(script.build_to, "#{package_atom}.tar.gz"),
+      ]
+      logger.debug "Candidates: #{candidates.inspect}"
+
+      package_path = candidates.select { |_| _ }.find { |_| File.exists?(_) }
+
+      unless package_path
+        abort "Package (#{package_atom}) couldn't find at #{candidates.join(', ')}"
+      end
+
+      package_path
     end
   end
 end
