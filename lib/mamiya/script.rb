@@ -1,8 +1,12 @@
 require 'mamiya/dsl'
 require 'mamiya/logger'
 
+require 'shellwords'
+
 module Mamiya
   class Script < DSL
+    class CommandFailed < Exception; end
+
     add_hook :before_build
     add_hook :prepare_build
     add_hook :build
@@ -50,7 +54,37 @@ module Mamiya
     def run(*args)
       # TODO: Stop when fail
       actual = -> do
-        system *args
+        logger = self.logger['RUN']
+
+        logger.info("$ #{args.shelljoin}")
+
+        err_r, err_w = IO.pipe
+        out_r, out_w = IO.pipe
+
+        pid = spawn(*args, out: out_w, err: err_w)
+
+        [out_w, err_w].each(&:close)
+
+        buf = ""
+
+        ths = {:debug => out_r, :warn => err_r}.map do |severity, io|
+          Thread.new {
+            until io.eof?
+              str = io.gets
+              logger.__send__(severity, str.chomp)
+              buf << str
+            end
+          }.tap { |_| _.abort_on_exception = true }
+        end
+
+        pid, status = Process.waitpid2(pid)
+        ths.each { |_| _.alive? && _.kill }
+
+        [out_r, err_r].each(&:close)
+
+        raise CommandFailed unless $?.success?
+
+        buf
       end
 
       if defined? Bundler
