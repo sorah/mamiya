@@ -59,5 +59,11 @@ describe Mamiya::Script do
       script.run("ruby", "-e", "warn 'bar'")
       expect(log).to include([:warn, "bar"])
     end
+
+    it "returns captured output as String" do
+      out = script.run("ruby", "-e", "puts 'foo'; warn 'bar'")
+      expect(out).to match(/^foo$/)
+      expect(out).to match(/^bar$/)
+    end
   end
 end
