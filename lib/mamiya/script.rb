@@ -82,7 +82,7 @@ module Mamiya
 
         [out_r, err_r].each(&:close)
 
-        raise CommandFailed unless $?.success?
+        raise CommandFailed unless status.success?
 
         buf
       end
