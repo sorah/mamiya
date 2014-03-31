@@ -78,6 +78,11 @@ module Mamiya
         end
 
         pid, status = Process.waitpid2(pid)
+
+        begin
+          timeout(3) { ths.each(&:join) }
+        rescue Timeout::Error
+        end
         ths.each { |_| _.alive? && _.kill }
 
         [out_r, err_r].each(&:close)
