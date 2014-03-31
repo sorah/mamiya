@@ -51,7 +51,7 @@ module Mamiya
 
     set_default :skip_prepare_build, false
 
-    def run(*args)
+    def run(*args, allow_failure: false)
       # TODO: Stop when fail
       actual = -> do
         logger = self.logger['RUN']
@@ -87,7 +87,7 @@ module Mamiya
 
         [out_r, err_r].each(&:close)
 
-        raise CommandFailed unless status.success?
+        raise CommandFailed unless allow_failure || status.success?
 
         buf
       end

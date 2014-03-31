@@ -43,7 +43,16 @@ describe Mamiya::Script do
           script.run("false")
         }.to raise_error(Mamiya::Script::CommandFailed)
       end
+
+      context "with allow_failure" do
+        it "ignores error" do
+          expect {
+            script.run("false", allow_failure: true)
+          }.not_to raise_error(Mamiya::Script::CommandFailed)
+        end
+      end
     end
+
 
     it "logs command as information" do
       script.run("echo", "foo", "bar'", " baz")
