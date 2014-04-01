@@ -61,9 +61,24 @@ module Mamiya
     desc "build", "Build package."
     method_option :build_from, aliases: %w(--source -f), type: :string
     method_option :build_to, aliases: %w(--destination -t), type: :string
+    method_option :skip_prepare_build, aliases: %w(--no-prepare-build -P), type: :boolean
+    method_option :force_prepare_build, aliases: %w(--prepare-build -p), type: :boolean
     def build
       # TODO: overriding name
       %i(build_from build_to).each { |k| script.set(k, File.expand_path(options[k])) if options[k] }
+
+      if options[:force_prepare_build] && options[:skip_prepare_build]
+        logger.warn 'Both force_prepare_build and skip_prepare_build are enabled. ' \
+          'This results skipping prepare_build...'
+      end
+
+      if options[:force_prepare_build]
+        script.set :skip_prepare_build, false
+      end
+
+      if options[:skip_prepare_build]
+        script.set :skip_prepare_build, true
+      end
 
       Mamiya::Steps::Build.new(script: script, logger: logger).run!
     end
