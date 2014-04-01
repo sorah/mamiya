@@ -1,5 +1,8 @@
 require 'time'
 
+set_default :git_remote, 'origin'
+set_default :commit, "#{self.git_remote}/HEAD"
+
 def git_ignored_files
   git_clean_out = `git clean -ndx`.lines
   prefix = /^Would (?:remove|skip repository) /
@@ -30,6 +33,25 @@ def git_head
       tap {|match| break Hash[match.names.map {|name| [name.to_sym, match[name]] }] },
     commit_date: Time.parse(commit.match(/^CommitDate:\s*(.+)$/)[1]),
   }
+end
+
+prepare_build do |update|
+  logger = self.logger['git']
+
+  if !update && !self.repository
+    logger.warn 'Skipping cloning repository because script.repository not set'
+  elsif !update
+    run "git", "clone", self.repository, self.build_from
+  end
+
+  Dir.chdir(self.build_from) do
+    logger.info Dir.pwd
+    run "git", "fetch", self.git_remote
+    run "git", "remote", "prune", self.git_remote, allow_failure: true
+    run "git", "fetch", "--tags", self.git_remote
+
+    run "git", "reset", "--hard", self.commit
+  end
 end
 
 if options[:exclude_git_clean_targets]
