@@ -21,6 +21,18 @@ module Mamiya
     class_option :no_color, type: :boolean
     # TODO: class_option :set, aliases: '-s', type: :array
 
+    no_commands do
+      def invoke_command(*)
+        super
+      rescue Exception => e
+        logger.fatal "#{e.class}: #{e.message}"
+
+        e.backtrace.map{ |_| _.prepend("\t") }.each do |line|
+          logger.debug line
+        end
+      end
+    end
+
     desc "status", "Show status of servers"
     def status
       # TODO:
