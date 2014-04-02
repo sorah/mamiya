@@ -64,6 +64,22 @@ describe Mamiya::Steps::Build do
         to(hooks)
     end
 
+    it "calls after_build hook even if exception occured" do
+      e = Exception.new("Good bye, the cruel world")
+      allow(script).to receive(:build).and_return(proc { raise e })
+
+      received = nil
+      allow(script).to receive(:after_build).and_return(proc { |_| received = _ })
+
+      expect {
+        begin
+          build_step.run!
+        rescue Exception; end
+      }.
+        to change { received }.
+        from(nil).to(e)
+    end
+
     it "calls build hook in :build_from (pwd)" do
       pwd = nil
       script.stub(build: proc { pwd = Dir.pwd })

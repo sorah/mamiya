@@ -5,6 +5,8 @@ module Mamiya
   module Steps
     class Build < Abstract
       def run!
+        @exception = nil
+
         logger.info "Initiating package build"
 
         logger.info "Running script.before_build"
@@ -54,8 +56,12 @@ module Mamiya
            logger: logger)
         logger.info "Packed."
 
+      rescue Exception => e
+        @exception = e
+        raise
+      ensure
         logger.info "Running script.after_build"
-        script.after_build[]
+        script.after_build[@exception]
 
         logger.info "DONE!"
       end
