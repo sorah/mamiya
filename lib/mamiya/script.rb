@@ -108,6 +108,7 @@ module Mamiya
     end
 
     def cd(*args)
+      logger.info "$ cd #{args[0]}"
       Dir.chdir *args
     end
 
