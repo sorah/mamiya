@@ -87,7 +87,15 @@ module Mamiya
 
         [out_r, err_r].each(&:close)
 
-        raise CommandFailed unless allow_failure || status.success?
+        unless allow_failure || status.success?
+          raise CommandFailed,
+            "Excecution failed (" \
+            "status=#{status.exitstatus}" \
+            " pid=#{status.pid}" \
+            "#{status.signaled? ? "termsig=#{status.termsig.inspect} stopsig=#{status.stopsig.inspect}" : nil}" \
+            "#{status.stopped? ? " stopped" : nil}" \
+            "): #{args.inspect}"
+        end
 
         buf
       end
