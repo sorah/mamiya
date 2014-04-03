@@ -55,9 +55,21 @@ module Mamiya
     end
 
     desc "show PACKAGE", "Show package"
+    method_option :format, aliases: %w(-f), type: :string, default: 'pp'
     def show(package)
-      require 'pp'
-      pp storage.meta(package)
+      meta = storage.meta(package)
+
+      case options[:format]
+      when 'pp'
+        require 'pp'
+        pp meta
+      when 'json'
+        require 'json'
+        puts meta.to_json
+      when 'yaml'
+        require 'yaml'
+        puts meta.to_yaml
+      end
     end
 
     # ---
