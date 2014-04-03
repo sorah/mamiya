@@ -171,7 +171,7 @@ module Mamiya
       else
         logger.debug "Couldn't find configuration file"
         return nil if dont_raise_error
-        abort "Configuration File not found (try --config(-C) option or place it at ./mamiya.yml or ./config.yml)"
+        fatal! "Configuration File not found (try --config(-C) option or place it at ./mamiya.yml or ./config.yml)"
       end
     end
 
@@ -188,8 +188,13 @@ module Mamiya
       else
         logger.debug "Couldn't find deploy script."
         return nil if dont_raise_error
-        abort "Deploy Script File not found (try --script(-S) option or place it at ./mamiya.rb or ./deploy.rb)"
+        fatal! "Deploy Script File not found (try --script(-S) option or place it at ./mamiya.rb or ./deploy.rb)"
       end
+    end
+
+    def fatal!(message)
+      logger.fatal message
+      exit 1
     end
 
     def application
@@ -229,7 +234,7 @@ module Mamiya
       package_path = candidates.select { |_| _ }.find { |_| File.exists?(_) }
 
       unless package_path
-        abort "Package (#{package_atom}) couldn't find at #{candidates.join(', ')}"
+        fatal! "Package (#{package_atom}) couldn't find at #{candidates.join(', ')}"
       end
 
       package_path
