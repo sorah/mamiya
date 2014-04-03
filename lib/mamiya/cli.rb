@@ -100,7 +100,7 @@ module Mamiya
       package_path = package_path_from_atom(package_atom)
 
       if options[:application]
-        warn "WARNING: Overriding package's application name with given one: #{options[:application]}"
+        logger.warn "Overriding package's application name with given one: #{options[:application]}"
         sleep 2
       end
 
