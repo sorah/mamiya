@@ -60,10 +60,12 @@ module Mamiya
         @exception = e
         raise
       ensure
+        logger.warn "Exception occured, cleaning up..." if @exception
+
         logger.info "Running script.after_build"
         script.after_build[@exception]
 
-        logger.info "DONE!"
+        logger.info "DONE!" unless @exception
       end
     end
   end
