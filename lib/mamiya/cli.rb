@@ -46,7 +46,7 @@ module Mamiya
         puts ""
       end
 
-      puts storage.packages
+      puts storage.packages.sort
     end
 
     desc "list-applications", "List applications in storage"
