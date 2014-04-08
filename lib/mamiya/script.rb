@@ -111,14 +111,5 @@ module Mamiya
       logger.info "$ cd #{args[0]}"
       Dir.chdir *args
     end
-
-    def servers
-    end
-
-    def servers_use
-    end
-
-    def storage(name, options={})
-    end
   end
 end
