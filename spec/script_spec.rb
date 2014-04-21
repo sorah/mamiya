@@ -48,7 +48,7 @@ describe Mamiya::Script do
         it "ignores error" do
           expect {
             script.run("false", allow_failure: true)
-          }.not_to raise_error(Mamiya::Script::CommandFailed)
+          }.not_to raise_error
         end
       end
     end
