@@ -1,7 +1,9 @@
 require 'mamiya/storages/mock'
 require 'mamiya/logger'
 
-Mamiya::Logger.defaults[:outputs] = []
+unless ENV["ENABLE_LOG"]
+  Mamiya::Logger.defaults[:outputs] = []
+end
 
 RSpec.configure do |config|
   config.treat_symbols_as_metadata_keys_with_true_values = true
