@@ -19,6 +19,20 @@ module Mamiya
       self[:storage] && Storages.find(self[:storage][:type])
     end
 
+    def deploy_to_for_app(app)
+      # TODO: test
+      app = app.to_sym
+
+      if self[:apps] && self[:applications][app]
+        Pathname.new(self[:applications][app][:deploy_to])
+      end
+    end
+
+    def releases_path_for_app(app)
+      # TODO: test
+      deploy_to_for_app(app).join('releases')
+    end
+
     private
 
     def symbolize_keys_in(hash)
