@@ -1,0 +1,11 @@
+storage:
+  type: s3
+  bucket: ...
+  region: ap-northeast-1
+
+deploy_script_dir: /path/to/deploy/scripts
+packages_dir: ''
+
+apps:
+  myapp:
+    deploy_to: /path/to/myapp
