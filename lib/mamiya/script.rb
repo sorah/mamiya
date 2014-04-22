@@ -44,6 +44,8 @@ module Mamiya
     set_default :dereference_symlinks, true
 
     set_default :package_to, nil
+
+    # TODO: use variable in config.yml
     set_default :deploy_to, nil
     set_default :prepare_to, nil
 
