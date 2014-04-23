@@ -43,94 +43,37 @@ describe Mamiya::Agent do
     end
   end
 
-  describe "events:" do
-    describe "fetch" do
-      def trigger_fetch_request
-        serf.trigger('user_event', Villein::Event.new(
-          {
-            'SERF_EVENT' => 'user',
-            'SERF_USER_EVENT' => 'mamiya-fetch',
-          },
-          payload: {
-            application: 'app',
-            package: 'package',
-          }.to_json,
-        ))
+  describe "event handler" do
+    let(:handler_class) do
+      Class.new(Mamiya::Agent::Handlers::Abstract) do
       end
+    end
 
-      before do
-        allow(fetcher).to receive(:enqueue) do |&block|
-          block.call
-        end
+    def trigger(name, payload={})
+      serf.trigger('user_event', Villein::Event.new(
+        {
+          'SERF_EVENT' => 'user',
+          'SERF_USER_EVENT' => "mamiya-#{name}",
+        },
+        payload: payload.to_json,
+      ))
+    end
 
-        agent # to create
-      end
+    before do
+      stub_const("Mamiya::Agent::Handlers::Test", handler_class)
+      agent # to create
+    end
 
-      it "enqueue a request" do
-        expect(fetcher).to receive(:enqueue).with('app', 'package')
+    it "finds handler class then call #run!" do
+      expect_any_instance_of(handler_class).to receive(:run!)
 
-        trigger_fetch_request
-      end
+      trigger('test')
+    end
 
-      it "responds ack" do
-        allow(fetcher).to receive(:enqueue).with('app', 'package')
-        expect(serf).to receive(:event).with('mamiya-fetch-ack',
-          {name: serf.name, application: 'app', package: 'package'}.to_json)
+    it "passes proper argument to handler"
 
-        trigger_fetch_request
-      end
-
-      it "responds success" do
-        callback = nil
-        allow(fetcher).to receive(:enqueue).with('app', 'package') do |&block|
-          callback = block
-        end
-
-        trigger_fetch_request
-
-        expect(serf).to receive(:event).with(
-          'mamiya-fetch-success',
-          {name: serf.name, application: 'app', package: 'package'}.to_json
-        )
-
-        callback.call
-      end
-
-      it "updates tag" do
-        expect(agent).to receive(:update_tags)
-        trigger_fetch_request
-      end
-
-      context "when failed" do
-        it "notifies error" do
-          callback = nil
-          allow(fetcher).to receive(:enqueue).with('app', 'package') do |&block|
-            callback = block
-          end
-
-          trigger_fetch_request
-
-          error = RuntimeError.new('test')
-          expect(serf).to receive(:event).with(
-            'mamiya-fetch-error',
-            {
-              name: serf.name, application: 'app', package: 'package',
-              error: error.inspect,
-            }.to_json,
-          )
-
-          callback.call(error)
-        end
-
-        it "updates tag" do
-          allow(fetcher).to receive(:enqueue) do |&block|
-            block.call(Exception.new)
-          end
-
-          expect(agent).to receive(:update_tags)
-          trigger_fetch_request
-        end
-      end
+    context "when handler not found" do
+      it "ignores event"
     end
   end
 end

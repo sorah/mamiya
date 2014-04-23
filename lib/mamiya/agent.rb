@@ -5,12 +5,10 @@ require 'mamiya/logger'
 require 'mamiya/steps/fetch'
 require 'mamiya/agent/fetcher'
 
+require 'mamiya/agent/handlers/fetch'
+
 module Mamiya
   class Agent
-    FETCH_ACK_EVENT = 'mamiya-fetch-ack'
-    FETCH_SUCCESS_EVENT = 'mamiya-fetch-success'
-    FETCH_ERROR_EVENT = 'mamiya-fetch-error'
-
     def initialize(config, logger: Mamiya::Logger.new)
       @config = config
       @serf = init_serf
@@ -18,7 +16,7 @@ module Mamiya
       @logger = logger['agent']
     end
 
-    attr_reader :config, :serf, :logger
+    attr_reader :config, :serf, :logger, :fetcher
 
     def run!
       serf_start
@@ -61,10 +59,10 @@ module Mamiya
 
     def user_event_handler(event)
       type, payload = event.user_event, JSON.parse(event.payload)
-      method = "handle_#{type.sub(/^mamiya-/,'').gsub(/-/,'_')}_event"
+      class_name = type.sub(/^mamiya-/,'').capitalize.gsub(/_./) { |_| _[1].upcase }
 
-      if respond_to?(method, true)
-        self.__send__(method, payload, event)
+      if Handlers.const_defined?(class_name)
+        Handlers.const_get(class_name).new(self, event).run!
       else
         logger.warn("Discarded event[#{event.user_event}] because we don't handle it")
       end
@@ -80,36 +78,7 @@ module Mamiya
     end
 
     def handle_fetch_event(payload, event)
-      serf.event(FETCH_ACK_EVENT,
-        {
-          name: serf.name,
-          application: payload['application'],
-          package: payload['package']
-        }.to_json
-      )
 
-      @fetcher.enqueue(payload['application'], payload['package']) do |error|
-        if error
-          serf.event(FETCH_ERROR_EVENT,
-            {
-              name: serf.name,
-              application: payload['application'],
-              package: payload['package'],
-              error: error.inspect,
-            }.to_json
-          )
-        else
-          serf.event(FETCH_SUCCESS_EVENT,
-            {
-              name: serf.name,
-              application: payload['application'],
-              package: payload['package'],
-            }.to_json
-          )
-        end
-
-        update_tags
-      end
     end
 
   end
