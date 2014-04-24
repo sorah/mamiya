@@ -87,10 +87,5 @@ module Mamiya
     rescue JSON::ParserError
       logger.warn("Discarded event[#{event.user_event}] with invalid payload (unable to parse as json)")
     end
-
-    def handle_fetch_event(payload, event)
-
-    end
-
   end
 end
