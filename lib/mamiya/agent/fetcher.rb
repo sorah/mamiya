@@ -70,6 +70,10 @@ module Mamiya
 
       rescue Exception => e
         @logger.fatal "fetch failed (#{app}:#{package}): #{e.inspect}"
+        e.backtrace.each do |line|
+          @logger.fatal line.prepend("\t")
+        end
+
         callback.call(e) if callback
       end
     end
