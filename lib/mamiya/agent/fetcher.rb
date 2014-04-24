@@ -23,6 +23,8 @@ module Mamiya
       end
 
       def start!
+        @logger.info 'Starting...'
+
         @thread = Thread.new(&method(:main_loop))
         @thread.abort_on_exception = true
       end
@@ -63,6 +65,8 @@ module Mamiya
         ).run!
 
         callback.call if callback
+
+        @logger.info "fetched #{app}:#{package}"
 
       rescue Exception => e
         @logger.fatal "fetch failed (#{app}:#{package}): #{e.inspect}"

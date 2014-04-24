@@ -19,8 +19,12 @@ module Mamiya
     attr_reader :config, :serf, :logger, :fetcher
 
     def run!
+      logger.info "Starting..."
+
       serf_start
       fetcher_start
+
+      logger.info "Started."
 
       loop do
         sleep 10
@@ -49,17 +53,24 @@ module Mamiya
     end
 
     def serf_start
+      logger.debug "Starting serf"
+
       @serf.start!
       @serf.auto_stop
     end
 
     def fetcher_start
+      logger.debug "Starting fetcher"
+
       @fetcher.start!
     end
 
     def user_event_handler(event)
       type, payload = event.user_event, JSON.parse(event.payload)
       class_name = type.sub(/^mamiya-/,'').capitalize.gsub(/_./) { |_| _[1].upcase }
+
+      logger.debug "Received user event #{type}"
+      logger.debug payload.inspect
 
       if Handlers.const_defined?(class_name)
         Handlers.const_get(class_name).new(self, event).run!
