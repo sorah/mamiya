@@ -45,7 +45,8 @@ module Mamiya
     private
 
     def init_serf
-      Villein::Agent.new(**config[:serf][:agent]).tap do |serf|
+      agent_config = (config[:serf] && config[:serf][:agent]) || {}
+      Villein::Agent.new(**agent_config).tap do |serf|
         serf.on_user_event do |event|
           user_event_handler(event)
         end
