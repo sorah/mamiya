@@ -8,12 +8,14 @@ module Mamiya
     class Fetcher
       GRACEFUL_TIMEOUT = 60
 
-      def initialize(destination: raise(ArgumentError, 'missing :destination'), logger: Mamiya::Logger.new)
+      def initialize(config, logger: Mamiya::Logger.new)
         @thread = nil
         @queue = Queue.new
 
+        @config = config
+        @destination = config[:packages_dir]
+
         @logger = logger['fetcher']
-        @destination = destination
       end
 
       attr_reader :thread
@@ -62,6 +64,7 @@ module Mamiya
           application: app,
           package: package,
           destination: @destination,
+          config: @config,
         ).run!
 
         callback.call if callback

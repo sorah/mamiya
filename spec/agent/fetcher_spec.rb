@@ -4,7 +4,11 @@ require 'mamiya/agent/fetcher'
 require 'mamiya/steps/fetch'
 
 describe Mamiya::Agent::Fetcher do
-  subject(:fetcher) { described_class.new(destination: 'destination') }
+  let(:config) do
+    {packages_dir: 'destination'}
+  end
+
+  subject(:fetcher) { described_class.new(config) }
 
   describe "lifecycle" do
     it "can start and stop" do
@@ -37,6 +41,7 @@ describe Mamiya::Agent::Fetcher do
         application: 'myapp',
         package: 'package',
         destination: 'destination',
+        config: config,
       ).and_return(step)
 
       fetcher.start!

@@ -12,7 +12,7 @@ module Mamiya
     def initialize(config, logger: Mamiya::Logger.new)
       @config = config
       @serf = init_serf
-      @fetcher = Mamiya::Agent::Fetcher.new(destination: config[:packages_dir])
+      @fetcher = Mamiya::Agent::Fetcher.new(config)
       @logger = logger['agent']
     end
 
