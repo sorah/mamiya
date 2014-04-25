@@ -75,5 +75,34 @@ describe Mamiya::Agent do
     context "when handler not found" do
       it "ignores event"
     end
+
+    context "with events_only" do
+      subject(:agent) { described_class.new(config, events_only: [/foo/]) }
+
+      let(:handler_foo) do
+        Class.new(Mamiya::Agent::Handlers::Abstract) do
+        end
+      end
+
+      let(:handler_bar) do
+        Class.new(Mamiya::Agent::Handlers::Abstract) do
+          def run!
+            raise 'oops?'
+          end
+        end
+      end
+
+      before do
+        stub_const("Mamiya::Agent::Handlers::Foo", handler_foo)
+        stub_const("Mamiya::Agent::Handlers::Bar", handler_bar)
+      end
+
+      it "handles events only matches any of them" do
+        expect_any_instance_of(handler_foo).to receive(:run!)
+
+        trigger('foo')
+        trigger('bar')
+      end
+    end
   end
 end

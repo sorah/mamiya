@@ -9,9 +9,11 @@ require 'mamiya/agent/handlers/fetch'
 
 module Mamiya
   class Agent
-    def initialize(config, logger: Mamiya::Logger.new)
+    def initialize(config, logger: Mamiya::Logger.new, events_only: nil)
       @config = config
       @serf = init_serf
+      @events_only = events_only
+
       @fetcher = Mamiya::Agent::Fetcher.new(config)
       @logger = logger['agent']
     end
@@ -71,6 +73,8 @@ module Mamiya
 
     def user_event_handler(event)
       type, payload = event.user_event, JSON.parse(event.payload)
+      return if @events_only && !@events_only.any?{ |_| _ === type }
+
       class_name = type.sub(/^mamiya-/,'').capitalize.gsub(/-./) { |_| _[1].upcase }
 
       logger.debug "Received user event #{type}"
