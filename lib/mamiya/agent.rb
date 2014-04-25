@@ -87,7 +87,8 @@ module Mamiya
       logger.debug payload.inspect
 
       if Handlers.const_defined?(class_name)
-        Handlers.const_get(class_name).new(self, event).run!
+        handler = Handlers.const_get(class_name).new(self, event)
+        handler.send(action || :run!, event)
       else
         logger.warn("Discarded event[#{event.user_event}] because we don't handle it")
       end

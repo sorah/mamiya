@@ -104,5 +104,12 @@ describe Mamiya::Agent do
         trigger('bar')
       end
     end
+
+    context "with action" do
+      it "calls another method instead of run!" do
+        expect_any_instance_of(handler_class).to receive(:hello)
+        trigger('test:hello')
+      end
+    end
   end
 end
