@@ -58,6 +58,9 @@ module Mamiya
 
       @serf.start!
       @serf.auto_stop
+      @serf.wait_for_ready
+
+      logger.debug "Serf became ready"
     end
 
     def fetcher_start
