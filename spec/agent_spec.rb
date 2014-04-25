@@ -5,6 +5,7 @@ require 'villein/event'
 
 require 'mamiya/agent'
 require 'mamiya/agent/fetcher'
+require 'mamiya/agent/actions'
 
 require_relative './support/dummy_serf.rb'
 
@@ -22,6 +23,10 @@ describe Mamiya::Agent do
   end
 
   subject(:agent) { described_class.new(config) }
+
+  it "includes actions" do
+    expect(described_class.ancestors).to include(Mamiya::Agent::Actions)
+  end
 
   describe "#run!" do
     it "starts serf and fetcher" do

@@ -6,9 +6,12 @@ require 'mamiya/steps/fetch'
 require 'mamiya/agent/fetcher'
 
 require 'mamiya/agent/handlers/fetch'
+require 'mamiya/agent/actions'
 
 module Mamiya
   class Agent
+    include Mamiya::Agent::Actions
+
     def initialize(config, logger: Mamiya::Logger.new, events_only: nil)
       @config = config
       @serf = init_serf
@@ -42,6 +45,13 @@ module Mamiya
     end
 
     def releases
+    end
+
+    def trigger(type, action: nil, **payload)
+      name = "mamiya:#{type}"
+      name << ":#{action}" if action
+
+      serf.event(name, payload.to_json)
     end
 
     private
