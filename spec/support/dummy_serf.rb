@@ -20,6 +20,13 @@ class DummySerf
   def auto_stop
   end
 
+  def ready?
+    true
+  end
+
+  def wait_for_ready
+  end
+
   def event(name, payload)
   end
 
