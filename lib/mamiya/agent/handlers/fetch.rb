@@ -4,9 +4,9 @@ module Mamiya
   class Agent
     module Handlers
       class Fetch < Abstract
-        FETCH_ACK_EVENT = 'mamiya-fetch-ack'
-        FETCH_SUCCESS_EVENT = 'mamiya-fetch-success'
-        FETCH_ERROR_EVENT = 'mamiya-fetch-error'
+        FETCH_ACK_EVENT = 'mamiya:fetch-result:ack'
+        FETCH_SUCCESS_EVENT = 'mamiya:fetch-result:success'
+        FETCH_ERROR_EVENT = 'mamiya:fetch-result:error'
 
         def run!
           agent.serf.event(FETCH_ACK_EVENT,

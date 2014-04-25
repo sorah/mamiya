@@ -72,10 +72,16 @@ module Mamiya
     end
 
     def user_event_handler(event)
-      type, payload = event.user_event, JSON.parse(event.payload)
+      user_event, payload = event.user_event, JSON.parse(event.payload)
+
+      return unless user_event.start_with?('mamiya:')
+      user_event.sub!(/^mamiya:/, '')
+
+      type, action = event.user_event.split(/:/, 2)
+
       return if @events_only && !@events_only.any?{ |_| _ === type }
 
-      class_name = type.sub(/^mamiya-/,'').capitalize.gsub(/-./) { |_| _[1].upcase }
+      class_name = type.capitalize.gsub(/-./) { |_| _[1].upcase }
 
       logger.debug "Received user event #{type}"
       logger.debug payload.inspect

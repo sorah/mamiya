@@ -10,7 +10,7 @@ describe Mamiya::Agent::Handlers::Fetch do
     Villein::Event.new(
       {
         'SERF_EVENT' => 'user',
-        'SERF_USER_EVENT' => 'mamiya-fetch',
+        'SERF_USER_EVENT' => 'mamiya:fetch',
       },
       payload: {
         application: 'app',
@@ -42,7 +42,7 @@ describe Mamiya::Agent::Handlers::Fetch do
 
   it "responds ack" do
     allow(fetcher).to receive(:enqueue).with('app', 'package')
-    expect(serf).to receive(:event).with('mamiya-fetch-ack',
+    expect(serf).to receive(:event).with('mamiya:fetch-result:ack',
       {name: serf.name, application: 'app', package: 'package'}.to_json)
 
     handler.run!
@@ -57,7 +57,7 @@ describe Mamiya::Agent::Handlers::Fetch do
     handler.run!
 
     expect(serf).to receive(:event).with(
-      'mamiya-fetch-success',
+      'mamiya:fetch-result:success',
       {name: serf.name, application: 'app', package: 'package'}.to_json
     )
 
@@ -80,7 +80,7 @@ describe Mamiya::Agent::Handlers::Fetch do
 
       error = RuntimeError.new('test')
       expect(serf).to receive(:event).with(
-        'mamiya-fetch-error',
+        'mamiya:fetch-result:error',
         {
           name: serf.name, application: 'app', package: 'package',
           error: error.inspect,

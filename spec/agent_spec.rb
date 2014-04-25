@@ -53,7 +53,7 @@ describe Mamiya::Agent do
       serf.trigger('user_event', Villein::Event.new(
         {
           'SERF_EVENT' => 'user',
-          'SERF_USER_EVENT' => "mamiya-#{name}",
+          'SERF_USER_EVENT' => "mamiya:#{name}",
         },
         payload: payload.to_json,
       ))
