@@ -25,15 +25,17 @@ module Mamiya
 
     def run!
       logger.info "Starting..."
-
-      serf_start
-      fetcher_start
-
+      start()
       logger.info "Started."
 
       loop do
         sleep 10
       end
+    end
+
+    def start
+      serf_start
+      fetcher_start
     end
 
     def update_tags
