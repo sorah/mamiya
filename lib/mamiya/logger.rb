@@ -32,6 +32,7 @@ module Mamiya
     def_delegators :@logger,
       :<<, :add, :log,
       :fatal, :error, :warn, :info, :debug,
+      :fatal?, :error?, :warn?, :info?, :debug?,
       :level, :level=, :progname, :progname=,
       :close
 
