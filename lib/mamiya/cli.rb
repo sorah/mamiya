@@ -10,6 +10,7 @@ require 'mamiya/steps/fetch'
 require 'mamiya/steps/extract'
 
 require 'mamiya/agent'
+require 'mamiya/master'
 
 require 'thor'
 
@@ -167,8 +168,11 @@ module Mamiya
       agent.run!
     end
 
-    # def master
-    # end
+    desc "master", "Start master"
+    def master
+      agent = Master.new(config)
+      agent.run!
+    end
 
     # def worker
     # end

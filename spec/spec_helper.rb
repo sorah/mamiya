@@ -1,5 +1,21 @@
+require 'rack/test'
 require 'mamiya/storages/mock'
 require 'mamiya/logger'
+
+module Rack
+  module Test
+    class Session
+      def envs
+        @envs ||= {}
+      end
+
+      alias_method :default_env_orig, :default_env
+      def default_env
+        default_env_orig.merge(envs)
+      end
+    end
+  end
+end
 
 unless ENV["ENABLE_LOG"]
   Mamiya::Logger.defaults[:outputs] = []
