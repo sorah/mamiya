@@ -17,11 +17,14 @@ module Mamiya
       @serf = init_serf
       @events_only = events_only
 
-      @fetcher = Mamiya::Agent::Fetcher.new(config)
       @logger = logger['agent']
     end
 
-    attr_reader :config, :serf, :logger, :fetcher
+    attr_reader :config, :serf, :logger
+
+    def fetcher
+      @fetcher ||= Mamiya::Agent::Fetcher.new(config)
+    end
 
     def run!
       logger.info "Starting..."
@@ -74,7 +77,7 @@ module Mamiya
     def fetcher_start
       logger.debug "Starting fetcher"
 
-      @fetcher.start!
+      fetcher.start!
     end
 
     def user_event_handler(event)
