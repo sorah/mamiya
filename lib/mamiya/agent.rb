@@ -43,12 +43,6 @@ module Mamiya
       # serf.tags.update(
     end
 
-    def status
-    end
-
-    def releases
-    end
-
     def trigger(type, action: nil, **payload)
       name = "mamiya:#{type}"
       name << ":#{action}" if action
