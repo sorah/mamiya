@@ -21,7 +21,9 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "thor", "~> 0.18.1"
   spec.add_runtime_dependency "aws-sdk-core", "2.0.0.rc6"
   spec.add_runtime_dependency "term-ansicolor", ">= 1.3.0"
-  spec.add_runtime_dependency "villein", ">= 0.2.0"
+  unless ENV["MAMIYA_VILLEIN_PATH"]
+    spec.add_runtime_dependency "villein", ">= 0.2.0"
+  end
 
   spec.add_development_dependency "rspec", "2.14.1"
 
