@@ -59,6 +59,8 @@ module Mamiya
 
       def handle_order(app, package, callback = nil)
         @logger.info "fetching #{app}:#{package}"
+        # TODO: dig subdir by app name
+        # TODO: Limit apps by destination existence
 
         Mamiya::Steps::Fetch.new(
           application: app,

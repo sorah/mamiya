@@ -17,6 +17,11 @@ module Mamiya
         storage.keys
       end
 
+      def initialize(*)
+        super
+        self.class.storage[application] ||= {}
+      end
+
       def packages
         self.class.storage[application].keys
       end
@@ -43,6 +48,13 @@ module Mamiya
         FileUtils.cp package.path, package_path
         FileUtils.cp package.meta_path, meta_path
         return package
+      end
+
+      def meta(package_name)
+        package = self.class.storage[application][package_name]
+        return unless package
+
+        package[:package].meta
       end
     end
   end

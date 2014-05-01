@@ -55,7 +55,7 @@ module Mamiya
 
       def call(env)
         env['rack.logger'] = @logger['web']
-        env['mamiya.master'] = this
+        env['mamiya.master'] = @this
         @app.call(env)
       end
     end
