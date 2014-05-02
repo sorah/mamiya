@@ -15,6 +15,10 @@ module Mamiya
       @config[key]
     end
 
+    def []=(key, value)
+      @config[key] = value
+    end
+
     def storage_class
       self[:storage] && Storages.find(self[:storage][:type])
     end

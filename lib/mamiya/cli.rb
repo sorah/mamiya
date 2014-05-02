@@ -163,13 +163,19 @@ module Mamiya
     # ---
 
     desc "agent", "Start agent."
+    method_option :serf, type: :array
     def agent
+      merge_serf_option!
+
       agent = Agent.new(config)
       agent.run!
     end
 
     desc "master", "Start master"
+    method_option :serf, type: :array
     def master
+      merge_serf_option!
+
       agent = Master.new(config)
       agent.run!
     end
@@ -216,6 +222,15 @@ module Mamiya
     def fatal!(message)
       logger.fatal message
       exit 1
+    end
+
+    def merge_serf_option!
+      (config[:serf] ||= {})[:agent] ||= {}
+
+      options[:serf].flat_map{ |_| _.split(/,/) }.each do |conf|
+        k,v = conf.split(/=/,2)
+        config[:serf][:agent][k.to_sym] = v
+      end
     end
 
     def application
