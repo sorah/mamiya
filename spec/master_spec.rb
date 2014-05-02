@@ -1,9 +1,11 @@
 require 'spec_helper'
-
+require 'tmpdir'
+require 'fileutils'
 require 'json'
 require 'villein/event'
 
 require 'mamiya/agent'
+require 'mamiya/storages/mock'
 
 require 'mamiya/master'
 
@@ -15,7 +17,8 @@ describe Mamiya::Master do
   let(:config) do
     {
       serf: {agent: {rpc_addr: '127.0.0.1:17373', bind: '127.0.0.1:17946'}},
-      web: {port: 0, bind: 'localhost'}
+      web: {port: 0, bind: 'localhost'},
+      storage: {type: :mock},
     }
   end
 
@@ -27,6 +30,27 @@ describe Mamiya::Master do
 
   it "inherits Mamiya::Agent" do
     expect(described_class.superclass).to eq Mamiya::Agent
+  end
+
+  describe "#distribute" do
+    # let!(:tmpdir) { Dir.mktmpdir('maimya-master-spec') }
+    # after { FileUtils.remove_entry_secure(tmpdir) }
+
+    # let(:package) do
+    #   File.write File.join(tmpdir, 'mypackage.tar.gz'), "\n"
+    #   File.write File.join(tmpdir, 'mypackage.json'), "#{{meta: 'data'}.to_json}\n"
+    #   Mamiya::Package.new(File.join(tmpdir, 'mypackage'))
+    # end
+
+    # before do
+    #   Mamiya::Storages::Mock.new(application: 'myapp').push(package)
+    # end
+
+    it "triggers fetch event" do
+      expect(master).to receive(:trigger).with(:fetch, application: 'myapp', package: 'mypackage')
+
+      master.distribute('myapp', 'mypackage')
+    end
   end
 
   describe "#run!" do

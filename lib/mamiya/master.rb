@@ -28,6 +28,10 @@ module Mamiya
       serf_start
     end
 
+    def distribute(application, package)
+      trigger(:fetch, application: application, package: package)
+    end
+
     def storage(app)
       config.storage_class.new(
         config[:storage].merge(
