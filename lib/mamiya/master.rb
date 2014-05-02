@@ -28,6 +28,14 @@ module Mamiya
       serf_start
     end
 
+    def storage(app)
+      config.storage_class.new(
+        config[:storage].merge(
+          application: app
+        )
+      )
+    end
+
     private
 
     def web_start

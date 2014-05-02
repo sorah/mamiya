@@ -12,11 +12,7 @@ module Mamiya
         end
 
         def storage(app)
-          master.config.storage_class.new(
-            master.config[:storage].merge(
-              application: app
-            )
-          )
+          master.storage(app)
         end
       end
 

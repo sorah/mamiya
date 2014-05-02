@@ -16,7 +16,7 @@ describe Mamiya::Master::Web do
   let(:app) { described_class }
 
   let(:config_source) do
-    {storage: {}}
+    {}
   end
 
   let(:config) do
@@ -24,12 +24,16 @@ describe Mamiya::Master::Web do
       allow(c).to receive(:[]) do |k|
         config_source[k]
       end
-
-      allow(c).to receive(:storage_class).and_return(Mamiya::Storages::Mock)
     end
   end
 
-  let(:master) { double('master', config: config) }
+  let(:master) do
+    double('master', config: config).tap do |m|
+      allow(m).to receive(:storage) do |app|
+        Mamiya::Storages::Mock.new(application: app)
+      end
+    end
+  end
 
   let(:package) do
     File.write File.join(tmpdir, 'mypackage.tar.gz'), "\n"
