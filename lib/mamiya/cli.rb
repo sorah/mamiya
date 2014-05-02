@@ -250,6 +250,7 @@ module Mamiya
     end
 
     def logger
+      $stdout.sync = ENV["MAMIYA_SYNC_OUT"] == '1'
       Mamiya::Logger.new(
         color: options[:no_color] ? false : (options[:color] ? true : nil),
         outputs: [$stdout],
