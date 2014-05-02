@@ -97,7 +97,7 @@ module Mamiya
 
       if Handlers.const_defined?(class_name)
         handler = Handlers.const_get(class_name).new(self, event)
-        handler.send(action || :run!, event)
+        handler.send(action || :run!)
       else
         logger.warn("Discarded event[#{event.user_event}] because we don't handle it")
       end
