@@ -103,6 +103,19 @@ describe Mamiya::Master::Web do
   end
 
   describe "POST /packages/:application/:package/distribute" do
-    it "dispatchs distribute request"
+    it "dispatchs distribute request" do
+      expect(master).to receive(:distribute).with('myapp', 'mypackage')
+
+      post '/packages/myapp/mypackage/distribute'
+
+      expect(last_response.status).to eq 204 # no content
+    end
+
+    context "when package not found" do
+      it "returns 404" do
+        post '/packages/myapp/noexist/distribute'
+        expect(last_response.status).to eq 404
+      end
+    end
   end
 end

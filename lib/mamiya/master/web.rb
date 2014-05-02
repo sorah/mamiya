@@ -43,6 +43,14 @@ module Mamiya
       end
 
       post '/packages/:application/:package/distribute' do
+        if storage(params[:application]).meta(params[:package])
+          status 204
+          master.distribute(params[:application], params[:package])
+        else
+          status 404
+          content_type :json
+          {error: 'not found'}.to_json
+        end
       end
     end
   end
