@@ -54,6 +54,7 @@ module Mamiya
           Logger: logger['web']
         }
         server = Rack::Server.new(rack_options)
+        # To disable trap(:INT) and trap(:TERM)
         server.define_singleton_method(:trap) { |*args| }
         server.start
       end
