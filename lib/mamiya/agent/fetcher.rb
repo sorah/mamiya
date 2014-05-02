@@ -1,6 +1,8 @@
 require 'thread'
 require 'mamiya/steps/fetch'
 
+require 'mamiya/storages/abstract'
+
 module Mamiya
   class Agent
     ##
@@ -73,6 +75,9 @@ module Mamiya
 
         @logger.info "fetched #{app}:#{package}"
 
+      rescue Mamiya::Storages::Abstract::AlreadyFetched => e
+        @logger.info "skipped #{app}:#{package} (already fetched)"
+        callback.call(e) if callback
       rescue Exception => e
         @logger.fatal "fetch failed (#{app}:#{package}): #{e.inspect}"
         e.backtrace.each do |line|

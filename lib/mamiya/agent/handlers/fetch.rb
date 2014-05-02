@@ -1,4 +1,5 @@
 require 'mamiya/agent/handlers/abstract'
+require 'mamiya/storages/abstract'
 
 module Mamiya
   class Agent
@@ -7,6 +8,10 @@ module Mamiya
         FETCH_ACK_EVENT = 'mamiya:fetch-result:ack'
         FETCH_SUCCESS_EVENT = 'mamiya:fetch-result:success'
         FETCH_ERROR_EVENT = 'mamiya:fetch-result:error'
+
+        IGNORED_ERRORS = [
+          Mamiya::Storages::Abstract::AlreadyFetched.new(''),
+        ].freeze
 
         def run!
           agent.serf.event(FETCH_ACK_EVENT,
@@ -18,7 +23,7 @@ module Mamiya
           )
 
           agent.fetcher.enqueue(payload['application'], payload['package']) do |error|
-            if error
+            if error && IGNORED_ERRORS.lazy.grep(error.class).none?
               agent.serf.event(FETCH_ERROR_EVENT,
                 {
                   name: agent.serf.name,
