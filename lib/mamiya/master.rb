@@ -50,11 +50,11 @@ module Mamiya
 
     class AppBridge
       def initialize(app, log, this)
-        @app, @logger, @this = app, log, this
+        @app, @logger, @this = app, log['web'], this
       end
 
       def call(env)
-        env['rack.logger'] = @logger['web']
+        env['rack.logger'] = @logger
         env['mamiya.master'] = @this
         @app.call(env)
       end
