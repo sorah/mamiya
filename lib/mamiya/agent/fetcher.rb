@@ -18,6 +18,7 @@ module Mamiya
         @destination = config[:packages_dir]
 
         @logger = logger['fetcher']
+        @working = nil
       end
 
       attr_reader :thread
@@ -50,6 +51,10 @@ module Mamiya
         @thread && @thread.alive?
       end
 
+      def working?
+        !!@working
+      end
+
       private
 
       def main_loop
@@ -60,6 +65,7 @@ module Mamiya
       end
 
       def handle_order(app, package, callback = nil)
+        @working = true
         @logger.info "fetching #{app}:#{package}"
         # TODO: dig subdir by app name
         # TODO: Limit apps by destination existence
@@ -85,6 +91,8 @@ module Mamiya
         end
 
         callback.call(e) if callback
+      ensure
+        @working = false
       end
     end
   end

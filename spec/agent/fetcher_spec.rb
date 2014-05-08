@@ -72,6 +72,20 @@ describe Mamiya::Agent::Fetcher do
       expect(received).to be_nil
     end
 
+    it "claims itself as working" do
+      expect(fetcher.working?).to be_false
+
+      received = false
+      fetcher.enqueue('myapp', 'package') do |error|
+        received = true
+        expect(fetcher.working?).to be_true
+      end
+
+      fetcher.stop!(:graceful)
+      expect(received).to be_true
+      expect(fetcher.working?).to be_false
+    end
+
     context "when fetch step raised error" do
       let(:exception) { Exception.new("he he...") }
 
