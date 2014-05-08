@@ -1,11 +1,16 @@
 require 'spec_helper'
+require 'tmpdir'
+require 'fileutils'
 
 require 'mamiya/agent/fetcher'
 require 'mamiya/steps/fetch'
 
 describe Mamiya::Agent::Fetcher do
+  let!(:tmpdir) { Dir.mktmpdir('mamiya-agent-fetcher-spec') }
+  after { FileUtils.remove_entry_secure(tmpdir) if File.exist?(tmpdir) }
+
   let(:config) do
-    {packages_dir: 'destination'}
+    {packages_dir: tmpdir}
   end
 
   subject(:fetcher) { described_class.new(config) }
@@ -40,7 +45,7 @@ describe Mamiya::Agent::Fetcher do
       allow(Mamiya::Steps::Fetch).to receive(:new).with(
         application: 'myapp',
         package: 'package',
-        destination: 'destination',
+        destination: File.join(tmpdir, 'myapp'),
         config: config,
       ).and_return(step)
 

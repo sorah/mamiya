@@ -67,13 +67,16 @@ module Mamiya
       def handle_order(app, package, callback = nil)
         @working = true
         @logger.info "fetching #{app}:#{package}"
-        # TODO: dig subdir by app name
-        # TODO: Limit apps by destination existence
+        # TODO: Limit apps by configuration
+
+        destination = File.join(@destination, app)
+
+        Dir.mkdir(destination) unless File.exist?(destination)
 
         Mamiya::Steps::Fetch.new(
           application: app,
           package: package,
-          destination: @destination,
+          destination: destination,
           config: @config,
         ).run!
 
