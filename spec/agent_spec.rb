@@ -1,5 +1,7 @@
 require 'spec_helper'
 
+require 'tmpdir'
+require 'fileutils'
 require 'json'
 require 'villein/event'
 
@@ -10,8 +12,9 @@ require 'mamiya/agent/actions'
 require_relative './support/dummy_serf.rb'
 
 describe Mamiya::Agent do
+
   let(:serf) { DummySerf.new }
-  let(:fetcher) { double('fetcher', start!: nil) }
+  let(:fetcher) { double('fetcher', start!: nil, working?: false) }
 
   let(:config) do
     {serf: {agent: {rpc_addr: '127.0.0.1:17373', bind: '127.0.0.1:17946'}}}
@@ -45,6 +48,42 @@ describe Mamiya::Agent do
       ensure
         th.kill if th && th.alive?
       end
+    end
+  end
+
+  describe "#update_tags!" do
+    describe "(status)" do
+      context "when it is not busy" do
+        it "shows ready" do
+          agent.update_tags!
+
+          expect(serf.tags['mamiya']).to eq ',ready,'
+        end
+      end
+
+      context "when it is fetching" do
+        before do
+          allow(fetcher).to receive(:working?).and_return(true)
+        end
+
+        it "shows fetching" do
+          agent.update_tags!
+
+          expect(serf.tags['mamiya']).to eq ',fetching,'
+        end
+      end
+
+      context "when it is running multiple jobs" do
+        pending
+      end
+    end
+
+    describe "(prepared)" do
+      pending
+    end
+
+    describe "(current)" do
+      pending
     end
   end
 

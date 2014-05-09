@@ -41,9 +41,13 @@ module Mamiya
       fetcher_start
     end
 
-    def update_tags
-      # TODO:
-      # serf.tags.update(
+    def update_tags!
+      serf.tags['mamiya'] = ','.tap do |status|
+        status.concat('fetching,') if fetcher.working?
+        status.concat('ready,') if status == ','
+      end
+
+      nil
     end
 
     def trigger(type, action: nil, **payload)
