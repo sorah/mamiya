@@ -77,6 +77,7 @@ module Mamiya
 
         Dir.mkdir(destination) unless File.exist?(destination)
 
+        # TODO: before run hook for agent.update_tags!
         Mamiya::Steps::Fetch.new(
           application: app,
           package: package,
