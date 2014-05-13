@@ -153,6 +153,15 @@ describe Mamiya::Agent do
     end
   end
 
+  describe "query responder" do
+    it "responds to 'mamiya:status'" do
+      allow(agent).to receive(:status).and_return("my" => "status")
+
+      response = serf.trigger_query('mamiya:status', '')
+      expect(JSON.parse(response)).to eq("my" => "status")
+    end
+  end
+
   describe "event handler" do
     let(:handler_class) do
       Class.new(Mamiya::Agent::Handlers::Abstract) do

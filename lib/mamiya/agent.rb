@@ -109,6 +109,10 @@ module Mamiya
         serf.on_user_event do |event|
           user_event_handler(event)
         end
+
+        serf.respond('mamiya:status') do |event|
+          self.status.to_json
+        end
       end
     end
 

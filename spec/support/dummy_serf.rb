@@ -1,6 +1,7 @@
 class DummySerf
   def initialize()
     @hooks = {}
+    @responders = {}
 
     @tags = {}
     class << @tags
@@ -41,6 +42,23 @@ class DummySerf
 
   def hooks(name)
     @hooks[name] ||= []
+  end
+
+  def respond(name, override: false, &block)
+    raise 'already defined' if !override && @responders[name.to_s]
+    @responders[name.to_s] = block
+    self
+  end
+
+  def trigger_query(name, payload)
+    event = Villein::Event.new(
+      {
+        'SERF_EVENT' => 'query',
+        'SERF_QUERY_NAME' => "name",
+      },
+      payload: payload.to_s,
+    )
+    @responders[name.to_s] && @responders[name.to_s].call(event)
   end
 
   def trigger(name, *args)
