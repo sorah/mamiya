@@ -42,7 +42,7 @@ module Mamiya
               )
             end
 
-            agent.update_tags
+            agent.update_tags!
           end
         end
       end
