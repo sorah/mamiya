@@ -50,6 +50,8 @@ module Mamiya
       nil
     end
 
+    ##
+    # Returns agent status. Used for HTTP API and `serf query` inspection.
     def status
       {}.tap do |s|
         s[:name] = serf.name
@@ -63,6 +65,9 @@ module Mamiya
       end
     end
 
+    ##
+    # Returns hash with existing packages (where valid) by app name.
+    # Packages which has json and tarball is considered as valid.
     def existing_packages
       paths_by_app = Dir[File.join(config[:packages_dir], '*', '*.{tar.gz,json}')].group_by { |path|
         path.split('/')[-2]
