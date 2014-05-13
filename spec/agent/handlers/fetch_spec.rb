@@ -23,7 +23,7 @@ describe Mamiya::Agent::Handlers::Fetch do
   let(:serf) { double('serf', name: 'myname', event: nil) }
 
   let(:agent) do
-    double('agent', fetcher: fetcher, serf: serf, update_tags: nil)
+    double('agent', fetcher: fetcher, serf: serf, update_tags!: nil)
   end
 
   subject(:handler) { described_class.new(agent, event) }
@@ -96,7 +96,7 @@ describe Mamiya::Agent::Handlers::Fetch do
         block.call(Exception.new)
       end
 
-      expect(agent).to receive(:update_tags)
+      expect(agent).to receive(:update_tags!)
       handler.run!
     end
   end
