@@ -40,6 +40,10 @@ module Mamiya
       )
     end
 
+    def status
+      {name: serf.name, master: true}
+    end
+
     private
 
     def web_start

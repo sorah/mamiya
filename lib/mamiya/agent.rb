@@ -54,6 +54,7 @@ module Mamiya
     # Returns agent status. Used for HTTP API and `serf query` inspection.
     def status
       {}.tap do |s|
+        s[:master] = false
         s[:name] = serf.name
 
         s[:fetcher] = {
