@@ -65,7 +65,7 @@ describe Mamiya::Agent::Handlers::Fetch do
   end
 
   it "updates tag" do
-    expect(agent).to receive(:update_tags)
+    expect(agent).to receive(:update_tags!)
     handler.run!
   end
 
