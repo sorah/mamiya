@@ -91,7 +91,7 @@ describe Mamiya::Agent do
     before do
       allow(agent).to receive(:existing_packages).and_return("app" => ["pkg"])
       allow(fetcher).to receive(:queue_size).and_return(42)
-      allow(fetcher).to receive(:fetching?).and_return(false)
+      allow(fetcher).to receive(:working?).and_return(false)
     end
 
     subject(:status) { agent.status }
@@ -115,7 +115,7 @@ describe Mamiya::Agent do
 
       context "when it's fetching" do
         before do
-          allow(fetcher).to receive(:fetching?).and_return(true)
+          allow(fetcher).to receive(:working?).and_return(true)
         end
 
         it "shows fetching true" do

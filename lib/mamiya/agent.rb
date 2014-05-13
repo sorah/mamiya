@@ -55,7 +55,7 @@ module Mamiya
         s[:name] = serf.name
 
         s[:fetcher] = {
-          fetching: fetcher.fetching?,
+          fetching: fetcher.working?,
           pending: fetcher.queue_size,
         }
 
