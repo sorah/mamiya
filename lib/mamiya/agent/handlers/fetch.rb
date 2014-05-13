@@ -18,7 +18,8 @@ module Mamiya
             {
               name: agent.serf.name,
               application: payload['application'],
-              package: payload['package']
+              package: payload['package'],
+              pending: agent.fetcher.queue_size.succ,
             }.to_json
           )
 
@@ -30,6 +31,7 @@ module Mamiya
                   application: payload['application'],
                   package: payload['package'],
                   error: error.inspect,
+                  pending: agent.fetcher.queue_size,
                 }.to_json
               )
             else
@@ -38,6 +40,7 @@ module Mamiya
                   name: agent.serf.name,
                   application: payload['application'],
                   package: payload['package'],
+                  pending: agent.fetcher.queue_size,
                 }.to_json
               )
             end

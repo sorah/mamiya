@@ -29,6 +29,7 @@ describe Mamiya::Agent::Handlers::Fetch do
   subject(:handler) { described_class.new(agent, event) }
 
   before do
+    allow(fetcher).to receive(:queue_size).and_return(0)
     allow(fetcher).to receive(:enqueue) do |&block|
       block.call
     end
@@ -43,7 +44,7 @@ describe Mamiya::Agent::Handlers::Fetch do
   it "responds ack" do
     allow(fetcher).to receive(:enqueue).with('app', 'package')
     expect(serf).to receive(:event).with('mamiya:fetch-result:ack',
-      {name: serf.name, application: 'app', package: 'package'}.to_json)
+      {name: serf.name, application: 'app', package: 'package', pending: 1}.to_json)
 
     handler.run!
   end
@@ -58,7 +59,7 @@ describe Mamiya::Agent::Handlers::Fetch do
 
     expect(serf).to receive(:event).with(
       'mamiya:fetch-result:success',
-      {name: serf.name, application: 'app', package: 'package'}.to_json
+      {name: serf.name, application: 'app', package: 'package', pending: 0}.to_json
     )
 
     callback.call
@@ -83,7 +84,7 @@ describe Mamiya::Agent::Handlers::Fetch do
         'mamiya:fetch-result:error',
         {
           name: serf.name, application: 'app', package: 'package',
-          error: error.inspect,
+          error: error.inspect, pending: 0,
         }.to_json,
       )
 
