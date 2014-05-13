@@ -87,6 +87,72 @@ describe Mamiya::Agent do
     end
   end
 
+  describe "#status" do
+    before do
+      allow(agent).to receive(:existing_packages).and_return("app" => ["pkg"])
+      allow(fetcher).to receive(:queue_size).and_return(42)
+      allow(fetcher).to receive(:fetching?).and_return(false)
+    end
+
+    subject(:status) { agent.status }
+
+    it "includes agent name" do
+      expect(status[:name]).to eq serf.name
+    end
+
+    it "includes packages" do
+      expect(status[:packages]).to eq agent.existing_packages
+    end
+
+    describe "(fetcher)" do
+      it "includes queue_size as pending" do
+        expect(status[:fetcher][:pending]).to eq 42
+      end
+
+      it "shows fetching status" do
+        expect(status[:fetcher][:fetching]).to be_false
+      end
+
+      context "when it's fetching" do
+        before do
+          allow(fetcher).to receive(:fetching?).and_return(true)
+        end
+
+        it "shows fetching true" do
+          expect(status[:fetcher][:fetching]).to be_true
+        end
+      end
+    end
+  end
+
+  describe "#existing_packages" do
+    let!(:packages_dir) { Dir.mktmpdir('mamiya-agent-spec') }
+    after { FileUtils.remove_entry_secure(packages_dir) }
+
+    let(:config) { {packages_dir: packages_dir} }
+
+    subject(:existing_packages) { agent.existing_packages }
+
+    before do
+      dir = Pathname.new(packages_dir)
+      %w(a b).each do |app|
+        dir.join(app).mkdir
+        %w(valid.tar.gz valid.json
+           valid-2.tar.gz valid-2.json
+           invalid-1.tar.gz invalid-2.json invalid-3.txt).each do |name|
+          File.write dir.join(app, name), "\n"
+        end
+      end
+    end
+
+    it "returns valid packages" do
+      expect(existing_packages).to eq(
+        "a" => ["valid", "valid-2"],
+        "b" => ["valid", "valid-2"],
+      )
+    end
+  end
+
   describe "event handler" do
     let(:handler_class) do
       Class.new(Mamiya::Agent::Handlers::Abstract) do

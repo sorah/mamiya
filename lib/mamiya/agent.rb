@@ -50,6 +50,45 @@ module Mamiya
       nil
     end
 
+    def status
+      {}.tap do |s|
+        s[:name] = serf.name
+
+        s[:fetcher] = {
+          fetching: fetcher.fetching?,
+          pending: fetcher.queue_size,
+        }
+
+        s[:packages] = self.existing_packages
+      end
+    end
+
+    def existing_packages
+      paths_by_app = Dir[File.join(config[:packages_dir], '*', '*.{tar.gz,json}')].group_by { |path|
+        path.split('/')[-2]
+      }
+
+      Hash[
+        paths_by_app.map { |app, paths|
+          names_by_base = paths.group_by do |path|
+            File.basename(path).sub(/\.(?:tar\.gz|json)\z/, '')
+          end
+
+          packages = names_by_base.flat_map { |base, names|
+            names.map do |name|
+              (
+                name.end_with?(".tar.gz") &&
+                names.find { |_| _.end_with?(".json") } &&
+                base
+              ) || nil
+            end
+          }.compact
+
+          [app, packages.sort]
+        }
+      ]
+    end
+
     def trigger(type, action: nil, **payload)
       name = "mamiya:#{type}"
       name << ":#{action}" if action

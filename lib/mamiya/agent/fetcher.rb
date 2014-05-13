@@ -27,6 +27,10 @@ module Mamiya
         @queue << [app, package, callback]
       end
 
+      def queue_size
+        @queue.size
+      end
+
       def start!
         @logger.info 'Starting...'
 
