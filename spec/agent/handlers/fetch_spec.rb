@@ -36,7 +36,7 @@ describe Mamiya::Agent::Handlers::Fetch do
   end
 
   it "enqueue a request" do
-    expect(fetcher).to receive(:enqueue).with('app', 'package')
+    expect(fetcher).to receive(:enqueue).with('app', 'package', kind_of(Hash))
 
     handler.run!
   end
@@ -49,9 +49,27 @@ describe Mamiya::Agent::Handlers::Fetch do
     handler.run!
   end
 
+  it "kicks update_tag! on start" do
+    allow(fetcher).to receive(:enqueue) do |app, package, options, &block|
+      options[:before].call
+    end
+    expect(agent).to receive(:update_tags!)
+    handler.run!
+  end
+
+  it "reports start" do
+    allow(fetcher).to receive(:enqueue) do |app, package, options, &block|
+      options[:before].call
+    end
+    expect(serf).to receive(:event).with('mamiya:fetch-result:start',
+      {name: serf.name, application: 'app', package: 'package', pending: 1}.to_json)
+
+    handler.run!
+  end
+
   it "responds success" do
     callback = nil
-    allow(fetcher).to receive(:enqueue).with('app', 'package') do |&block|
+    allow(fetcher).to receive(:enqueue).with('app', 'package', kind_of(Hash)) do |&block|
       callback = block
     end
 
@@ -73,7 +91,7 @@ describe Mamiya::Agent::Handlers::Fetch do
   context "when failed" do
     it "notifies error" do
       callback = nil
-      allow(fetcher).to receive(:enqueue).with('app', 'package') do |&block|
+      allow(fetcher).to receive(:enqueue).with('app', 'package', kind_of(Hash)) do |&block|
         callback = block
       end
 

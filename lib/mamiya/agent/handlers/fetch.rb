@@ -6,6 +6,7 @@ module Mamiya
     module Handlers
       class Fetch < Abstract
         FETCH_ACK_EVENT = 'mamiya:fetch-result:ack'
+        FETCH_START_EVENT = 'mamiya:fetch-result:start'
         FETCH_SUCCESS_EVENT = 'mamiya:fetch-result:success'
         FETCH_ERROR_EVENT = 'mamiya:fetch-result:error'
 
@@ -23,7 +24,20 @@ module Mamiya
             }.to_json
           )
 
-          agent.fetcher.enqueue(payload['application'], payload['package']) do |error|
+          agent.fetcher.enqueue(
+            payload['application'], payload['package'],
+            before: proc {
+              agent.serf.event(FETCH_START_EVENT,
+                {
+                  name: agent.serf.name,
+                  application: payload['application'],
+                  package: payload['package'],
+                  pending: agent.fetcher.queue_size.succ,
+                }.to_json
+              )
+              agent.update_tags!
+            }
+          ) do |error|
             if error && IGNORED_ERRORS.lazy.grep(error.class).none?
               agent.serf.event(FETCH_ERROR_EVENT,
                 {

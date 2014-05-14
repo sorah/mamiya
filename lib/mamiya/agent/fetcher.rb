@@ -23,8 +23,8 @@ module Mamiya
 
       attr_reader :thread
 
-      def enqueue(app, package, &callback)
-        @queue << [app, package, callback]
+      def enqueue(app, package, before: nil, &callback)
+        @queue << [app, package, before, callback]
       end
 
       def queue_size
@@ -68,7 +68,7 @@ module Mamiya
         end
       end
 
-      def handle_order(app, package, callback = nil)
+      def handle_order(app, package, before_hook = nil, callback = nil)
         @working = true
         @logger.info "fetching #{app}:#{package}"
         # TODO: Limit apps by configuration
@@ -76,6 +76,8 @@ module Mamiya
         destination = File.join(@destination, app)
 
         Dir.mkdir(destination) unless File.exist?(destination)
+
+        before_hook.call if before_hook
 
         # TODO: before run hook for agent.update_tags!
         Mamiya::Steps::Fetch.new(

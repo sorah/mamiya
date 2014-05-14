@@ -91,6 +91,25 @@ describe Mamiya::Agent::Fetcher do
       expect(fetcher.working?).to be_false
     end
 
+    context "with before hook" do
+      it "calls callback" do
+        run = false
+        received = false
+
+        allow(step).to receive(:run!) do
+          run = true
+        end
+
+        fetcher.enqueue('myapp', 'package', before: proc {
+          received = true
+          expect(run).to be_false
+        })
+        fetcher.stop!(:graceful)
+
+        expect(received).to be_true
+      end
+    end
+
     context "when fetch step raised error" do
       let(:exception) { Exception.new("he he...") }
 
