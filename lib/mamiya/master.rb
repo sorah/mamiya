@@ -1,5 +1,6 @@
 require 'mamiya/agent'
 require 'mamiya/master/web'
+require 'mamiya/master/agent_monitor'
 
 module Mamiya
   class Master < Agent
@@ -8,9 +9,12 @@ module Mamiya
     def initialize(*)
       super
 
+      @agent_monitor = AgentMonitor.new(self)
       @events_only ||= []
       @events_only << MASTER_EVENTS
     end
+
+    attr_reader :agent_monitor
 
     def web
       logger = self.logger
@@ -26,6 +30,7 @@ module Mamiya
       # Override and stop starting fetcher
       web_start
       serf_start
+      monitor_start
     end
 
     def distribute(application, package)
@@ -63,6 +68,12 @@ module Mamiya
         server.start
       end
       @web_thread.abort_on_exception = true
+    end
+
+    def monitor_start
+      logger.debug "Starting agent_monitor..."
+      @agent_monitor.start!
+      logger.debug "agent_monitor became ready"
     end
 
     class AppBridge
