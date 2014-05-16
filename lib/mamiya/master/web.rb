@@ -11,6 +11,10 @@ module Mamiya
           env['mamiya.master']
         end
 
+        def agent_monitor
+          master.agent_monitor
+        end
+
         def storage(app)
           master.storage(app)
         end
@@ -51,6 +55,36 @@ module Mamiya
           content_type :json
           {error: 'not found'}.to_json
         end
+      end
+
+      get '/agents' do
+        statuses = agent_monitor.statuses
+        members = agent_monitor.agents
+        failed_agents = agent_monitor.failed_agents
+
+        agents = {}
+        members.each do |name, status|
+          agents[name] ||= {}
+          agents[name]["membership"] = status
+        end
+
+        statuses.each do |name, status|
+          if status["master"]
+            agents.delete name
+            next
+          end
+
+          agents[name] ||= {}
+          agents[name]["status"] = status
+        end
+
+
+        content_type :json
+
+        {
+          agents: agents,
+          failed_agents: failed_agents,
+        }.to_json
       end
     end
   end

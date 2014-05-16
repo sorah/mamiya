@@ -63,6 +63,8 @@ module Mamiya
       def commit_event(event)
         logger.debug "Commiting #{event.user_event}"
 
+        # TODO:
+
       rescue JSON::ParserError => e
         logger.warn "Failed to parse payload in event #{event.user_event}: #{e.message}"
       end
