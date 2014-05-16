@@ -38,7 +38,7 @@ describe Mamiya::Master::AgentMonitor do
     end
 
     before do
-      allow(serf).to receive(:query).with('mamiya:status').and_return(query_response)
+      allow(serf).to receive(:query).with('mamiya:status', '').and_return(query_response)
       allow(serf).to receive(:members).and_return(members)
     end
 

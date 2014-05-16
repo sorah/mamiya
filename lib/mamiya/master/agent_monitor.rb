@@ -79,7 +79,7 @@ module Mamiya
           new_failed_agents.add(member["name"]) unless member["status"] == 'alive'
         end
 
-        response = @master.serf.query(STATUS_QUERY)
+        response = @master.serf.query(STATUS_QUERY, '')
         response["Responses"].each do |name, json|
           begin
             new_statuses[name] = JSON.parse(json)
