@@ -15,9 +15,13 @@ module Mamiya
       STATUS_QUERY = 'mamiya:status'.freeze
       DEFAULT_INTERVAL = 300
 
-      def initialize(master, refresh_interval: DEFAULT_INTERVAL, raise_exception: false)
+      def initialize(master, raise_exception: false)
         @master = master
-        @interval = refresh_interval
+        @interval = (master.config[:master] && 
+                    master.config[:master][:monitor] &&
+                    master.config[:master][:monitor][:refresh_interval]) ||
+                    DEFAULT_INTERVAL
+ 
         @raise_exception = raise_exception
 
         @agents = {}.freeze
