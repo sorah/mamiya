@@ -5,8 +5,9 @@ require 'mamiya/master/agent_monitor'
 
 describe Mamiya::Master::AgentMonitor do
   let(:serf) { double('serf') }
+  let(:config) { {} }
   let(:master) do
-    double('master', logger: Mamiya::Logger.new, serf: serf)
+    double('master', logger: Mamiya::Logger.new, serf: serf, config: config)
   end
 
   subject(:agent_monitor) do
