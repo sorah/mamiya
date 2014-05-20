@@ -94,9 +94,21 @@ module Mamiya
 
         new_failed_agents = new_failed_agents.to_a
 
-        logger.info "New agents: #{(new_agents.keys - @agents.keys).join(", ")}"
-        logger.info "Recovered agents: #{(failed_agents - new_failed_agents).join(", ")}"
-        logger.info "Newly failed agents: #{(new_failed_agents - failed_agents).join(", ")}"
+        (new_agents.keys - @agents.keys).join(", ").tap do |agents|
+          logger.info "Added agents: #{agents}" unless agents.empty?
+        end
+
+        (@agents.keys - new_agents.keys).join(", ").tap do |agents|
+          logger.info "Removed agents: #{agents}" unless agents.empty?
+        end
+
+        (failed_agents - new_failed_agents).join(", ").tap do |agents|
+          logger.info "Recovered agents: #{agents}" unless agents.empty?
+        end
+
+        (new_failed_agents - failed_agents).join(", ").tap do |agents|
+          logger.info "Newly failed agents: #{agents}" unless agents.empty?
+        end
 
         @agents = new_agents.freeze
         @failed_agents = new_failed_agents.freeze
