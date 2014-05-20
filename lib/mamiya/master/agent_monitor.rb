@@ -70,6 +70,7 @@ module Mamiya
       end
 
       def refresh
+        # TODO: lock
         logger.info "Refrashing..."
 
         new_agents = {}

@@ -47,6 +47,7 @@ module Mamiya
       end
 
       post '/packages/:application/:package/distribute' do
+        # TODO: filter with label
         if storage(params[:application]).meta(params[:package])
           status 204
           master.distribute(params[:application], params[:package])
