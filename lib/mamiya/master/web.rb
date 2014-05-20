@@ -58,6 +58,36 @@ module Mamiya
         end
       end
 
+      get '/packages/:application/:package/distribution' do
+        # TODO: filter with label
+        content_type :json
+        meta = storage(params[:application]).meta(params[:package])
+        unless meta
+          status 404
+          next {error: 'not found'}.to_json
+        end
+
+        result = {application: params[:application], package: params[:package], distributed: [], not_distributed: []}
+        statuses = agent_monitor.statuses
+
+        statuses.each do |name, status|
+          next if status["master"]
+          if status["packages"] && status["packages"][params[:application]] &&
+            status["packages"][params[:application]].include?(params[:package])
+
+            result[:distributed] << name
+          else
+            result[:not_distributed] << name
+          end
+        end
+
+        result[:distributed_count] = result[:distributed].size
+        result[:not_distributed_count] = result[:not_distributed].size
+
+        result.to_json
+      end
+
+
       get '/agents' do
         statuses = agent_monitor.statuses
         members = agent_monitor.agents
@@ -86,6 +116,25 @@ module Mamiya
           agents: agents,
           failed_agents: failed_agents,
         }.to_json
+      end
+
+      get '/agents/:name' do
+        content_type :json
+
+        status = agent_monitor.statuses[params[:name]]
+        membership = agent_monitor.agents[params[:name]]
+
+        if status || membership
+          {name: params[:name], status: status, membership: membership}.to_json
+        else
+          status 404
+          {error: 'not found'}.to_json
+        end
+      end
+
+      post '/agents/refresh' do
+        agent_monitor.refresh
+        status 204
       end
     end
   end
