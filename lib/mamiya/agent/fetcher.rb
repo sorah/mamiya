@@ -16,6 +16,7 @@ module Mamiya
 
         @config = config
         @destination = config[:packages_dir]
+        @keep_packages = config[:keep_packages]
 
         @logger = logger['fetcher']
         @working = nil
@@ -59,6 +60,23 @@ module Mamiya
         !!@working
       end
 
+      def cleanup
+        Dir[File.join(@destination, '*')].each do |app|
+          packages = Dir[File.join(app, "*.tar.gz")]
+          packages.sort_by! { |_| [File.mtime(_), _] }
+          packages[0...-@keep_packages].each do |victim|
+            @logger.info "Cleaning up: remove #{victim}"
+            File.unlink victim
+
+            meta_victim = victim.sub(/\.tar\.gz\z/, '.json')
+            if victim
+              @logger.info "Cleaning up: remove #{meta_victim}"
+              File.unlink(meta_victim)
+            end
+          end
+        end
+      end
+
       private
 
       def main_loop
@@ -90,6 +108,8 @@ module Mamiya
         callback.call if callback
 
         @logger.info "fetched #{app}:#{package}"
+
+        cleanup
 
       rescue Mamiya::Storages::Abstract::AlreadyFetched => e
         @logger.info "skipped #{app}:#{package} (already fetched)"

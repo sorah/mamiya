@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'pathname'
 require 'tmpdir'
 require 'fileutils'
 
@@ -10,7 +11,7 @@ describe Mamiya::Agent::Fetcher do
   after { FileUtils.remove_entry_secure(tmpdir) if File.exist?(tmpdir) }
 
   let(:config) do
-    {packages_dir: tmpdir}
+    {packages_dir: tmpdir, keep_packages: 2}
   end
 
   subject(:fetcher) { described_class.new(config) }
@@ -37,6 +38,60 @@ describe Mamiya::Agent::Fetcher do
     end
 
     it "can graceful stop"
+  end
+
+  describe "#cleanup" do
+    before do
+      path = Pathname.new(tmpdir)
+
+      path.join('a').mkdir
+      File.write path.join('a', "a.tar.gz"), "\n"
+      File.write path.join('a', "a.json"), "\n"
+      File.write path.join('a', "b.json"), "\n"
+      File.write path.join('a', "b.tar.gz"), "\n"
+      File.write path.join('a', "c.json"), "\n"
+      File.write path.join('a', "c.tar.gz"), "\n"
+      path.join('b').mkdir
+      File.write path.join('b', "a.tar.gz"), "\n"
+      File.write path.join('b', "a.json"), "\n"
+
+      path.join('c').mkdir
+      File.write path.join('c', "a.tar.gz"), "\n"
+      File.write path.join('c', "b.json"), "\n"
+    end
+
+    it "cleans up" do
+      fetcher.cleanup
+
+      path = Pathname.new(tmpdir)
+      existences = Hash[
+        [
+          path.join('a', 'a.tar.gz'),
+          path.join('a', 'a.json'),
+          path.join('a', 'b.tar.gz'),
+          path.join('a', 'b.json'),
+          path.join('a', 'c.tar.gz'),
+          path.join('a', 'c.json'),
+
+          path.join('b', 'a.tar.gz'),
+          path.join('b', 'a.json'),
+        ].map { |file|
+          [file, file.exist?]
+        }
+      ]
+
+      expect(existences).to eq(
+        path.join('a', 'a.tar.gz') => false,
+        path.join('a', 'a.json') => false,
+        path.join('a', 'b.tar.gz') => true,
+        path.join('a', 'b.json') => true,
+        path.join('a', 'c.tar.gz') => true,
+        path.join('a', 'c.json') => true,
+
+        path.join('b', 'a.tar.gz') => true,
+        path.join('b', 'a.json') => true,
+      )
+    end
   end
 
   describe "mainloop" do
@@ -75,6 +130,12 @@ describe Mamiya::Agent::Fetcher do
       fetcher.stop!(:graceful)
 
       expect(received).to be_nil
+    end
+
+    it "calls cleanup" do
+      expect(fetcher).to receive(:cleanup)
+      fetcher.enqueue('myapp', 'package')
+      fetcher.stop!(:graceful)
     end
 
     it "claims itself as working" do
