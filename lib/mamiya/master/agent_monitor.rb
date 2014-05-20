@@ -71,7 +71,7 @@ module Mamiya
 
       def refresh
         # TODO: lock
-        logger.info "Refrashing..."
+        logger.debug "Refreshing..."
 
         new_agents = {}
         new_failed_agents = Set.new
