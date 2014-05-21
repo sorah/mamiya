@@ -46,6 +46,13 @@ module Mamiya
         end
       end
 
+      get '/packages' do
+        content_type :json
+        applications = master.applications
+
+        {applications: applications}.to_json
+      end
+
       post '/packages/:application/:package/distribute' do
         # TODO: filter with label
         if storage(params[:application]).meta(params[:package])
