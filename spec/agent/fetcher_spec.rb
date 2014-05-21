@@ -61,6 +61,9 @@ describe Mamiya::Agent::Fetcher do
     end
 
     it "cleans up" do
+      called = []
+      fetcher.cleanup_hook = proc { |a,b| called << [a,b] }
+
       fetcher.cleanup
 
       path = Pathname.new(tmpdir)
@@ -72,14 +75,12 @@ describe Mamiya::Agent::Fetcher do
           path.join('a', 'b.json'),
           path.join('a', 'c.tar.gz'),
           path.join('a', 'c.json'),
-
-          path.join('b', 'a.tar.gz'),
-          path.join('b', 'a.json'),
         ].map { |file|
           [file, file.exist?]
         }
       ]
 
+      expect(called).to eq([['a', 'a']])
       expect(existences).to eq(
         path.join('a', 'a.tar.gz') => false,
         path.join('a', 'a.json') => false,
@@ -87,9 +88,6 @@ describe Mamiya::Agent::Fetcher do
         path.join('a', 'b.json') => true,
         path.join('a', 'c.tar.gz') => true,
         path.join('a', 'c.json') => true,
-
-        path.join('b', 'a.tar.gz') => true,
-        path.join('b', 'a.json') => true,
       )
     end
   end

@@ -11,6 +11,7 @@ require 'mamiya/agent/actions'
 module Mamiya
   class Agent
     include Mamiya::Agent::Actions
+    FETCH_REMOVE_EVENT = 'mamiya:fetch-result:remove'
 
     def initialize(config, logger: Mamiya::Logger.new, events_only: nil)
       @config = config
@@ -23,7 +24,9 @@ module Mamiya
     attr_reader :config, :serf, :logger
 
     def fetcher
-      @fetcher ||= Mamiya::Agent::Fetcher.new(config)
+      @fetcher ||= Mamiya::Agent::Fetcher.new(config).tap do |f|
+        f.cleanup_hook = self.method(:cleanup_handler)
+      end
     end
 
     def run!
@@ -163,6 +166,16 @@ module Mamiya
       raise e if $0.end_with?('rspec')
     rescue JSON::ParserError
       logger.warn("Discarded event[#{event.user_event}] with invalid payload (unable to parse as json)")
+    end
+
+    def cleanup_handler(app, package)
+      serf.event(FETCH_REMOVE_EVENT,
+        {
+          name: self.serf.name,
+          application: app,
+          package: package,
+        }.to_json
+      )
     end
   end
 end

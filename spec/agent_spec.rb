@@ -14,7 +14,13 @@ require_relative './support/dummy_serf.rb'
 describe Mamiya::Agent do
 
   let(:serf) { DummySerf.new }
-  let(:fetcher) { double('fetcher', start!: nil, working?: false) }
+  let(:fetcher) do
+    double('fetcher', start!: nil, working?: false).tap do |f|
+      cleanup_hook = nil
+      allow(f).to receive(:cleanup_hook=) { |_| cleanup_hook = _ }
+      allow(f).to receive(:cleanup_hook)  { cleanup_hook }
+    end
+  end
 
   let(:config) do
     {serf: {agent: {rpc_addr: '127.0.0.1:17373', bind: '127.0.0.1:17946'}}}
@@ -29,6 +35,19 @@ describe Mamiya::Agent do
 
   it "includes actions" do
     expect(described_class.ancestors).to include(Mamiya::Agent::Actions)
+  end
+
+  describe "fetcher" do
+    it "sends events on cleanup hook" do
+      expect(serf).to receive(:event).with(
+        'mamiya:fetch-result:remove',
+        {
+          name: serf.name, application: 'foo', package: 'bar',
+        }.to_json,
+      )
+
+      agent.fetcher.cleanup_hook.call('foo', 'bar')
+    end
   end
 
   describe "#run!" do

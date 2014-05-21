@@ -23,6 +23,7 @@ module Mamiya
       end
 
       attr_reader :thread
+      attr_writer :cleanup_hook
 
       def enqueue(app, package, before: nil, &callback)
         @queue << [app, package, before, callback]
@@ -72,6 +73,11 @@ module Mamiya
             if File.exist?(meta_victim)
               @logger.info "Cleaning up: remove #{meta_victim}"
               File.unlink(meta_victim)
+            end
+
+            package_name = File.basename(victim, '.tar.gz')
+            if @cleanup_hook
+              @cleanup_hook.call(File.basename(app), package_name)
             end
           end
         end
