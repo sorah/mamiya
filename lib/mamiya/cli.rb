@@ -27,6 +27,7 @@ module Mamiya
     no_commands do
       def invoke_command(*)
         super
+      rescue SystemExit
       rescue Exception => e
         logger.fatal "#{e.class}: #{e.message}"
 
@@ -278,3 +279,5 @@ module Mamiya
     end
   end
 end
+
+require 'mamiya/cli/client'
