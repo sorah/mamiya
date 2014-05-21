@@ -66,10 +66,10 @@ module Mamiya
           packages.sort_by! { |_| [File.mtime(_), _] }
           packages[0...-@keep_packages].each do |victim|
             @logger.info "Cleaning up: remove #{victim}"
-            File.unlink victim
+            File.unlink(victim) if File.exist?(victim)
 
             meta_victim = victim.sub(/\.tar\.gz\z/, '.json')
-            if victim
+            if File.exist?(meta_victim)
               @logger.info "Cleaning up: remove #{meta_victim}"
               File.unlink(meta_victim)
             end
