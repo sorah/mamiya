@@ -45,6 +45,12 @@ module Mamiya
       )
     end
 
+    def applications
+      config.storage_class.find(
+        config[:storage]
+      ).keys
+    end
+
     def status
       {name: serf.name, master: true}
     end
