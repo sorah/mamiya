@@ -138,16 +138,19 @@ describe Mamiya::Agent::Fetcher do
 
     it "claims itself as working" do
       expect(fetcher.working?).to be_false
+      expect(fetcher.current_job).to be_nil
 
       received = false
       fetcher.enqueue('myapp', 'package') do |error|
         received = true
         expect(fetcher.working?).to be_true
+        expect(fetcher.current_job).to eq %w(myapp package)
       end
 
       fetcher.stop!(:graceful)
       expect(received).to be_true
       expect(fetcher.working?).to be_false
+      expect(fetcher.current_job).to be_nil
     end
 
     context "with before hook" do

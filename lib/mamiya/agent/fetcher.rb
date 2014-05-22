@@ -17,12 +17,14 @@ module Mamiya
         @config = config
         @destination = config[:packages_dir]
         @keep_packages = config[:keep_packages]
+        @current_job = nil
 
         @logger = logger['fetcher']
         @working = nil
       end
 
       attr_reader :thread
+      attr_reader :current_job
       attr_writer :cleanup_hook
 
       def enqueue(app, package, before: nil, &callback)
@@ -58,7 +60,7 @@ module Mamiya
       end
 
       def working?
-        !!@working
+        !!@current_job
       end
 
       def cleanup
@@ -93,7 +95,7 @@ module Mamiya
       end
 
       def handle_order(app, package, before_hook = nil, callback = nil)
-        @working = true
+        @current_job = [app, package]
         @logger.info "fetching #{app}:#{package}"
         # TODO: Limit apps by configuration
 
@@ -128,7 +130,7 @@ module Mamiya
 
         callback.call(e) if callback
       ensure
-        @working = false
+        @current_job = nil
       end
     end
   end

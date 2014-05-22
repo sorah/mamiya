@@ -61,9 +61,16 @@ module Mamiya
       end
 
       def commit_event(event)
-        logger.debug "Commiting #{event.user_event}"
+        return unless /\Amamiya:/ === event
 
-        # TODO:
+        method_name = event.user_event(event[7..-1].gsub(/:/, '__'))
+        return unless self.respond_to?(method_name, true)
+
+        payload = JSON.parse(event.payload)
+        agent = @agents[payload["name"]]
+
+        logger.debug "Commiting #{event.user_event}"
+        __send__ method_name, agent, payload, event
 
       rescue JSON::ParserError => e
         logger.warn "Failed to parse payload in event #{event.user_event}: #{e.message}"

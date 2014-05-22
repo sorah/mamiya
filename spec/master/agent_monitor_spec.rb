@@ -14,9 +14,6 @@ describe Mamiya::Master::AgentMonitor do
     described_class.new(master)
   end
 
-  describe "#commit_event" do
-  end
-
   describe "#refresh" do
     let(:query_response) do
       {
@@ -90,5 +87,8 @@ describe Mamiya::Master::AgentMonitor do
         }.from([]).to(['a'])
       end
     end
+  end
+
+  describe "(commiting events)" do
   end
 end
