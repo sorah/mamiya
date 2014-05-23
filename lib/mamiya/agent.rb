@@ -140,9 +140,9 @@ module Mamiya
       user_event, payload = event.user_event, JSON.parse(event.payload)
 
       return unless user_event.start_with?('mamiya:')
-      user_event.sub!(/^mamiya:/, '')
+      user_event = user_event.sub(/^mamiya:/, '')
 
-      type, action = event.user_event.split(/:/, 2)
+      type, action = user_event.split(/:/, 2)
 
       return if @events_only && !@events_only.any?{ |_| _ === type }
 
