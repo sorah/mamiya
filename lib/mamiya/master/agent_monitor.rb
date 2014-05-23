@@ -84,10 +84,6 @@ module Mamiya
       end
 
       def refresh
-        @commit_lock.synchronize { refresh_without_lock }
-      end
-
-      def refresh_without_lock
         # TODO: lock
         logger.debug "Refreshing..."
 
@@ -100,38 +96,40 @@ module Mamiya
           new_failed_agents.add(member["name"]) unless member["status"] == 'alive'
         end
 
-        response = @master.serf.query(STATUS_QUERY, '')
-        response["Responses"].each do |name, json|
-          begin
-            new_statuses[name] = JSON.parse(json)
-          rescue JSON::ParserError => e
-            logger.warn "Failed to parse status from #{name}: #{e.message}"
-            new_failed_agents << name
-            next
+        @commit_lock.synchronize { 
+          response = @master.serf.query(STATUS_QUERY, '')
+          response["Responses"].each do |name, json|
+            begin
+              new_statuses[name] = JSON.parse(json)
+            rescue JSON::ParserError => e
+              logger.warn "Failed to parse status from #{name}: #{e.message}"
+              new_failed_agents << name
+              next
+            end
           end
-        end
 
-        new_failed_agents = new_failed_agents.to_a
+          new_failed_agents = new_failed_agents.to_a
 
-        (new_agents.keys - @agents.keys).join(", ").tap do |agents|
-          logger.info "Added agents: #{agents}" unless agents.empty?
-        end
+          (new_agents.keys - @agents.keys).join(", ").tap do |agents|
+            logger.info "Added agents: #{agents}" unless agents.empty?
+          end
 
-        (@agents.keys - new_agents.keys).join(", ").tap do |agents|
-          logger.info "Removed agents: #{agents}" unless agents.empty?
-        end
+          (@agents.keys - new_agents.keys).join(", ").tap do |agents|
+            logger.info "Removed agents: #{agents}" unless agents.empty?
+          end
 
-        (failed_agents - new_failed_agents).join(", ").tap do |agents|
-          logger.info "Recovered agents: #{agents}" unless agents.empty?
-        end
+          (failed_agents - new_failed_agents).join(", ").tap do |agents|
+            logger.info "Recovered agents: #{agents}" unless agents.empty?
+          end
 
-        (new_failed_agents - failed_agents).join(", ").tap do |agents|
-          logger.info "Newly failed agents: #{agents}" unless agents.empty?
-        end
+          (new_failed_agents - failed_agents).join(", ").tap do |agents|
+            logger.info "Newly failed agents: #{agents}" unless agents.empty?
+          end
 
-        @agents = new_agents.freeze
-        @failed_agents = new_failed_agents.freeze
-        @statuses = new_statuses
+          @agents = new_agents.freeze
+          @failed_agents = new_failed_agents.freeze
+          @statuses = new_statuses
+        }
 
         self
       end
