@@ -77,7 +77,9 @@ module Mamiya
         return unless agent
 
         logger.debug "Commiting #{event.user_event}"
+        logger.debug "- #{agent.inspect}"
         __send__ method_name, agent, payload, event
+        logger.debug "+ #{agent.inspect}"
 
       rescue JSON::ParserError => e
         logger.warn "Failed to parse payload in event #{event.user_event}: #{e.message}"
