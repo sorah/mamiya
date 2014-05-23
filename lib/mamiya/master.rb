@@ -57,6 +57,23 @@ module Mamiya
 
     private
 
+    def init_serf
+      super.tap do |serf|
+        serf.on_user_event do |event|
+          monitor_commit_event(event)
+        end
+      end
+    end
+
+    def monitor_commit_event(event)
+      @agent_monitor.commit_event(event)
+    rescue Exception => e
+      logger.fatal("Error during commiting event: #{e.inspect}")
+      e.backtrace.each do |line|
+        logger.fatal "\t#{line}"
+      end
+    end
+
     def web_start
       @web_thread = Thread.new do
         options = config[:web] || {}
