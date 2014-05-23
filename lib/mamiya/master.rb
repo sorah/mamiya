@@ -4,7 +4,7 @@ require 'mamiya/master/agent_monitor'
 
 module Mamiya
   class Master < Agent
-    MASTER_EVENTS = %i(aaaa)
+    MASTER_EVENTS = []
 
     def initialize(*)
       super
