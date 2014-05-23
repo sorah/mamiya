@@ -168,7 +168,7 @@ module Mamiya
     def agent
       merge_serf_option!
 
-      agent = Agent.new(config)
+      agent = Agent.new(config, logger: logger)
       agent.run!
     end
 
@@ -177,7 +177,7 @@ module Mamiya
     def master
       merge_serf_option!
 
-      agent = Master.new(config)
+      agent = Master.new(config, logger: logger)
       agent.run!
     end
 
