@@ -1,5 +1,6 @@
 require 'json'
 require 'set'
+require 'thread'
 
 require 'mamiya/master'
 require 'mamiya/master/agent_monitor_handlers'
@@ -13,7 +14,7 @@ module Mamiya
       include AgentMonitorHandlers
 
       STATUS_QUERY = 'mamiya:status'.freeze
-      DEFAULT_INTERVAL = 300
+      DEFAULT_INTERVAL = 60
 
       def initialize(master, raise_exception: false)
         @master = master
@@ -27,6 +28,7 @@ module Mamiya
         @agents = {}.freeze
         @failed_agents = [].freeze
         @statuses = {}
+        @commit_lock = Mutex.new
       end
 
       attr_reader :statuses, :agents, :failed_agents
@@ -61,13 +63,18 @@ module Mamiya
       end
 
       def commit_event(event)
-        return unless /\Amamiya:/ === event
+        @commit_lock.synchronize { commit_event_without_lock(event) }
+      end
 
-        method_name = event.user_event(event[7..-1].gsub(/:/, '__'))
+      def commit_event_without_lock(event)
+        return unless /\Amamiya:/ === event.user_event
+
+        method_name = event.user_event[7..-1].gsub(/:/, '__').gsub(/-/,'_')
         return unless self.respond_to?(method_name, true)
 
         payload = JSON.parse(event.payload)
-        agent = @agents[payload["name"]]
+        agent = @statuses[payload["name"]]
+        return unless agent
 
         logger.debug "Commiting #{event.user_event}"
         __send__ method_name, agent, payload, event
@@ -77,6 +84,10 @@ module Mamiya
       end
 
       def refresh
+        @commit_lock.synchronize { refresh_without_lock }
+      end
+
+      def refresh_without_lock
         # TODO: lock
         logger.debug "Refreshing..."
 

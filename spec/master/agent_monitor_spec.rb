@@ -1,6 +1,8 @@
 require 'spec_helper'
 require 'json'
 
+require 'villein/event'
+
 require 'mamiya/master/agent_monitor'
 
 describe Mamiya::Master::AgentMonitor do
@@ -38,6 +40,14 @@ describe Mamiya::Master::AgentMonitor do
     before do
       allow(serf).to receive(:query).with('mamiya:status', '').and_return(query_response)
       allow(serf).to receive(:members).and_return(members)
+    end
+
+    it "updates #statuses" do
+      expect {
+        agent_monitor.refresh
+      }.to change {
+        agent_monitor.statuses["a"]
+      }.to("foo" => "bar")
     end
 
     it "updates #agents" do
@@ -90,5 +100,163 @@ describe Mamiya::Master::AgentMonitor do
   end
 
   describe "(commiting events)" do
+    let(:query_response) do
+      {
+        "Acks" => ['a'],
+        "Responses" => {
+          'a' => status.to_json,
+        },
+      }
+    end
+
+    let(:members) do
+      [
+        {
+          "name"=>"a", "status"=>"alive",
+          "addr"=>"x.x.x.x:7676", "port"=>7676,
+          "protocol"=>{"max"=>4, "min"=>2, "version"=>4},
+          "tags"=>{},
+        },
+      ]
+    end
+
+    let(:status) do
+      {}
+    end
+
+    def commit(event, payload)
+      agent_monitor.commit_event(Villein::Event.new(
+        {
+          'SERF_EVENT' => 'user',
+          'SERF_USER_EVENT' => event,
+        },
+        payload: {name: "a"}.merge(payload).to_json
+      ))
+    end
+
+    before do
+      allow(serf).to receive(:query).with('mamiya:status', '').and_return(query_response)
+      allow(serf).to receive(:members).and_return(members)
+
+      agent_monitor.refresh
+    end
+
+    subject(:new_status) { agent_monitor.statuses["a"] }
+
+    describe "fetch-result" do
+      describe ":ack" do
+        let(:status) do
+          {fetcher: {fetching: nil, pending: 0}}
+        end
+
+        it "updates pending" do
+          commit('mamiya:fetch-result:ack', pending: 72)
+          expect(new_status["fetcher"]["pending"]).to eq 72
+        end
+      end
+
+      describe ":start" do
+        let(:status) do
+          {fetcher: {fetching: nil, pending: 0}}
+        end
+
+        it "updates fetching" do
+          commit('mamiya:fetch-result:start',
+                 application: 'app', package: 'pkg', pending: 0)
+          expect(new_status["fetcher"]["fetching"]).to eq ['app', 'pkg']
+        end
+      end
+
+      describe ":error" do
+        let(:status) do
+          {fetcher: {fetching: ['app', 'pkg'], pending: 0}}
+        end
+
+        it "updates fetching" do
+          commit('mamiya:fetch-result:error',
+                 application: 'app', package: 'pkg', pending: 0)
+
+          expect(new_status["fetcher"]["fetching"]).to eq nil
+        end
+
+        context "when package doesn't match with present state" do
+          it "doesn't updates fetching" do
+            commit('mamiya:fetch-result:error',
+                   application: 'app', package: 'pkg2', pending: 0)
+
+            expect(new_status["fetcher"]["fetching"]).to \
+              eq(['app', 'pkg'])
+          end
+        end
+      end
+
+      describe ":success" do
+        let(:status) do
+          {fetcher: {fetching: ['app', 'pkg'], pending: 0},
+           packages: {}}
+        end
+
+        it "updates fetching" do
+          commit('mamiya:fetch-result:success',
+                 application: 'app', package: 'pkg', pending: 0)
+
+          expect(new_status["fetcher"]["fetching"]).to eq nil
+        end
+
+        it "updates packages" do
+          commit('mamiya:fetch-result:success',
+                 application: 'app', package: 'pkg', pending: 0)
+
+          expect(new_status["packages"]["app"]).to eq ["pkg"]
+        end
+
+        context "with existing packages" do
+          let(:status) do
+            {fetcher: {fetching: ['app', 'pkg2'], pending: 0},
+             packages: {"app" => ['pkg1']}}
+          end
+
+          it "updates packages" do
+            commit('mamiya:fetch-result:success',
+                   application: 'app', package: 'pkg2', pending: 0)
+
+            expect(new_status["packages"]["app"]).to eq %w(pkg1 pkg2)
+          end
+        end
+
+        context "when package doesn't match with present state" do
+          it "doesn't updates fetching" do
+            commit('mamiya:fetch-result:success',
+                   application: 'app', package: 'pkg2', pending: 0)
+
+            expect(agent_monitor.statuses["a"]["fetcher"]["fetching"]).to \
+              eq(['app', 'pkg'])
+          end
+
+          it "updates packages" do
+            commit('mamiya:fetch-result:success',
+                   application: 'app', package: 'pkg', pending: 0)
+
+            expect(new_status["packages"]["app"]).to eq ["pkg"]
+          end
+        end
+      end
+
+      describe ":remove" do
+        context "with existing packages" do
+          let(:status) do
+            {fetcher: {fetching: ['app', 'pkg2'], pending: 0},
+             packages: {"app" => ['pkg1']}}
+          end
+
+          it "updates packages" do
+            commit('mamiya:fetch-result:remove',
+                   application: 'app', package: 'pkg1', pending: 0)
+
+            expect(new_status["packages"]["app"]).to eq []
+          end
+        end
+      end
+    end
   end
 end
