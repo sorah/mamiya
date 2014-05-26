@@ -53,4 +53,16 @@ describe Mamiya::Logger do
       expect(sio.string).to match(/^.*test.*$/)
     end
   end
+
+  describe "#reopen" do
+    it "reopens file IOs" do
+      io = double('io', path: 'foo', tty?: false, write: 0, sync: true)
+      expect(io).to receive(:reopen).with('foo', 'a')
+      expect(io).to receive(:sync=).with(true)
+
+      logger = described_class.new(outputs: [io])
+
+      logger.reopen
+    end
+  end
 end

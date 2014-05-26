@@ -36,6 +36,8 @@ module Mamiya
       :level, :level=, :progname, :progname=,
       :close
 
+    def_delegators :@logdev, :reopen
+
     def add_output(*outputs)
       @logdev.add(*outputs)
     end
@@ -132,6 +134,14 @@ module Mamiya
           output.close unless output.respond_to?(:closed?) && output.closed?
         end
         self
+      end
+
+      def reopen
+        @outputs.select { |io| io.respond_to?(:path) }.each do |io|
+          sync = io.sync
+          io.reopen(io.path, 'a')
+          io.sync = sync
+        end
       end
 
       def add(*outputs)

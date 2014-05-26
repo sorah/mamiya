@@ -13,6 +13,7 @@ require 'mamiya/agent'
 require 'mamiya/master'
 
 require 'thor'
+require 'thread'
 
 module Mamiya
   class CLI < Thor
@@ -165,7 +166,11 @@ module Mamiya
 
     desc "agent", "Start agent."
     method_option :serf, type: :array
+    method_option :daemonize, aliases: '-D', type: :boolean, default: false
+    method_option :log, aliases: '-l', type: :string
+    method_option :pidfile, aliases: '-p', type: :string
     def agent
+      prepare_agent_behavior!
       merge_serf_option!
 
       agent = Agent.new(config, logger: logger)
@@ -174,7 +179,11 @@ module Mamiya
 
     desc "master", "Start master"
     method_option :serf, type: :array
+    method_option :daemonize, aliases: '-D', type: :boolean, default: false
+    method_option :log, aliases: '-l', type: :string
+    method_option :pidfile, aliases: '-p', type: :string
     def master
+      prepare_agent_behavior!
       merge_serf_option!
 
       agent = Master.new(config, logger: logger)
@@ -188,6 +197,32 @@ module Mamiya
     # end
 
     private
+
+    def prepare_agent_behavior!
+      pidfile = File.expand_path(options[:pidfile]) if options[:pidfile]
+      logger # insitantiate
+
+      Process.daemon(:nochdir) if options[:daemonize]
+
+      if pidfile
+        open(pidfile, 'w') { |io| io.puts $$ }
+        at_exit { File.unlink(pidfile) if File.exist?(pidfile) }
+      end
+
+      reload_queue = Queue.new
+      reload_thread = Thread.new do
+        while reload_queue.pop
+          logger.info "Reopening"
+          logger.reopen
+          logger.info "Log reopened"
+        end
+      end
+      reload_thread.abort_on_exception = true
+
+      trap(:HUP) do
+        reload_queue << true
+      end
+    end
 
     def config(dont_raise_error = false)
       return @config if @config
@@ -251,12 +286,16 @@ module Mamiya
     end
 
     def logger
-      $stdout.sync = ENV["MAMIYA_SYNC_OUT"] == '1'
-      Mamiya::Logger.new(
-        color: options[:no_color] ? false : (options[:color] ? true : nil),
-        outputs: [$stdout],
-        level: options[:debug] ? Mamiya::Logger::DEBUG : Mamiya::Logger.defaults[:level],
-      )
+      @logger ||= begin
+        $stdout.sync = ENV["MAMIYA_SYNC_OUT"] == '1'
+        outs = [$stdout]
+        outs << File.expand_path(options[:log]) if options[:log]
+        Mamiya::Logger.new(
+          color: options[:no_color] ? false : (options[:color] ? true : nil),
+          outputs: outs,
+          level: options[:debug] ? Mamiya::Logger::DEBUG : Mamiya::Logger.defaults[:level],
+        )
+      end
     end
 
     def package_path_from_atom(package_atom)
