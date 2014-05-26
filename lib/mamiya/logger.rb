@@ -179,7 +179,9 @@ module Mamiya
           when out.respond_to?(:write)
             out
           when out.kind_of?(String)
-            File.open(out, 'a')
+            File.open(out, 'a').tap{ |_| _.sync = true }
+          else
+            raise ArgumentError, 'output should able to respond to :write or be String'
           end
         end
       end
