@@ -38,7 +38,7 @@ describe Mamiya::Master::AgentMonitor do
     end
 
     before do
-      allow(serf).to receive(:query).with('mamiya:status', '').and_return(query_response)
+      allow(serf).to receive(:query).with('mamiya:status', '', {}).and_return(query_response)
       allow(serf).to receive(:members).and_return(members)
     end
 
@@ -97,6 +97,13 @@ describe Mamiya::Master::AgentMonitor do
         }.from([]).to(['a'])
       end
     end
+
+    context "with argument" do
+      it "passes args to serf query" do
+        expect(serf).to receive(:query).with('mamiya:status', '', node: 'foo').and_return(query_response)
+        agent_monitor.refresh(node: 'foo')
+      end
+    end
   end
 
   describe "(commiting events)" do
@@ -135,7 +142,7 @@ describe Mamiya::Master::AgentMonitor do
     end
 
     before do
-      allow(serf).to receive(:query).with('mamiya:status', '').and_return(query_response)
+      allow(serf).to receive(:query).with('mamiya:status', '', {}).and_return(query_response)
       allow(serf).to receive(:members).and_return(members)
 
       agent_monitor.refresh

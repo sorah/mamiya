@@ -85,7 +85,7 @@ module Mamiya
         logger.warn "Failed to parse payload in event #{event.user_event}: #{e.message}"
       end
 
-      def refresh
+      def refresh(**kwargs)
         # TODO: lock
         logger.debug "Refreshing..."
 
@@ -99,7 +99,7 @@ module Mamiya
         end
 
         @commit_lock.synchronize { 
-          response = @master.serf.query(STATUS_QUERY, '')
+          response = @master.serf.query(STATUS_QUERY, '', **kwargs)
           response["Responses"].each do |name, json|
             begin
               new_statuses[name] = JSON.parse(json)

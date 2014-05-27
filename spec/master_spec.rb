@@ -7,12 +7,14 @@ require 'villein/event'
 require 'mamiya/agent'
 require 'mamiya/storages/mock'
 
+require 'mamiya/master/agent_monitor'
 require 'mamiya/master'
 
 require_relative './support/dummy_serf.rb'
 
 describe Mamiya::Master do
   let(:serf) { DummySerf.new }
+  let(:agent_monitor) { double('agent_monitor', start!: nil) }
 
   let(:config) do
     {
@@ -24,6 +26,7 @@ describe Mamiya::Master do
 
   before do
     allow(Villein::Agent).to receive(:new).and_return(serf)
+    allow(Mamiya::Master::AgentMonitor).to receive(:new).and_return(agent_monitor)
   end
 
   subject(:master) { described_class.new(config) }
@@ -50,6 +53,21 @@ describe Mamiya::Master do
       expect(master).to receive(:trigger).with(:fetch, application: 'myapp', package: 'mypackage')
 
       master.distribute('myapp', 'mypackage')
+    end
+  end
+
+  it "starts agent monitor"
+
+  describe "(member join event)" do
+    it "initiates refresh" do
+      master # initiate
+
+      expect(agent_monitor).to receive(:refresh).with(node: ['the-node', 'another-node'])
+
+      serf.trigger("member_join", Villein::Event.new(
+        {"SERF_EVENT" => "member-join"},
+        payload: "the-node\tX.X.X.X\t\tkey=val,a=b\nanother-node\tY.Y.Y.Y\t\tkey=val,a=b\n"
+      ))
     end
   end
 

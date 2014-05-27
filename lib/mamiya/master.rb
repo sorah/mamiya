@@ -62,6 +62,10 @@ module Mamiya
         serf.on_user_event do |event|
           monitor_commit_event(event)
         end
+
+        serf.on_member_join do |event|
+          @agent_monitor.refresh(node: event.members.map { |_| _[:name] })
+        end
       end
     end
 
