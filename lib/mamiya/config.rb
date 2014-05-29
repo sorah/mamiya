@@ -4,7 +4,7 @@ require 'mamiya/storages'
 module Mamiya
   class Config
     def self.load(file)
-      self.new YAML.load_file(file)
+      self.new YAML.load(ERB.new(File.read(file)).result(binding))
     end
 
     def initialize(config_hash = {})
