@@ -29,6 +29,7 @@ module Mamiya
       def invoke_command(*)
         super
       rescue SystemExit
+        raise
       rescue Exception => e
         logger.fatal "#{e.class}: #{e.message}"
 
