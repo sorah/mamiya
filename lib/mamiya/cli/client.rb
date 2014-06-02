@@ -146,10 +146,15 @@ number of agents don't have package: #{dist['not_distributed_count']}
       end
 
       def master_post(path, data='')
+        response = nil
         master_http.start do |http|
-          response = http.post(path, data).tap(&:value)
-          response.code == '204' ? true : JSON.parse(response.tap(&:value).body)
+          response = http.post(path, data)
+          response.value
+          response.code == '204' ? true : JSON.parse(response.body)
         end
+      rescue Net::HTTPExceptions => e
+        puts response.body rescue nil
+        raise e
       end
 
       def master_http
