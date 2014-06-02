@@ -264,9 +264,11 @@ module Mamiya
     def merge_serf_option!
       (config[:serf] ||= {})[:agent] ||= {}
 
-      options[:serf].flat_map{ |_| _.split(/,/) }.each do |conf|
-        k,v = conf.split(/=/,2)
-        config[:serf][:agent][k.to_sym] = v
+      if options[:serf]
+        options[:serf].flat_map{ |_| _.split(/,/) }.each do |conf|
+          k,v = conf.split(/=/,2)
+          config[:serf][:agent][k.to_sym] = v
+        end
       end
     end
 
