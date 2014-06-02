@@ -2,6 +2,7 @@ require 'mamiya/cli'
 
 require 'net/http'
 require 'net/https'
+require 'rack/utils'
 require 'uri'
 require 'json'
 require 'thor'
@@ -128,6 +129,11 @@ number of agents don't have package: #{dist['not_distributed_count']}
       def rollback
       end
 
+      desc "join HOST", "let serf to join to HOST"
+      def join(host)
+        master_post('/join', host: host)
+      end
+
       private
 
       def fatal!(msg)
@@ -148,6 +154,10 @@ number of agents don't have package: #{dist['not_distributed_count']}
       def master_post(path, data='')
         response = nil
         master_http.start do |http|
+          if Hash === data
+            data = Rack::Utils.build_nested_query(data)
+          end
+
           response = http.post(path, data)
           response.value
           response.code == '204' ? true : JSON.parse(response.body)

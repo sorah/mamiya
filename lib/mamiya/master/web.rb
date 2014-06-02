@@ -143,6 +143,19 @@ module Mamiya
         agent_monitor.refresh
         status 204
       end
+
+      post '/join' do
+        begin
+          master.serf.join(params[:host])
+          status 204
+        rescue Villein::Client::SerfError => e
+          raise e unless /Error joining the cluster/ === e.message
+
+          content_type :json
+          status 400
+          {error: e.message}.to_json
+        end
+      end
     end
   end
 end
