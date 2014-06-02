@@ -141,6 +141,7 @@ module Mamiya
           sync = io.sync
           io.reopen(io.path, 'a')
           io.sync = sync
+          io.puts("Log reopened")
         end
       end
 

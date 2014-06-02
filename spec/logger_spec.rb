@@ -56,7 +56,7 @@ describe Mamiya::Logger do
 
   describe "#reopen" do
     it "reopens file IOs" do
-      io = double('io', path: 'foo', tty?: false, write: 0, sync: true)
+      io = double('io', path: 'foo', tty?: false, write: 0, sync: true, puts: nil)
       expect(io).to receive(:reopen).with('foo', 'a')
       expect(io).to receive(:sync=).with(true)
 

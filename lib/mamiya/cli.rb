@@ -215,18 +215,9 @@ module Mamiya
         at_exit { File.unlink(pidfile) if File.exist?(pidfile) }
       end
 
-      reload_queue = Queue.new
-      reload_thread = Thread.new do
-        while reload_queue.pop
-          logger.info "Reopening"
-          logger.reopen
-          logger.info "Log reopened"
-        end
-      end
-      reload_thread.abort_on_exception = true
-
       trap(:HUP) do
-        reload_queue << true
+        $stderr.puts "hi"
+        logger.reopen
       end
     end
 
