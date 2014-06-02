@@ -33,8 +33,13 @@ module Mamiya
       rescue Exception => e
         logger.fatal "#{e.class}: #{e.message}"
 
+        use_fatal = config(:no_error) && config[:show_backtrace_in_fatal]
         e.backtrace.map{ |_| _.prepend("\t") }.each do |line|
-          logger.debug line
+          if use_fatal
+            logger.fatal line
+          else
+            logger.debug line
+          end
         end
       end
     end
