@@ -18,6 +18,8 @@ module Mamiya
       @serf = init_serf
       @events_only = events_only
 
+      @terminate = false
+
       @logger = logger['agent']
     end
 
@@ -35,13 +37,28 @@ module Mamiya
       logger.info "Started."
 
       loop do
-        sleep 10
+        if @terminate
+          terminate
+          return
+        end
+        sleep 1
       end
+    end
+
+    def stop!
+      @terminate = true
     end
 
     def start
       serf_start
       fetcher_start
+    end
+
+    def terminate
+      serf.stop!
+      fetcher.stop!
+    ensure
+      @terminate = false
     end
 
     def update_tags!

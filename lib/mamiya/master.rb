@@ -33,6 +33,11 @@ module Mamiya
       monitor_start
     end
 
+    def terminate
+      @agent_monitor.stop!
+      super
+    end
+
     def distribute(application, package)
       trigger(:fetch, application: application, package: package)
     end

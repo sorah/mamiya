@@ -179,8 +179,8 @@ module Mamiya
       prepare_agent_behavior!
       merge_serf_option!
 
-      agent = Agent.new(config, logger: logger)
-      agent.run!
+      @agent = Agent.new(config, logger: logger)
+      @agent.run!
     end
 
     desc "master", "Start master"
@@ -192,8 +192,8 @@ module Mamiya
       prepare_agent_behavior!
       merge_serf_option!
 
-      agent = Master.new(config, logger: logger)
-      agent.run!
+      @agent = Master.new(config, logger: logger)
+      @agent.run!
     end
 
     # def worker
@@ -217,6 +217,11 @@ module Mamiya
 
       trap(:HUP) do
         logger.reopen
+      end
+
+      trap(:TERM) do
+        puts "Received SIGTERM..."
+        @agent.stop! if @agent
       end
     end
 
