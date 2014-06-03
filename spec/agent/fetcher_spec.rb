@@ -122,6 +122,7 @@ describe Mamiya::Agent::Fetcher do
       received = true
 
       fetcher.enqueue('myapp', 'package') do |succeeded|
+        expect(fetcher.working?).to be_false
         received = succeeded
       end
 
@@ -141,11 +142,11 @@ describe Mamiya::Agent::Fetcher do
       expect(fetcher.current_job).to be_nil
 
       received = false
-      fetcher.enqueue('myapp', 'package') do |error|
-        received = true
+      fetcher.enqueue 'myapp', 'package', before: proc { |error|
         expect(fetcher.working?).to be_true
         expect(fetcher.current_job).to eq %w(myapp package)
-      end
+        received = true
+      }
 
       fetcher.stop!(:graceful)
       expect(received).to be_true

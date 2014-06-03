@@ -112,6 +112,7 @@ module Mamiya
           config: @config,
         ).run!
 
+        @current_job = nil
         callback.call if callback
 
         @logger.info "fetched #{app}:#{package}"
