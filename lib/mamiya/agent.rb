@@ -24,7 +24,7 @@ module Mamiya
     attr_reader :config, :serf, :logger
 
     def fetcher
-      @fetcher ||= Mamiya::Agent::Fetcher.new(config).tap do |f|
+      @fetcher ||= Mamiya::Agent::Fetcher.new(config, logger: logger).tap do |f|
         f.cleanup_hook = self.method(:cleanup_handler)
       end
     end
