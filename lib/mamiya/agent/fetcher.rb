@@ -20,7 +20,6 @@ module Mamiya
         @current_job = nil
 
         @logger = logger['fetcher']
-        @working = nil
       end
 
       attr_reader :thread
