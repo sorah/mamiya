@@ -1,4 +1,9 @@
+require 'simplecov'
 require 'rack/test'
+SimpleCov.start do
+  add_filter "/spec/"
+end
+
 require 'mamiya/storages/mock'
 require 'mamiya/logger'
 
