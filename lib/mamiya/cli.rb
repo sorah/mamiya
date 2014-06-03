@@ -216,7 +216,6 @@ module Mamiya
       end
 
       trap(:HUP) do
-        $stderr.puts "hi"
         logger.reopen
       end
     end
