@@ -36,7 +36,7 @@ module Mamiya
       end
 
       def queue_size
-        @queue.size
+        @internal_queue.size
       end
 
       def start!
