@@ -117,6 +117,13 @@ module Mamiya
       def handle_order(app, package, before_hook = nil, callback = nil)
         @current_job = [app, package]
         @logger.info "fetching #{app}:#{package}"
+
+        if @config[:fetch_sleep]
+          wait = rand(@config[:fetch_sleep])
+          @logger.debug "Sleeping #{wait} before starting fetch"
+          sleep wait
+        end
+
         # TODO: Limit apps by configuration
 
         destination = File.join(@destination, app)

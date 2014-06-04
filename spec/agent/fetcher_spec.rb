@@ -182,6 +182,15 @@ describe Mamiya::Agent::Fetcher do
       expect(fetcher.current_job).to be_nil
     end
 
+    context "with config.fetch_sleep" do
+      it "calls sleep" do
+        config[:fetch_sleep] = 1
+        expect(fetcher).to receive(:sleep)
+        fetcher.enqueue 'myapp', 'package'
+        fetcher.stop!(:graceful)
+      end
+    end
+
     context "with before hook" do
       it "calls callback" do
         run = false
