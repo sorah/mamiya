@@ -1,5 +1,7 @@
 require 'thread'
 require 'villein'
+require 'mamiya/version'
+
 require 'mamiya/logger'
 
 require 'mamiya/steps/fetch'
@@ -76,6 +78,7 @@ module Mamiya
       {}.tap do |s|
         s[:master] = false
         s[:name] = serf.name
+        s[:version] = Mamiya::VERSION
 
         s[:fetcher] = {
           fetching: fetcher.current_job,

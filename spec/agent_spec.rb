@@ -5,6 +5,7 @@ require 'fileutils'
 require 'json'
 require 'villein/event'
 
+require 'mamiya/version'
 require 'mamiya/agent'
 require 'mamiya/agent/fetcher'
 require 'mamiya/agent/actions'
@@ -116,6 +117,10 @@ describe Mamiya::Agent do
     end
 
     subject(:status) { agent.status }
+
+    it "includes version identifier" do
+      expect(status[:version]).to eq Mamiya::VERSION
+    end
 
     it "includes agent name" do
       expect(status[:name]).to eq serf.name
