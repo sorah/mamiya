@@ -157,20 +157,22 @@ describe Mamiya::Master::AgentMonitor do
         end
 
         it "updates pending" do
-          commit('mamiya:fetch-result:ack', pending: 72)
+          commit('mamiya:fetch-result:ack', pending: 72, application: 'foo', package: 'bar')
           expect(new_status["fetcher"]["pending"]).to eq 72
+          expect(new_status["fetcher"]["pending_jobs"]).to eq [%w(foo bar)]
         end
       end
 
       describe ":start" do
         let(:status) do
-          {fetcher: {fetching: nil, pending: 0}}
+          {fetcher: {fetching: nil, pending: 1, pending_jobs: [%w(app pkg)]}}
         end
 
         it "updates fetching" do
           commit('mamiya:fetch-result:start',
                  application: 'app', package: 'pkg', pending: 0)
           expect(new_status["fetcher"]["fetching"]).to eq ['app', 'pkg']
+          expect(new_status["fetcher"]["pending_jobs"]).to be_empty
         end
       end
 

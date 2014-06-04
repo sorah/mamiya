@@ -6,11 +6,17 @@ module Mamiya
       def fetch_result__ack(status, payload, event)
         status['fetcher'] ||= {}
         status['fetcher']['pending'] = payload['pending']
+
+        status['fetcher']['pending_jobs'] ||= []
+        status['fetcher']['pending_jobs'] << [payload['application'], payload['package']]
       end
 
       def fetch_result__start(status, payload, event)
         status['fetcher'] ||= {}
         status['fetcher']['fetching'] = [payload['application'], payload['package']]
+
+        status['fetcher']['pending_jobs'] ||= []
+        status['fetcher']['pending_jobs'].delete [payload['application'], payload['package']]
       end
 
       def fetch_result__error(status, payload, event)

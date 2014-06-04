@@ -11,23 +11,28 @@ module Mamiya
       GRACEFUL_TIMEOUT = 60
 
       def initialize(config, logger: Mamiya::Logger.new)
-        @thread = nil
-        @queue = Queue.new
+        @worker_thread = nil
+        @queueing_thread = nil
+        @external_queue = Queue.new
+        @internal_queue = Queue.new
 
         @config = config
         @destination = config[:packages_dir]
         @keep_packages = config[:keep_packages]
         @current_job = nil
+        @pending_jobs = []
 
         @logger = logger['fetcher']
       end
 
-      attr_reader :thread
+      attr_reader :worker_thread
+      attr_reader :queueing_thread
       attr_reader :current_job
+      attr_reader :pending_jobs
       attr_writer :cleanup_hook
 
       def enqueue(app, package, before: nil, &callback)
-        @queue << [app, package, before, callback]
+        @external_queue << [app, package, before, callback]
       end
 
       def queue_size
@@ -35,27 +40,34 @@ module Mamiya
       end
 
       def start!
+        stop!
         @logger.info 'Starting...'
 
-        @thread = Thread.new(&method(:main_loop))
-        @thread.abort_on_exception = true
+        @worker_thread = Thread.new(&method(:main_loop))
+        @worker_thread.abort_on_exception = true
+
+        @queueing_thread = Thread.new(&method(:queueing_loop))
+        @queueing_thread.abort_on_exception = true
       end
 
       def stop!(graceful = false)
-        return unless @thread
+        {@external_queue => @queueing_thread, @internal_queue => @worker_thread}.each do |q, th|
+          next unless th
+          if graceful
+            q << :suicide
+            th.join(GRACEFUL_TIMEOUT)
+          end
 
-        if graceful
-          @queue << :suicide
-          @thread.join(GRACEFUL_TIMEOUT)
+          th.kill if th.alive?
         end
-
-        @thread.kill if @thread.alive?
       ensure
-        @thread = nil
+        @worker_thread = nil
+        @queueing_thread = nil
       end
 
       def running?
-        @thread && @thread.alive?
+        @worker_thread && @worker_thread.alive? && \
+        @queueing_thread && @queueing_thread.alive?
       end
 
       def working?
@@ -87,9 +99,18 @@ module Mamiya
       private
 
       def main_loop
-        while order = @queue.pop
+        while order = @internal_queue.pop
           break if order == :suicide
+          @pending_jobs.delete(order)
           handle_order(*order)
+        end
+      end
+
+      def queueing_loop
+        while order = @external_queue.pop
+          break if order == :suicide
+          @pending_jobs << order
+          @internal_queue << order
         end
       end
 

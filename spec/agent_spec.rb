@@ -111,7 +111,8 @@ describe Mamiya::Agent do
       allow(agent).to receive(:existing_packages).and_return("app" => ["pkg"])
       allow(fetcher).to receive(:queue_size).and_return(42)
       allow(fetcher).to receive(:working?).and_return(false)
-          allow(fetcher).to receive(:current_job).and_return(nil)
+      allow(fetcher).to receive(:current_job).and_return(nil)
+      allow(fetcher).to receive(:pending_jobs).and_return([['app', 'pkg2', nil, nil]])
     end
 
     subject(:status) { agent.status }
@@ -127,6 +128,10 @@ describe Mamiya::Agent do
     describe "(fetcher)" do
       it "includes queue_size as pending" do
         expect(status[:fetcher][:pending]).to eq 42
+      end
+
+      it "includes pendings job" do
+        expect(status[:fetcher][:pending_jobs]).to eq([['app', 'pkg2']])
       end
 
       it "shows fetching status" do

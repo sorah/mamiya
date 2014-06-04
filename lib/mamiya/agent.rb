@@ -80,6 +80,7 @@ module Mamiya
         s[:fetcher] = {
           fetching: fetcher.current_job,
           pending: fetcher.queue_size,
+          pending_jobs: fetcher.pending_jobs.map{ |_| _[0,2] },
         }
 
         s[:packages] = self.existing_packages

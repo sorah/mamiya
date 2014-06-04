@@ -6,6 +6,7 @@ require 'fileutils'
 require 'mamiya/agent/fetcher'
 require 'mamiya/steps/fetch'
 
+
 describe Mamiya::Agent::Fetcher do
   let!(:tmpdir) { Dir.mktmpdir('mamiya-agent-fetcher-spec') }
   after { FileUtils.remove_entry_secure(tmpdir) if File.exist?(tmpdir) }
@@ -18,22 +19,22 @@ describe Mamiya::Agent::Fetcher do
 
   describe "lifecycle" do
     it "can start and stop" do
-      expect(fetcher.thread).to be_nil
+      expect(fetcher.worker_thread).to be_nil
       expect(fetcher).not_to be_running
 
       fetcher.start!
 
       expect(fetcher).to be_running
-      expect(fetcher.thread).to be_a(Thread)
-      expect(fetcher.thread).to be_alive
-      th = fetcher.thread
+      expect(fetcher.worker_thread).to be_a(Thread)
+      expect(fetcher.worker_thread).to be_alive
+      th = fetcher.worker_thread
 
       fetcher.stop!
 
-      10.times { break unless th.alive?; sleep 0.1 }
+      20.times { break unless th.alive?; sleep 0.1 }
       expect(th).not_to be_alive
 
-      expect(fetcher.thread).to be_nil
+      expect(fetcher.worker_thread).to be_nil
       expect(fetcher).not_to be_running
     end
 
@@ -89,6 +90,33 @@ describe Mamiya::Agent::Fetcher do
         path.join('a', 'c.tar.gz') => true,
         path.join('a', 'c.json') => true,
       )
+    end
+  end
+
+  describe "#pending_jobs" do
+    before do
+      step = double('fetch-step')
+      allow(step).to receive(:run!)
+      allow(Mamiya::Steps::Fetch).to receive(:new).with(
+        application: 'myapp',
+        package: 'package',
+        destination: File.join(tmpdir, 'myapp'),
+        config: config,
+      ).and_return(step)
+    end
+
+    it "shows remaining jobs" do
+      fetcher.start!; fetcher.worker_thread.kill
+
+      expect {
+        fetcher.enqueue('myapp', 'package')
+        fetcher.stop!(:graceful)
+      }.to change { fetcher.pending_jobs } \
+        .from([]).to([['myapp', 'package', nil, nil]])
+
+      fetcher.start!; fetcher.stop!(:graceful)
+
+      expect(fetcher.pending_jobs).to be_empty
     end
   end
 
