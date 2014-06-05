@@ -74,8 +74,17 @@ module Mamiya
           next {error: 'not found'}.to_json
         end
 
-        result = {application: params[:application], package: params[:package], distributed: [], not_distributed: []}
+        result = {
+          application: params[:application],
+          package: params[:package],
+          distributed: [],
+          fetching: [],
+          queued: [],
+          not_distributed: []
+        }
         statuses = agent_monitor.statuses
+
+        pkg_array = [params[:application], params[:package]]
 
         statuses.each do |name, status|
           next if status["master"]
@@ -83,17 +92,45 @@ module Mamiya
             status["packages"][params[:application]].include?(params[:package])
 
             result[:distributed] << name
+          elsif status["fetcher"] && status["fetcher"]["fetching"] && status["fetcher"]["fetching"] == pkg_array
+            result[:fetching] << name
+          elsif status["fetcher"]["pending_jobs"] &&
+                status["fetcher"]["pending_jobs"].include?(pkg_array)
+            result[:queued] << name
           else
             result[:not_distributed] << name
           end
         end
 
         result[:distributed_count] = result[:distributed].size
+        result[:fetching_count] = result[:fetching].size
         result[:not_distributed_count] = result[:not_distributed].size
+        result[:queued_count] = result[:queued].size
+
+        total = statuses.size
+
+        case
+        when 0 < result[:queued_count] || 0 < result[:fetching_count]
+          status = :distributing
+        when 0 < result[:distributed_count] && result[:distributed_count] < total
+          status = :well_distributed
+        when result[:distributed_count] == total
+          status = :distributed
+        else
+          status = :unknown
+        end
+
+        result[:status] = status
+
+        if params[:count_only]
+          result.delete :distributed
+          result.delete :fetching
+          result.delete :queued
+          result.delete :not_distributed
+        end
 
         result.to_json
       end
-
 
       get '/agents' do
         statuses = agent_monitor.statuses

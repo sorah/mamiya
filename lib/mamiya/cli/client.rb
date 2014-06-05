@@ -91,23 +91,33 @@ module Mamiya
           return
         end
 
-        total = dist['distributed_count'] + dist['not_distributed_count']
-        puts <<-EOF
-Distribution status of #{application}/#{package}
+        total = dist['distributed_count'] + dist['fetching_count'] +
+          dist['queued_count'] + dist['not_distributed_count'] 
 
-ratio (distributed:total-agents):    #{"%.1f" % ((dist['distributed_count']/total.to_f)*100)}%
-number of agents have package:       #{dist['distributed_count']}
-number of agents don't have package: #{dist['not_distributed_count']}
+        progress = "%.1f" % ((dist['distributed_count']/total.to_f)*100)
+        puts <<-EOF
+package:         #{application}/#{package}
+status:          #{dist['status']}
+progress:        #{progress}
+
+distributed:     #{dist['distributed_count']} agents
+fetching:        #{dist['fetching_count']} agents
+queued:          #{dist['queued_count']} agents
+not distributed: #{dist['not_distributed_count']} agents
         EOF
 
         if options[:verbose]
           puts ""
-          dist['not_distributed'].each do |name|
-            puts "#{name}\tnot_distributed"
-          end
           dist['distributed'].each do |name|
             puts "#{name}\tdistributed"
           end
+          dist['queued'].each do |name|
+            puts "#{name}\tqueued"
+          end
+          dist['not_distributed'].each do |name|
+            puts "#{name}\tnot_distributed"
+          end
+
         end
       end
 
