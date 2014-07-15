@@ -95,11 +95,15 @@ module Mamiya
       end
 
       def self.initiate_s3_with_config(config) # :nodoc:
-        s3_config = config.dup
-        s3_config.delete(:bucket)
-        s3_config.delete(:application)
-        s3_config.delete(:type)
-        Aws::S3.new(s3_config)
+        Aws::S3.new(s3_config(config))
+      end
+
+      def self.s3_config(base) # :nodoc:
+        base.dup.tap do |c|
+          c.delete(:bucket)
+          c.delete(:application)
+          c.delete(:type)
+        end
       end
 
       private
