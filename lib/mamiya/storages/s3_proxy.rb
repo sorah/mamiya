@@ -70,14 +70,15 @@ module Mamiya
 
       def proxy_get(key, target)
         connect_proxy do |http|
-          response = http.get("#{proxy_host_uri.path}/#{@config[:bucket]}/#{key}")
-          response.value
+          http.request_get("#{proxy_host_uri.path}/#{@config[:bucket]}/#{key}") do |response|
+            response.value
 
-          if block_given?
-            yield(response)
-          else
-            response.read_body do |chunk|
-              target.write chunk
+            if block_given?
+              yield(response)
+            else
+              response.read_body do |chunk|
+                target.write chunk
+              end
             end
           end
         end

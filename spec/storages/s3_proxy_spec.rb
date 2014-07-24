@@ -29,27 +29,27 @@ describe Mamiya::Storages::S3Proxy do
       allow(http).to receive(:use_ssl=).with(false)
       allow(http).to receive(:start).and_yield(http)
 
-      allow(http).to receive(:get).with('/_/testbucket/myapp/test.tar.gz').and_return(
+      allow(http).to receive(:request_get).with('/_/testbucket/myapp/test.tar.gz').and_yield(
         double('tarball response').tap do |resp|
           allow(resp).to receive(:value).and_return(200)
           allow(resp).to receive(:read_body).and_yield("{}\n")
         end
       )
 
-      allow(http).to receive(:get).with('/_/testbucket/myapp/test.json').and_return(
+      allow(http).to receive(:request_get).with('/_/testbucket/myapp/test.json').and_yield(
         double('json response').tap do |resp|
           allow(resp).to receive(:value).and_return(200)
           allow(resp).to receive(:read_body).and_yield("{}\n")
         end
       )
 
-      allow(http).to receive(:get).with('/_/testbucket/myapp/not-found.tar.gz').and_return(
+      allow(http).to receive(:request_get).with('/_/testbucket/myapp/not-found.tar.gz').and_yield(
         double('tarball 404 response').tap do |resp|
           allow(resp).to receive(:value).and_raise(Net::HTTPServerException.new('404 "Not Found"',''))
         end
       )
 
-      allow(http).to receive(:get).with('/_/testbucket/myapp/not-found.json').and_return(
+      allow(http).to receive(:request_get).with('/_/testbucket/myapp/not-found.json').and_yield(
         double('json 404 response').tap do |resp|
           allow(resp).to receive(:value).and_raise(Net::HTTPServerException.new('404 "Not Found"',''))
         end
