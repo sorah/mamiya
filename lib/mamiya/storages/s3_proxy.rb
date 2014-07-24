@@ -64,7 +64,7 @@ module Mamiya
             http.verify_mode = OpenSSL::SSL::VERIFY_NONE
           end
 
-          break http.start(&block)
+          return http.start(&block)
         end
       end
 
@@ -74,7 +74,7 @@ module Mamiya
             response.value
 
             if block_given?
-              yield(response)
+              return yield(response)
             else
               response.read_body do |chunk|
                 target.write chunk
