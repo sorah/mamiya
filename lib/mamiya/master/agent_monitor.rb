@@ -52,6 +52,7 @@ module Mamiya
       end
 
       def work_loop
+        logger.debug "[#{Thread.current.inspect}] Starting periodical refresh"
         self.refresh
       rescue Exception => e
         raise e if @raise_exception
@@ -60,6 +61,7 @@ module Mamiya
         e.backtrace.each do |line|
           logger.fatal "\t#{line}"
         end
+        logger.fatal "#{@commit_lock.inspect} owned:#{@commit_lock.owned?} locked:#{@commit_lock.locked?}"
       end
 
       def commit_event(event)
@@ -87,7 +89,7 @@ module Mamiya
 
       def refresh(**kwargs)
         # TODO: lock
-        logger.debug "Refreshing..."
+        logger.debug "[#{Thread.current.inspect}] Refreshing..."
 
         new_agents = {}
         new_failed_agents = Set.new
@@ -98,8 +100,12 @@ module Mamiya
           new_failed_agents.add(member["name"]) unless member["status"] == 'alive'
         end
 
+        logger.debug "[#{Thread.current.inspect}] Acquiring lock"
         @commit_lock.synchronize { 
+          logger.debug "[#{Thread.current.inspect}] Requesting query"
           response = @master.serf.query(STATUS_QUERY, '', **kwargs)
+          logger.debug "[#{Thread.current.inspect}] Query finished"
+
           response["Responses"].each do |name, json|
             begin
               new_statuses[name] = JSON.parse(json)
