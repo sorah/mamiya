@@ -139,6 +139,8 @@ module Mamiya
 
         agents = {}
         members.each do |name, status|
+          next unless status["status"] == "alive"
+
           agents[name] ||= {}
           agents[name]["membership"] = status
         end
