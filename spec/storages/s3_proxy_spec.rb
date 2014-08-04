@@ -105,6 +105,15 @@ describe Mamiya::Storages::S3Proxy do
           fetch
         }.to raise_error(Mamiya::Storages::Abstract::AlreadyFetched)
       end
+
+      it "doesn't remove anything" do
+        begin
+          fetch
+        rescue Mamiya::Storages::Abstract::AlreadyFetched; end
+
+        expect(File.exist?(metafile)).to be_true
+      end
+
     end
 
     context "when tarball already exists" do
@@ -116,6 +125,14 @@ describe Mamiya::Storages::S3Proxy do
         expect {
           fetch
         }.to raise_error(Mamiya::Storages::Abstract::AlreadyFetched)
+      end
+
+      it "doesn't remove anything" do
+        begin
+          fetch
+        rescue Mamiya::Storages::Abstract::AlreadyFetched; end
+
+        expect(File.exist?(tarball)).to be_true
       end
     end
   end

@@ -30,6 +30,10 @@ module Mamiya
         end
 
         return Mamiya::Package.new(package_path)
+
+      rescue NotFound, AlreadyFetched => e
+        raise e
+
       rescue Exception => e
         File.unlink package_path if package_path && File.exists?(package_path)
         File.unlink meta_path if meta_path && File.exists?(meta_path)
