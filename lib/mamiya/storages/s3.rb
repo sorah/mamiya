@@ -60,11 +60,16 @@ module Mamiya
         end
 
         return Mamiya::Package.new(package_path)
+
+      rescue AlreadyFetched, NotFound => e
+        raise e
+
       rescue Aws::S3::Errors::NoSuchKey
         File.unlink package_path if package_path && File.exists?(package_path)
         File.unlink meta_path if meta_path && File.exists?(meta_path)
 
         raise NotFound
+
       rescue Exception => e
         File.unlink package_path if package_path && File.exists?(package_path)
         File.unlink meta_path if meta_path && File.exists?(meta_path)
