@@ -1,3 +1,3 @@
 module Mamiya
-  VERSION = "0.0.1.alpha16"
+  VERSION = "0.0.1.alpha17"
 end
