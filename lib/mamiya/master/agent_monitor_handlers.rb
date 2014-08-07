@@ -15,6 +15,8 @@ module Mamiya
         status['fetcher'] ||= {}
         status['fetcher']['fetching'] = [payload['application'], payload['package']]
 
+        logger.debug "#{status['name']} started to fetch #{payload['application']}/#{payload['package']}"
+
         status['fetcher']['pending_jobs'] ||= []
         status['fetcher']['pending_jobs'].delete [payload['application'], payload['package']]
       end
@@ -31,6 +33,8 @@ module Mamiya
 
       def fetch_result__success(status, payload, event)
         status['fetcher'] ||= {}
+
+        logger.info "#{status['name']} fetched #{payload['application']}/#{payload['package']}"
 
         if status['fetcher']['fetching'] == [payload['application'], payload['package']]
           status['fetcher']['fetching'] = nil
