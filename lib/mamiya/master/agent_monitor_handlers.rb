@@ -22,6 +22,8 @@ module Mamiya
       def fetch_result__error(status, payload, event)
         status['fetcher'] ||= {}
 
+        logger.error "#{status['name']} failed to fetch #{payload['application']}/#{payload['package']}: #{payload['error']}"
+
         if status['fetcher']['fetching'] == [payload['application'], payload['package']]
           status['fetcher']['fetching'] = nil
         end
