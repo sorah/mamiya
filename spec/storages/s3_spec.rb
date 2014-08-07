@@ -39,7 +39,7 @@ describe Mamiya::Storages::S3 do
   end
 
   before do
-    allow(Aws::S3).to receive(:new).with(foo: :bar, access_key_id: 'AKI', secret_access_key: 'secret', region: 'ap-northeast-1').and_return(s3)
+    allow(Aws::S3::Client).to receive(:new).with(foo: :bar, access_key_id: 'AKI', secret_access_key: 'secret', region: 'ap-northeast-1').and_return(s3)
   end
 
   describe "#push(package)" do

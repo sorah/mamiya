@@ -100,7 +100,7 @@ module Mamiya
       end
 
       def self.initiate_s3_with_config(config) # :nodoc:
-        Aws::S3.new(s3_config(config))
+        Aws::S3::Client.new(s3_config(config))
       end
 
       def self.s3_config(base) # :nodoc:
