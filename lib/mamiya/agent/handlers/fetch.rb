@@ -39,6 +39,7 @@ module Mamiya
             }
           ) do |error|
             if error && IGNORED_ERRORS.lazy.grep(error.class).none?
+              # FIXME: TODO: may exceed 256
               agent.serf.event(FETCH_ERROR_EVENT,
                 {
                   name: agent.serf.name,
