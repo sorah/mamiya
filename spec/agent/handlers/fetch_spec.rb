@@ -102,7 +102,7 @@ describe Mamiya::Agent::Handlers::Fetch do
         'mamiya:fetch-result:error',
         {
           name: serf.name, application: 'app', package: 'package',
-          error: error.inspect, pending: 0,
+          error: error.class, pending: 0,
         }.to_json,
       )
 

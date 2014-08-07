@@ -40,15 +40,19 @@ module Mamiya
           ) do |error|
             if error && IGNORED_ERRORS.lazy.grep(error.class).none?
               # FIXME: TODO: may exceed 256
-              agent.serf.event(FETCH_ERROR_EVENT,
-                {
-                  name: agent.serf.name,
-                  application: payload['application'],
-                  package: payload['package'],
-                  error: error.inspect,
-                  pending: agent.fetcher.queue_size,
-                }.to_json
-              )
+              begin
+                agent.serf.event(FETCH_ERROR_EVENT,
+                  {
+                    name: agent.serf.name,
+                    application: payload['application'],
+                    package: payload['package'],
+                    error: error.class,
+                    pending: agent.fetcher.queue_size,
+                  }.to_json
+                )
+              rescue Villein::Client::SerfError => e
+                agent.logger.error "error sending fetch error event: #{e.inspect}"
+              end
             else
               agent.serf.event(FETCH_SUCCESS_EVENT,
                 {
