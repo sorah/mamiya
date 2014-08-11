@@ -50,7 +50,7 @@ describe Mamiya::Master do
     # end
 
     it "triggers fetch event" do
-      expect(master).to receive(:trigger).with(:fetch, application: 'myapp', package: 'mypackage')
+      expect(master).to receive(:trigger).with(:fetch, coalesce: false, application: 'myapp', package: 'mypackage')
 
       master.distribute('myapp', 'mypackage')
     end

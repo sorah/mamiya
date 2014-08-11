@@ -15,13 +15,15 @@ module Mamiya
         ].freeze
 
         def run!
+          # XXX: Why don't use agent#trigger ...
           agent.serf.event(FETCH_ACK_EVENT,
             {
               name: agent.serf.name,
               application: payload['application'],
               package: payload['package'],
               pending: agent.fetcher.queue_size.succ,
-            }.to_json
+            }.to_json,
+            coalesce: false,
           )
 
           agent.fetcher.enqueue(
@@ -33,7 +35,8 @@ module Mamiya
                   application: payload['application'],
                   package: payload['package'],
                   pending: agent.fetcher.queue_size.succ,
-                }.to_json
+                }.to_json,
+                coalesce: false,
               )
               agent.update_tags!
             }
@@ -48,7 +51,8 @@ module Mamiya
                     package: payload['package'],
                     error: error.class,
                     pending: agent.fetcher.queue_size,
-                  }.to_json
+                  }.to_json,
+                  coalesce: false,
                 )
               rescue Villein::Client::SerfError => e
                 agent.logger.error "error sending fetch error event: #{e.inspect}"
@@ -60,7 +64,8 @@ module Mamiya
                   application: payload['application'],
                   package: payload['package'],
                   pending: agent.fetcher.queue_size,
-                }.to_json
+                }.to_json,
+                coalesce: false,
               )
             end
 

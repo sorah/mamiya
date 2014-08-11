@@ -45,6 +45,7 @@ describe Mamiya::Agent do
         {
           name: serf.name, application: 'foo', package: 'bar',
         }.to_json,
+        coalesce: false,
       )
 
       agent.fetcher.cleanup_hook.call('foo', 'bar')

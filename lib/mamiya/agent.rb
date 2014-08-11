@@ -119,11 +119,11 @@ module Mamiya
       ]
     end
 
-    def trigger(type, action: nil, **payload)
+    def trigger(type, action: nil, coalesce: true, **payload)
       name = "mamiya:#{type}"
       name << ":#{action}" if action
 
-      serf.event(name, payload.to_json)
+      serf.event(name, payload.to_json, coalesce: coalesce)
     end
 
     private
@@ -190,12 +190,10 @@ module Mamiya
     end
 
     def cleanup_handler(app, package)
-      serf.event(FETCH_REMOVE_EVENT,
-        {
-          name: self.serf.name,
-          application: app,
-          package: package,
-        }.to_json
+      trigger('fetch-result', action: 'remove', coalesce: false,
+        name: self.serf.name,
+        application: app,
+        package: package,
       )
     end
   end

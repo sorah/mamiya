@@ -28,7 +28,8 @@ describe Mamiya::Agent::Actions do
     it "sends fetch request" do
       expect(serf).to receive(:event).with(
         'mamiya:fetch',
-        {application: 'app', package: 'pkg'}.to_json
+        {application: 'app', package: 'pkg'}.to_json,
+        coalesce: false
       )
 
       agent.distribute('app', 'pkg')

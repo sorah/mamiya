@@ -38,8 +38,9 @@ module Mamiya
       super
     end
 
+    # XXX: dupe? Mamiya::Agent::Actions#distribute
     def distribute(application, package)
-      trigger(:fetch, application: application, package: package)
+      trigger(:fetch, coalesce: false, application: application, package: package)
     end
 
     def storage(app)

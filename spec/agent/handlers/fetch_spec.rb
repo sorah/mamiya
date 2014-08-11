@@ -44,7 +44,9 @@ describe Mamiya::Agent::Handlers::Fetch do
   it "responds ack" do
     allow(fetcher).to receive(:enqueue).with('app', 'package')
     expect(serf).to receive(:event).with('mamiya:fetch-result:ack',
-      {name: serf.name, application: 'app', package: 'package', pending: 1}.to_json)
+      {name: serf.name, application: 'app', package: 'package', pending: 1}.to_json,
+      coalesce: false,
+    )
 
     handler.run!
   end
@@ -62,7 +64,9 @@ describe Mamiya::Agent::Handlers::Fetch do
       options[:before].call
     end
     expect(serf).to receive(:event).with('mamiya:fetch-result:start',
-      {name: serf.name, application: 'app', package: 'package', pending: 1}.to_json)
+      {name: serf.name, application: 'app', package: 'package', pending: 1}.to_json,
+      coalesce: false
+    )
 
     handler.run!
   end
@@ -77,7 +81,8 @@ describe Mamiya::Agent::Handlers::Fetch do
 
     expect(serf).to receive(:event).with(
       'mamiya:fetch-result:success',
-      {name: serf.name, application: 'app', package: 'package', pending: 0}.to_json
+      {name: serf.name, application: 'app', package: 'package', pending: 0}.to_json,
+      coalesce: false
     )
 
     callback.call
@@ -104,6 +109,7 @@ describe Mamiya::Agent::Handlers::Fetch do
           name: serf.name, application: 'app', package: 'package',
           error: error.class, pending: 0,
         }.to_json,
+        coalesce: false,
       )
 
       callback.call(error)
