@@ -1,6 +1,7 @@
 require 'mamiya/agent'
 require 'thread'
 
+# XXX: TODO: have to refactor
 module Mamiya
   class Agent
     class TaskQueue
