@@ -7,9 +7,19 @@ module Mamiya
         def initialize(task_queue, task)
           @queue = task_queue
           @task = task
+          @error = nil
         end
 
-        attr_reader :task
+        attr_reader :task, :error
+
+        def execute
+          before
+          run
+        rescue Exception => error
+          @error = error
+        ensure
+          after
+        end
 
         def before
         end
