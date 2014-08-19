@@ -176,7 +176,7 @@ module Mamiya
         handler = Handlers.const_get(class_name).new(self, event)
         handler.send(action || :run!)
       else
-        logger.warn("Discarded event[#{event.user_event}] because we don't handle it")
+        #logger.warn("Discarded event[#{event.user_event}] because we don't handle it")
       end
     rescue Exception => e
       logger.fatal("Error during handling event: #{e.inspect}")
