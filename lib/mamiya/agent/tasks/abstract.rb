@@ -1,16 +1,19 @@
 require 'mamiya/agent'
+require 'mamiya/logger'
 
 module Mamiya
   class Agent
     module Tasks
       class Abstract
-        def initialize(task_queue, task)
+        def initialize(task_queue, task, agent: nil, logger: Mamiya::Logger.new)
+          @agent = agent
+          @logger = logger
           @queue = task_queue
           @task = task
           @error = nil
         end
 
-        attr_reader :task, :error
+        attr_reader :task, :error, :logger, :agent
 
         def execute
           before

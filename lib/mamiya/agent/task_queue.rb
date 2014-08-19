@@ -105,7 +105,7 @@ module Mamiya
               status[:pending].delete task
               status[:working] = task
             end
-            task_class.new(self, task).execute
+            task_class.new(self, task, agent: @agent, logger: @logger).execute
           rescue Exception => e
             @logger.error "#{task_class} worker catched error: #{e}\n\t#{e.backtrace.join("\n\t")}"
           ensure
