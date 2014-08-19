@@ -9,6 +9,7 @@ module Mamiya
       JOIN_TIMEOUT = 30
 
       def initialize(agent, task_classes: {}, logger: Mamiya::Logger.new)
+        @agent = agent
         @task_classes = task_classes
         @external_queue = Queue.new
         @queues = {}
@@ -20,7 +21,7 @@ module Mamiya
         @logger = logger
       end
 
-      attr_reader :worker_threads, :task_classes
+      attr_reader :worker_threads, :task_classes, :agent
 
       def start!
         @lifecycle_mutex.synchronize do
