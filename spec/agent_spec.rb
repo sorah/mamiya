@@ -52,6 +52,32 @@ describe Mamiya::Agent do
     end
   end
 
+  describe "#trigger" do
+    it "sends serf event" do
+      expect(serf).to receive(:event).with(
+        'mamiya:foo',
+        {
+          a: 'b',
+        }.to_json,
+        coalesce: true,
+      )
+
+      agent.trigger(:foo, a: 'b')
+    end
+
+    it "sends serf event with action" do
+      expect(serf).to receive(:event).with(
+        'mamiya:foo:bar',
+        {
+          a: 'b',
+        }.to_json,
+        coalesce: true,
+      )
+
+      agent.trigger(:foo, a: 'b', action: 'bar')
+    end
+  end
+
   describe "#run!" do
     it "starts serf and fetcher" do
       begin
