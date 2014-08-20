@@ -8,6 +8,7 @@ require 'villein/event'
 require 'mamiya/version'
 require 'mamiya/agent'
 require 'mamiya/agent/fetcher'
+require 'mamiya/agent/task_queue'
 require 'mamiya/agent/actions'
 
 require_relative './support/dummy_serf.rb'
@@ -23,6 +24,10 @@ describe Mamiya::Agent do
     end
   end
 
+  let(:task_queue) do
+    double('task_queue', start!: nil)
+  end
+
   let(:config) do
     {serf: {agent: {rpc_addr: '127.0.0.1:17373', bind: '127.0.0.1:17946'}}}
   end
@@ -30,6 +35,7 @@ describe Mamiya::Agent do
   before do
     allow(Villein::Agent).to receive(:new).and_return(serf)
     allow(Mamiya::Agent::Fetcher).to receive(:new).and_return(fetcher)
+    allow(Mamiya::Agent::TaskQueue).to receive(:new).and_return(task_queue)
   end
 
   subject(:agent) { described_class.new(config) }
@@ -79,17 +85,19 @@ describe Mamiya::Agent do
   end
 
   describe "#run!" do
-    it "starts serf and fetcher" do
+    it "starts serf, fetcher and task_quuee" do
       begin
         flag = false
 
         expect(fetcher).to receive(:start!)
+        expect(task_queue).to receive(:start!)
         expect(serf).to receive(:start!)
         expect(serf).to receive(:auto_stop) do
           flag = true
         end
 
         th = Thread.new { agent.run! }
+        th.abort_on_exception = true
 
         10.times { break if flag; sleep 0.1 }
       ensure

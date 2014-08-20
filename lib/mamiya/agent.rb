@@ -6,6 +6,7 @@ require 'mamiya/logger'
 
 require 'mamiya/steps/fetch'
 require 'mamiya/agent/fetcher'
+require 'mamiya/agent/task_queue'
 
 require 'mamiya/agent/handlers/fetch'
 require 'mamiya/agent/actions'
@@ -33,6 +34,11 @@ module Mamiya
       end
     end
 
+    def task_queue
+      @task_queue ||= Mamiya::Agent::TaskQueue.new(self, logger: logger, task_classes: {
+      })
+    end
+
     def run!
       logger.info "Starting..."
       start()
@@ -54,11 +60,13 @@ module Mamiya
     def start
       serf_start
       fetcher_start
+      task_queue_start
     end
 
     def terminate
       serf.stop!
       fetcher.stop!
+      task_queue.stop!
     ensure
       @terminate = false
     end
@@ -155,6 +163,11 @@ module Mamiya
       logger.debug "Starting fetcher"
 
       fetcher.start!
+    end
+
+    def task_queue_start
+      logger.debug "Starting task_queue"
+      task_queue.start!
     end
 
     def user_event_handler(event)
