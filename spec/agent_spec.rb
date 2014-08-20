@@ -145,10 +145,13 @@ describe Mamiya::Agent do
   describe "#status" do
     before do
       allow(agent).to receive(:existing_packages).and_return("app" => ["pkg"])
+
       allow(fetcher).to receive(:queue_size).and_return(42)
       allow(fetcher).to receive(:working?).and_return(false)
       allow(fetcher).to receive(:current_job).and_return(nil)
       allow(fetcher).to receive(:pending_jobs).and_return([['app', 'pkg2', nil, nil]])
+
+      allow(task_queue).to receive(:status).and_return({a: {working: nil, queue: []}})
     end
 
     subject(:status) { agent.status }
@@ -163,6 +166,12 @@ describe Mamiya::Agent do
 
     it "includes packages" do
       expect(status[:packages]).to eq agent.existing_packages
+    end
+
+    describe "(task queue)" do
+      it "includes task_queue" do
+        expect(status[:task_queues]).to eq({a: {working: nil, queue: []}})
+      end
     end
 
     describe "(fetcher)" do

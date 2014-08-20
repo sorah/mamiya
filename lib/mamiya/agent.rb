@@ -88,6 +88,8 @@ module Mamiya
         s[:name] = serf.name
         s[:version] = Mamiya::VERSION
 
+        s[:task_queues] = task_queue.status
+
         s[:fetcher] = {
           fetching: fetcher.current_job,
           pending: fetcher.queue_size,
