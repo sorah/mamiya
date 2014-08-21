@@ -32,6 +32,11 @@ module Mamiya
         logger.error "#{status['name']} finished task #{task['task']}: #{payload['error']}"
 
         task__finalize(status, payload, event)
+
+        method_name = "task___#{task['task']}__finish"
+        if self.respond_to?(method_name)
+          __send__ method_name, status, task
+        end
       end
 
       def task__error(status, payload, event)
@@ -39,7 +44,29 @@ module Mamiya
         logger.error "#{status['name']} failed task #{task['task']}: #{payload['error']}"
 
         task__finalize(status, payload, event)
+
+        method_name = "task___#{task['task']}__error"
+        if self.respond_to?(method_name)
+          __send__ method_name, status, task, error
+        end
       end
+
+
+
+      # XXX: move task finish handlers into tasks/
+      def task___fetch__finish(status, task)
+        status['packages'] ||= {}
+        status['packages'][task['application']] ||= []
+
+        unless status['packages'][task['application']].include?(task['package'])
+          status['packages'][task['application']] << task['package']
+        end
+      end
+
+      def task___fetch__error(status, task, error)
+      end
+
+
 
       def fetch_result__ack(status, payload, event)
         status['fetcher'] ||= {}

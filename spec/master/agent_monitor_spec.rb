@@ -285,6 +285,31 @@ describe Mamiya::Master::AgentMonitor do
 
     describe "(task handling)" do
       describe "fetch" do
+        describe "success" do
+          let(:status) do
+            {packages: {}}
+          end
+
+          it "updates packages" do
+            commit('mamiya:task:finish',
+                   task: {task: 'fetch', application: 'app', package: 'pkg'})
+
+            expect(new_status["packages"]["app"]).to eq ["pkg"]
+          end
+
+          context "with existing packages" do
+            let(:status) do
+              {packages: {"app" => ['pkg1']}}
+            end
+
+            it "updates packages" do
+              commit('mamiya:task:finish',
+                     task: {task: 'fetch', application: 'app', package: 'pkg2'})
+
+              expect(new_status["packages"]["app"]).to eq %w(pkg1 pkg2)
+            end
+          end
+        end
       end
     end
 
