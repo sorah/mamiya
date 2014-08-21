@@ -35,8 +35,8 @@ module Mamiya
     end
 
     def task_queue
-      @task_queue ||= Mamiya::Agent::TaskQueue.new(self, logger: logger, task_classes: {
-      })
+      @task_queue ||= Mamiya::Agent::TaskQueue.new(self, logger: logger, task_classes: [
+      ])
     end
 
     def run!

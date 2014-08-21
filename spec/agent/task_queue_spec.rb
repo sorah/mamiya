@@ -44,16 +44,22 @@ describe Mamiya::Agent::TaskQueue do
 
   let(:task_class_a) do
     Class.new(task_class_root) do
+      def self.identifier
+        'a'
+      end
     end
   end
 
   let(:task_class_b) do
     Class.new(task_class_root) do
+      def self.identifier
+        'b'
+      end
     end
   end
 
   subject(:queue) do
-    described_class.new(agent, task_classes: {a: task_class_a, b: task_class_b})
+    described_class.new(agent, task_classes: [task_class_a, task_class_b])
   end
 
   describe "lifecycle (#start!, #stop!)" do

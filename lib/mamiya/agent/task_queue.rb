@@ -8,7 +8,7 @@ module Mamiya
       GRACEFUL_TIMEOUT = 30
       JOIN_TIMEOUT = 30
 
-      def initialize(agent, task_classes: {}, logger: Mamiya::Logger.new)
+      def initialize(agent, task_classes: [], logger: Mamiya::Logger.new)
         @agent = agent
         @task_classes = task_classes
         @external_queue = Queue.new
@@ -31,7 +31,8 @@ module Mamiya
           queues = {}
           statuses = {}
 
-          @task_classes.each { |name, klass|
+          @task_classes.each { |klass|
+            name = klass.identifier.to_sym
             queue = queues[name] = Queue.new
             statuses[name] = {pending: [], lock: Mutex.new}
             th = worker_threads[name] = Thread.new(
