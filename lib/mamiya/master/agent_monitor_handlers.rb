@@ -2,6 +2,7 @@ require 'mamiya/master'
 
 module Mamiya
   class Master
+    # XXX: TODO:
     module AgentMonitorHandlers
       def task__start(status, payload, event)
         task = payload['task']
@@ -13,15 +14,11 @@ module Mamiya
         status['task_queues'][task['task']]['queue'].delete task
       end
 
-      def task__finish(status, payload, event, log: true)
+      def task__finalize(status, payload, event)
         task = payload['task']
 
         status['task_queues'] ||= {}
         status['task_queues'][task['task']] ||= {'queue' => [], 'working' => nil}
-
-        if log
-          logger.error "#{status['name']} finished task #{task['task']}: #{payload['error']}"
-        end
 
         s = status['task_queues'][task['task']]
         if s['working'] == task
@@ -30,11 +27,18 @@ module Mamiya
         status['task_queues'][task['task']]['queue'].delete task
       end
 
+      def task__finish(status, payload, event)
+        task = payload['task']
+        logger.error "#{status['name']} finished task #{task['task']}: #{payload['error']}"
+
+        task__finalize(status, payload, event)
+      end
+
       def task__error(status, payload, event)
         task = payload['task']
         logger.error "#{status['name']} failed task #{task['task']}: #{payload['error']}"
 
-        task__finish(status, payload, event, log: false)
+        task__finalize(status, payload, event)
       end
 
       def fetch_result__ack(status, payload, event)
