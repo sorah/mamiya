@@ -9,7 +9,7 @@ module Mamiya
           @agent = agent
           @logger = logger
           @queue = task_queue
-          @task = task
+          @task = task.merge('task' => self.class.identifier)
           @error = nil
         end
 

@@ -4,8 +4,18 @@ require 'mamiya/agent/tasks/abstract'
 describe Mamiya::Agent::Tasks::Abstract do
   let(:queue) { double('task_queue') }
 
-  let(:job) { {} }
+  let(:job) { {'foo' => 'bar'} }
   subject(:task) { described_class.new(queue, job) }
+
+  describe "#task" do
+    before do
+      allow(described_class).to receive(:identifier).and_return('ident')
+    end
+    it "includes job specification and class' identifier" do
+      expect(task.task['foo']).to eq 'bar'
+      expect(task.task['task']).to eq described_class.identifier
+    end
+  end
 
   describe "#execute" do
     it "calls before, then run" do

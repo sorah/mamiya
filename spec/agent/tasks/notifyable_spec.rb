@@ -5,7 +5,9 @@ describe Mamiya::Agent::Tasks::Notifyable do
   let(:queue) { double('task_queue') }
   let(:agent) { double('agent', trigger: nil) }
 
-  let(:job) { {'foo' => 'bar'} }
+  # specifying 'task' key that Tasks::Abstract assigns,
+  # to make expecting message easier
+  let(:job) { {'foo' => 'bar', 'task' => 'notifyable'} }
   subject(:task) { described_class.new(queue, job, agent: agent) }
 
   describe "#execute" do
