@@ -284,6 +284,25 @@ describe Mamiya::Master::AgentMonitor do
     end
 
     describe "(task handling)" do
+      describe "cleanup" do
+        # TODO: cleanup task
+        #describe ":remove" do
+        #  context "with existing packages" do
+        #    let(:status) do
+        #      {fetcher: {fetching: ['app', 'pkg2'], pending: 0},
+        #       packages: {"app" => ['pkg1']}}
+        #    end
+
+        #    it "updates packages" do
+        #      commit('mamiya:fetch-result:remove',
+        #             application: 'app', package: 'pkg1', pending: 0)
+
+        #      expect(new_status["packages"]["app"]).to eq []
+        #    end
+        #  end
+        #end
+      end
+
       describe "fetch" do
         describe "success" do
           let(:status) do
