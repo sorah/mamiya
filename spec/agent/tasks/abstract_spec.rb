@@ -25,5 +25,17 @@ describe Mamiya::Agent::Tasks::Abstract do
       expect(task.error).to eq err
     end
   end
+
+  describe ".identifier" do
+    it "returns class name without module name" do
+      allow(described_class).to receive(:name).and_return('Mamiya::Agent::Tasks::Foo')
+      expect(described_class.identifier).to eq 'foo'
+    end
+
+    it "returns camelcased class name" do
+      allow(described_class).to receive(:name).and_return('Mamiya::Agent::Tasks::FooBar')
+      expect(described_class.identifier).to eq 'foo_bar'
+    end
+  end
 end
 

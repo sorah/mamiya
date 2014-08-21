@@ -13,6 +13,10 @@ module Mamiya
           @error = nil
         end
 
+        def self.identifier
+          self.name.split(/::/).last.gsub(/(.)([A-Z])/, '\1_\2').downcase
+        end
+
         attr_reader :task, :error, :logger, :agent
 
         def execute
