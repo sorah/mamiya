@@ -21,7 +21,8 @@ module Mamiya
       end
 
       get '/' do
-        "mamiya v#{Mamiya::VERSION}"
+        content_type 'text/plain'
+        "mamiya v#{Mamiya::VERSION}\n"
       end
 
       get '/packages/:application' do
