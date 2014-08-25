@@ -5,12 +5,13 @@ module Mamiya
   class Agent
     module Tasks
       class Abstract
-        def initialize(task_queue, task, agent: nil, logger: Mamiya::Logger.new)
+        def initialize(task_queue, task, agent: nil, logger: Mamiya::Logger.new, raise_error: false)
           @agent = agent
           @logger = logger
           @queue = task_queue
           @task = task.merge('task' => self.class.identifier)
           @error = nil
+          @raise_error = raise_error
         end
 
         def self.identifier
@@ -19,11 +20,16 @@ module Mamiya
 
         attr_reader :task, :error, :logger, :agent
 
+        def raise_error?
+          !!@raise_error
+        end
+
         def execute
           before
           run
         rescue Exception => error
           @error = error
+          raise if raise_error?
         ensure
           after
         end
