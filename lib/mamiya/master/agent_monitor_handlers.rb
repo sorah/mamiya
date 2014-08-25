@@ -63,7 +63,10 @@ module Mamiya
         end
       end
 
-      def task___fetch__error(status, task, error)
+      def pkg__remove(status, payload, event)
+        status['packages'] ||= {}
+        packages = status['packages'][payload['application']]
+        packages.delete(payload['package']) if packages
       end
 
 
@@ -110,12 +113,8 @@ module Mamiya
         status['packages'][payload['application']] << payload['package']
       end
 
-      def fetch_result__remove(status, payload, event)
-        status['packages'] ||= {}
-        packages = status['packages'][payload['application']]
-        packages.delete(payload['package']) if packages
-      end
-
+      # TODO: XXX: deprecated
+      alias fetch_result__remove pkg__remove
     end
   end
 end

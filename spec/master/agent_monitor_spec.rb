@@ -284,23 +284,45 @@ describe Mamiya::Master::AgentMonitor do
     end
 
     describe "(task handling)" do
-      describe "cleanup" do
-        # TODO: cleanup task
-        #describe ":remove" do
-        #  context "with existing packages" do
-        #    let(:status) do
-        #      {fetcher: {fetching: ['app', 'pkg2'], pending: 0},
-        #       packages: {"app" => ['pkg1']}}
-        #    end
+      describe "pkg" do
+        describe ":remove" do
+          let(:status) do
+            {packages: {"app" => ['pkg1']}}
+          end
 
-        #    it "updates packages" do
-        #      commit('mamiya:fetch-result:remove',
-        #             application: 'app', package: 'pkg1', pending: 0)
+          it "removes removed package from packages" do
+            commit('mamiya:pkg:remove',
+                   application: 'app', package: 'pkg1')
 
-        #      expect(new_status["packages"]["app"]).to eq []
-        #    end
-        #  end
-        #end
+            expect(new_status["packages"]["app"]).to eq []
+          end
+
+          context "with existing packages" do
+            let(:status) do
+              {packages: {"app" => ['pkg1', 'pkg2']}}
+            end
+
+            it "removes removed package from packages" do
+              commit('mamiya:pkg:remove',
+                     application: 'app', package: 'pkg1')
+
+              expect(new_status["packages"]["app"]).to eq ['pkg2']
+            end
+          end
+
+          context "with inexist package" do
+            let(:status) do
+              {packages: {"app" => ['pkg1', 'pkg3']}}
+            end
+
+            it "removes removed package from packages" do
+              commit('mamiya:pkg:remove',
+                     application: 'app', package: 'pkg2')
+
+              expect(new_status["packages"]["app"]).to eq ['pkg1', 'pkg3']
+            end
+          end
+        end
       end
 
       describe "fetch" do
