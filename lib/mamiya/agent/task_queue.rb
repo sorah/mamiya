@@ -48,6 +48,7 @@ module Mamiya
           @queues = queues
           exqueue = @external_queue = Queue.new
           @queueing_thread = Thread.new(queues, exqueue, statuses, &method(:queueing_loop))
+          @queueing_thread.abort_on_exception = true
           @worker_threads = worker_threads
         end
       end
