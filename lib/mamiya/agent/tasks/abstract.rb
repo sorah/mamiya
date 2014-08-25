@@ -47,7 +47,14 @@ module Mamiya
         def after
         end
 
+        # TODO: XXX: unused
         def errored
+        end
+
+        private
+
+        def config
+          @config ||= agent ? agent.config : nil
         end
       end
     end
