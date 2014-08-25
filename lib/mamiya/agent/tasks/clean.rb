@@ -23,6 +23,7 @@ module Mamiya
             agent.trigger('pkg', action: 'remove',
               application: app,
               package: package_name,
+              coalesce: false,
             )
           end
         end

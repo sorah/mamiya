@@ -13,7 +13,7 @@ describe Mamiya::Agent::Tasks::Clean do
   let(:agent) { double('agent', config: config) }
   let(:task_queue) { double('task_queue') }
 
-  subject(:task) { described_class.new(task_queue, {}, agent: agent) }
+  subject(:task) { described_class.new(task_queue, {}, agent: agent, raise_error: true) }
 
   it 'inherits abstract task' do
     expect(described_class.ancestors).to include(Mamiya::Agent::Tasks::Abstract)
@@ -41,7 +41,7 @@ describe Mamiya::Agent::Tasks::Clean do
     end
 
     it "cleans up" do
-      expect(agent).to receive(:trigger).with('pkg', action: 'remove', application: 'a', package: 'a')
+      expect(agent).to receive(:trigger).with('pkg', action: 'remove', application: 'a', package: 'a', coalesce: false)
 
       task.execute
 
