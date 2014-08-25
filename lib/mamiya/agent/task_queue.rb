@@ -18,7 +18,7 @@ module Mamiya
         @queueing_thread = nil
         @lifecycle_mutex = Mutex.new
         @terminate = false
-        @logger = logger
+        @logger = logger['task_queue']
       end
 
       attr_reader :worker_threads, :task_classes, :agent
