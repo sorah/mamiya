@@ -8,7 +8,11 @@ require 'mamiya/steps/fetch'
 require 'mamiya/agent/fetcher'
 require 'mamiya/agent/task_queue'
 
+require 'mamiya/agent/tasks/fetch'
+require 'mamiya/agent/tasks/clean'
+
 require 'mamiya/agent/handlers/fetch'
+require 'mamiya/agent/handlers/task'
 require 'mamiya/agent/actions'
 
 module Mamiya
@@ -36,6 +40,8 @@ module Mamiya
 
     def task_queue
       @task_queue ||= Mamiya::Agent::TaskQueue.new(self, logger: logger, task_classes: [
+        Mamiya::Agent::Tasks::Fetch,
+        Mamiya::Agent::Tasks::Clean,
       ])
     end
 
