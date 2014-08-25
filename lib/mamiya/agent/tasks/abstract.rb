@@ -8,7 +8,7 @@ module Mamiya
         def initialize(task_queue, task, agent: nil, logger: Mamiya::Logger.new, raise_error: false)
           @agent = agent
           @logger = logger
-          @queue = task_queue
+          @task_queue = task_queue
           @task = task.merge('task' => self.class.identifier)
           @error = nil
           @raise_error = raise_error
@@ -18,7 +18,7 @@ module Mamiya
           self.name.split(/::/).last.gsub(/(.)([A-Z])/, '\1_\2').downcase
         end
 
-        attr_reader :task, :error, :logger, :agent
+        attr_reader :task, :error, :logger, :agent, :task_queue
 
         def raise_error?
           !!@raise_error
