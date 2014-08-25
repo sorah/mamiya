@@ -146,6 +146,7 @@ module Mamiya
 
     def init_serf
       agent_config = (config[:serf] && config[:serf][:agent]) || {}
+      # agent_config.merge!(log: $stderr)
       Villein::Agent.new(**agent_config).tap do |serf|
         serf.on_user_event do |event|
           user_event_handler(event)
@@ -195,7 +196,12 @@ module Mamiya
 
       if Handlers.const_defined?(class_name)
         handler = Handlers.const_get(class_name).new(self, event)
-        handler.send(action || :run!)
+        meth = action || :run!
+        if handler.respond_to?(meth)
+          handler.send meth
+        else
+          logger.debug "Handler #{class_name} doesn't respond to #{meth}, skipping"
+        end
       else
         #logger.warn("Discarded event[#{event.user_event}] because we don't handle it")
       end
