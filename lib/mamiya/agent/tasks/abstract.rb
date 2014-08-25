@@ -1,4 +1,3 @@
-require 'mamiya/agent'
 require 'mamiya/logger'
 
 module Mamiya
