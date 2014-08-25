@@ -7,24 +7,24 @@ module Mamiya
       def task__start(status, payload, event)
         task = payload['task']
 
-        status['task_queues'] ||= {}
-        status['task_queues'][task['task']] ||= {'queue' => [], 'working' => nil}
+        status['queues'] ||= {}
+        status['queues'][task['task']] ||= {'queue' => [], 'working' => nil}
 
-        status['task_queues'][task['task']]['working'] = task
-        status['task_queues'][task['task']]['queue'].delete task
+        status['queues'][task['task']]['working'] = task
+        status['queues'][task['task']]['queue'].delete task
       end
 
       def task__finalize(status, payload, event)
         task = payload['task']
 
-        status['task_queues'] ||= {}
-        status['task_queues'][task['task']] ||= {'queue' => [], 'working' => nil}
+        status['queues'] ||= {}
+        status['queues'][task['task']] ||= {'queue' => [], 'working' => nil}
 
-        s = status['task_queues'][task['task']]
+        s = status['queues'][task['task']]
         if s['working'] == task
           s['working'] = nil
         end
-        status['task_queues'][task['task']]['queue'].delete task
+        status['queues'][task['task']]['queue'].delete task
       end
 
       def task__finish(status, payload, event)

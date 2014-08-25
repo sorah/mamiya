@@ -154,7 +154,7 @@ describe Mamiya::Master::AgentMonitor do
       describe ":start" do
         context "if task is in the queue" do
           let(:status) do
-            {task_queues: {
+            {queues: {
               a: {queue: [{task: 'a', foo: 'bar'}], working: nil}
             }}
           end
@@ -163,14 +163,14 @@ describe Mamiya::Master::AgentMonitor do
             commit('mamiya:task:start',
                    task: {task: 'a', foo: 'bar'})
 
-            expect(new_status['task_queues']['a']['queue']).to be_empty
-            expect(new_status['task_queues']['a']['working']).to eq('task' => 'a', 'foo' => 'bar')
+            expect(new_status['queues']['a']['queue']).to be_empty
+            expect(new_status['queues']['a']['working']).to eq('task' => 'a', 'foo' => 'bar')
           end
         end
 
         context "if task is not in the queue" do
           let(:status) do
-            {task_queues: {
+            {queues: {
               a: {queue: [], working: nil}
             }}
           end
@@ -179,7 +179,7 @@ describe Mamiya::Master::AgentMonitor do
             commit('mamiya:task:start',
                    task: {task: 'a', foo: 'bar'})
 
-            expect(new_status['task_queues']['a']['working']).to eq('task' => 'a', 'foo' => 'bar')
+            expect(new_status['queues']['a']['working']).to eq('task' => 'a', 'foo' => 'bar')
           end
         end
       end
@@ -187,7 +187,7 @@ describe Mamiya::Master::AgentMonitor do
       describe ":finish" do
         context "if task is working" do
           let(:status) do
-            {task_queues: {
+            {queues: {
               a: {queue: [], working: {task: 'a', foo: 'bar'}}
             }}
           end
@@ -196,13 +196,13 @@ describe Mamiya::Master::AgentMonitor do
             commit('mamiya:task:finish',
                    task: {task: 'a', foo: 'bar'})
 
-            expect(new_status['task_queues']['a']['working']).to be_nil
+            expect(new_status['queues']['a']['working']).to be_nil
           end
         end
 
         context "if task is in queue" do
           let(:status) do
-            {task_queues: {
+            {queues: {
               a: {queue: [{task: 'a', foo: 'bar'}, {task: 'a', bar: 'baz'}], working: nil}
             }}
           end
@@ -211,14 +211,14 @@ describe Mamiya::Master::AgentMonitor do
             commit('mamiya:task:finish',
                    task: {task: 'a', foo: 'bar'})
 
-            expect(new_status['task_queues']['a']['working']).to be_nil
-            expect(new_status['task_queues']['a']['queue']).to eq [{'task' => 'a', 'bar' => 'baz'}]
+            expect(new_status['queues']['a']['working']).to be_nil
+            expect(new_status['queues']['a']['queue']).to eq [{'task' => 'a', 'bar' => 'baz'}]
           end
         end
 
         context "if task is not working" do
           let(:status) do
-            {task_queues: {
+            {queues: {
               a: {queue: [], working: {task: 'a', foo: 'baz'}}
             }}
           end
@@ -227,8 +227,8 @@ describe Mamiya::Master::AgentMonitor do
             commit('mamiya:task:finish',
                    task: {task: 'a', foo: 'bar'})
 
-            expect(new_status['task_queues']['a']['working']).to eq('task' => 'a', 'foo' => 'baz')
-            expect(new_status['task_queues']['a']['queue']).to eq []
+            expect(new_status['queues']['a']['working']).to eq('task' => 'a', 'foo' => 'baz')
+            expect(new_status['queues']['a']['queue']).to eq []
           end
         end
       end
@@ -236,7 +236,7 @@ describe Mamiya::Master::AgentMonitor do
       describe ":error" do
         context "if task is working" do
           let(:status) do
-            {task_queues: {
+            {queues: {
               a: {queue: [], working: {task: 'a', foo: 'bar'}}
             }}
           end
@@ -245,13 +245,13 @@ describe Mamiya::Master::AgentMonitor do
             commit('mamiya:task:finish',
                    task: {task: 'a', foo: 'bar'})
 
-            expect(new_status['task_queues']['a']['working']).to be_nil
+            expect(new_status['queues']['a']['working']).to be_nil
           end
         end
 
         context "if task is in queue" do
           let(:status) do
-            {task_queues: {
+            {queues: {
               a: {queue: [{task: 'a', foo: 'bar'}, {task: 'a', bar: 'baz'}], working: nil}
             }}
           end
@@ -260,14 +260,14 @@ describe Mamiya::Master::AgentMonitor do
             commit('mamiya:task:finish',
                    task: {task: 'a', foo: 'bar'})
 
-            expect(new_status['task_queues']['a']['working']).to be_nil
-            expect(new_status['task_queues']['a']['queue']).to eq [{'task' => 'a', 'bar' => 'baz'}]
+            expect(new_status['queues']['a']['working']).to be_nil
+            expect(new_status['queues']['a']['queue']).to eq [{'task' => 'a', 'bar' => 'baz'}]
           end
         end
 
         context "if task is not working" do
           let(:status) do
-            {task_queues: {
+            {queues: {
               a: {queue: [], working: {task: 'a', foo: 'baz'}}
             }}
           end
@@ -276,8 +276,8 @@ describe Mamiya::Master::AgentMonitor do
             commit('mamiya:task:finish',
                    task: {task: 'a', foo: 'bar'})
 
-            expect(new_status['task_queues']['a']['working']).to eq('task' => 'a', 'foo' => 'baz')
-            expect(new_status['task_queues']['a']['queue']).to eq []
+            expect(new_status['queues']['a']['working']).to eq('task' => 'a', 'foo' => 'baz')
+            expect(new_status['queues']['a']['queue']).to eq []
           end
         end
       end

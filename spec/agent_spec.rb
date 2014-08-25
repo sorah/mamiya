@@ -172,7 +172,7 @@ describe Mamiya::Agent do
 
     describe "(task queue)" do
       it "includes task_queue" do
-        expect(status[:task_queues]).to eq({a: {working: nil, queue: []}})
+        expect(status[:queues]).to eq({a: {working: nil, queue: []}})
       end
     end
 
