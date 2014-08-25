@@ -133,7 +133,7 @@ module Mamiya
       name = "mamiya:#{type}"
       name << ":#{action}" if action
 
-      serf.event(name, payload.to_json, coalesce: coalesce)
+      serf.event(name, payload.merge(name: self.serf.name).to_json, coalesce: coalesce)
     end
 
     private

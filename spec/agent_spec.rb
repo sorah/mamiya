@@ -64,6 +64,7 @@ describe Mamiya::Agent do
         'mamiya:foo',
         {
           a: 'b',
+          name: 'my-name',
         }.to_json,
         coalesce: true,
       )
@@ -76,6 +77,7 @@ describe Mamiya::Agent do
         'mamiya:foo:bar',
         {
           a: 'b',
+          name: 'my-name',
         }.to_json,
         coalesce: true,
       )
