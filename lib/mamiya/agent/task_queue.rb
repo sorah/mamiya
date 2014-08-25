@@ -83,6 +83,8 @@ module Mamiya
 
       def enqueue(task_name, task)
         raise Stopped, 'this task queue is stopped' unless running?
+
+        @logger.debug "enqueue #{task_name.inspect}, #{task.inspect}, #{@external_queue.inspect}"
         @external_queue << [task_name, task]
         self
       end
@@ -120,17 +122,29 @@ module Mamiya
       end
 
       def queueing_loop(queues, external_queue, statuses)
+        @logger.debug "queueing thread started #{external_queue.inspect}"
         while _ = external_queue.pop
           task_name, task = _
+
           break if @terminate
+
           queue = queues[task_name]
-          next unless queue
+          unless queue
+            @logger.debug "Ignoring task #{task_name} (queue not defined)"
+            next
+          end
+
           statuses[task_name][:lock].synchronize do
             statuses[task_name][:pending] << task
           end
+          @logger.info "Queueing task #{task_name}: #{task.inspect}"
           queue << task
           break if @terminate
         end
+        @logger.debug "queueing thread finish"
+      rescue Exception => e
+        @logger.error "queueing thread error #{e.inspect}\n\t#{e.backtrace.join("\n\t")}"
+        raise e
       end
     end
   end
