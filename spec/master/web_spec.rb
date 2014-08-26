@@ -147,8 +147,8 @@ describe Mamiya::Master::Web do
                 'queues' => {'fetch' => {
                   'working' => {
                     'task' => 'fetch',
-                    'application' => 'myapp',
-                    'package' => 'mypackage'
+                    'app' => 'myapp',
+                    'pkg' => 'mypackage'
                   },
                   'queue' => [
                   ]
@@ -181,8 +181,8 @@ describe Mamiya::Master::Web do
                   'queue' => [
                     {
                       'task' => 'fetch',
-                      'application' => 'myapp',
-                      'package' => 'mypackage'
+                      'app' => 'myapp',
+                      'pkg' => 'mypackage'
                     }
                   ]
                 }}
@@ -297,8 +297,8 @@ describe Mamiya::Master::Web do
               'queues' => {'fetch' => {
                 'working' => {
                   'task' => 'fetch',
-                  'application' => 'myapp',
-                  'package' => 'mypackage',
+                  'app' => 'myapp',
+                  'pkg' => 'mypackage',
                 },
                 'queue' => [
                 ]
@@ -332,8 +332,8 @@ describe Mamiya::Master::Web do
               'queues' => {'fetch' => {
                 'working' => {
                   'task' => 'fetch',
-                  'application' => 'myapp',
-                  'package' => 'mypackage',
+                  'app' => 'myapp',
+                  'pkg' => 'mypackage',
                 },
                 'queue' => [
                 ]
@@ -367,14 +367,14 @@ describe Mamiya::Master::Web do
               'queues' => {'fetch' => {
                 'working' => {
                     'task' => 'fetch',
-                    'application' => 'myapp',
-                    'package' => 'anotherpackage',
+                    'app' => 'myapp',
+                    'pkg' => 'anotherpackage',
                 },
                 'queue' => [
                   {
                     'task' => 'fetch',
-                    'application' => 'myapp',
-                    'package' => 'mypackage',
+                    'app' => 'myapp',
+                    'pkg' => 'mypackage',
                   }
                 ]
               }},
