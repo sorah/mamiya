@@ -31,11 +31,11 @@ module Mamiya
         end
 
         def application
-          task['application']
+          task['app']
         end
 
         def package
-          task['package']
+          task['pkg']
         end
 
         def destination
