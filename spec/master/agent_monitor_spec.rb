@@ -287,39 +287,39 @@ describe Mamiya::Master::AgentMonitor do
       describe "pkg" do
         describe ":remove" do
           let(:status) do
-            {packages: {"app" => ['pkg1']}}
+            {packages: {'myapp' => ['pkg1']}}
           end
 
           it "removes removed package from packages" do
             commit('mamiya:pkg:remove',
-                   application: 'app', package: 'pkg1')
+                   application: 'myapp', package: 'pkg1')
 
-            expect(new_status["packages"]["app"]).to eq []
+            expect(new_status["packages"]['myapp']).to eq []
           end
 
           context "with existing packages" do
             let(:status) do
-              {packages: {"app" => ['pkg1', 'pkg2']}}
+              {packages: {'myapp' => ['pkg1', 'pkg2']}}
             end
 
             it "removes removed package from packages" do
               commit('mamiya:pkg:remove',
-                     application: 'app', package: 'pkg1')
+                     application: 'myapp', package: 'pkg1')
 
-              expect(new_status["packages"]["app"]).to eq ['pkg2']
+              expect(new_status["packages"]['myapp']).to eq ['pkg2']
             end
           end
 
           context "with inexist package" do
             let(:status) do
-              {packages: {"app" => ['pkg1', 'pkg3']}}
+              {packages: {'myapp' => ['pkg1', 'pkg3']}}
             end
 
             it "removes removed package from packages" do
               commit('mamiya:pkg:remove',
-                     application: 'app', package: 'pkg2')
+                     application: 'myapp', package: 'pkg2')
 
-              expect(new_status["packages"]["app"]).to eq ['pkg1', 'pkg3']
+              expect(new_status["packages"]['myapp']).to eq ['pkg1', 'pkg3']
             end
           end
         end
@@ -333,21 +333,21 @@ describe Mamiya::Master::AgentMonitor do
 
           it "updates packages" do
             commit('mamiya:task:finish',
-                   task: {task: 'fetch', application: 'app', package: 'pkg'})
+                   task: {task: 'fetch', application: 'myapp', package: 'pkg'})
 
-            expect(new_status["packages"]["app"]).to eq ["pkg"]
+            expect(new_status["packages"]['myapp']).to eq ["pkg"]
           end
 
           context "with existing packages" do
             let(:status) do
-              {packages: {"app" => ['pkg1']}}
+              {packages: {'myapp' => ['pkg1']}}
             end
 
             it "updates packages" do
               commit('mamiya:task:finish',
-                     task: {task: 'fetch', application: 'app', package: 'pkg2'})
+                     task: {task: 'fetch', application: 'myapp', package: 'pkg2'})
 
-              expect(new_status["packages"]["app"]).to eq %w(pkg1 pkg2)
+              expect(new_status["packages"]['myapp']).to eq %w(pkg1 pkg2)
             end
           end
         end
@@ -369,25 +369,25 @@ describe Mamiya::Master::AgentMonitor do
 
       describe ":start" do
         let(:status) do
-          {fetcher: {fetching: nil, pending: 1, pending_jobs: [%w(app pkg)]}}
+          {fetcher: {fetching: nil, pending: 1, pending_jobs: [%w(myapp pkg)]}}
         end
 
         it "updates fetching" do
           commit('mamiya:fetch-result:start',
-                 application: 'app', package: 'pkg', pending: 0)
-          expect(new_status["fetcher"]["fetching"]).to eq ['app', 'pkg']
+                 application: 'myapp', package: 'pkg', pending: 0)
+          expect(new_status["fetcher"]["fetching"]).to eq ['myapp', 'pkg']
           expect(new_status["fetcher"]["pending_jobs"]).to be_empty
         end
       end
 
       describe ":error" do
         let(:status) do
-          {fetcher: {fetching: ['app', 'pkg'], pending: 0}}
+          {fetcher: {fetching: ['myapp', 'pkg'], pending: 0}}
         end
 
         it "updates fetching" do
           commit('mamiya:fetch-result:error',
-                 application: 'app', package: 'pkg', pending: 0)
+                 application: 'myapp', package: 'pkg', pending: 0)
 
           expect(new_status["fetcher"]["fetching"]).to eq nil
         end
@@ -395,62 +395,62 @@ describe Mamiya::Master::AgentMonitor do
         context "when package doesn't match with present state" do
           it "doesn't updates fetching" do
             commit('mamiya:fetch-result:error',
-                   application: 'app', package: 'pkg2', pending: 0)
+                   application: 'myapp', package: 'pkg2', pending: 0)
 
             expect(new_status["fetcher"]["fetching"]).to \
-              eq(['app', 'pkg'])
+              eq(['myapp', 'pkg'])
           end
         end
       end
 
       describe ":success" do
         let(:status) do
-          {fetcher: {fetching: ['app', 'pkg'], pending: 0},
+          {fetcher: {fetching: ['myapp', 'pkg'], pending: 0},
            packages: {}}
         end
 
         it "updates fetching" do
           commit('mamiya:fetch-result:success',
-                 application: 'app', package: 'pkg', pending: 0)
+                 application: 'myapp', package: 'pkg', pending: 0)
 
           expect(new_status["fetcher"]["fetching"]).to eq nil
         end
 
         it "updates packages" do
           commit('mamiya:fetch-result:success',
-                 application: 'app', package: 'pkg', pending: 0)
+                 application: 'myapp', package: 'pkg', pending: 0)
 
-          expect(new_status["packages"]["app"]).to eq ["pkg"]
+          expect(new_status["packages"]['myapp']).to eq ["pkg"]
         end
 
         context "with existing packages" do
           let(:status) do
-            {fetcher: {fetching: ['app', 'pkg2'], pending: 0},
-             packages: {"app" => ['pkg1']}}
+            {fetcher: {fetching: ['myapp', 'pkg2'], pending: 0},
+             packages: {'myapp' => ['pkg1']}}
           end
 
           it "updates packages" do
             commit('mamiya:fetch-result:success',
-                   application: 'app', package: 'pkg2', pending: 0)
+                   application: 'myapp', package: 'pkg2', pending: 0)
 
-            expect(new_status["packages"]["app"]).to eq %w(pkg1 pkg2)
+            expect(new_status["packages"]['myapp']).to eq %w(pkg1 pkg2)
           end
         end
 
         context "when package doesn't match with present state" do
           it "doesn't updates fetching" do
             commit('mamiya:fetch-result:success',
-                   application: 'app', package: 'pkg2', pending: 0)
+                   application: 'myapp', package: 'pkg2', pending: 0)
 
             expect(agent_monitor.statuses["a"]["fetcher"]["fetching"]).to \
-              eq(['app', 'pkg'])
+              eq(['myapp', 'pkg'])
           end
 
           it "updates packages" do
             commit('mamiya:fetch-result:success',
-                   application: 'app', package: 'pkg', pending: 0)
+                   application: 'myapp', package: 'pkg', pending: 0)
 
-            expect(new_status["packages"]["app"]).to eq ["pkg"]
+            expect(new_status["packages"]['myapp']).to eq ["pkg"]
           end
         end
       end
@@ -458,15 +458,15 @@ describe Mamiya::Master::AgentMonitor do
       describe ":remove" do
         context "with existing packages" do
           let(:status) do
-            {fetcher: {fetching: ['app', 'pkg2'], pending: 0},
-             packages: {"app" => ['pkg1']}}
+            {fetcher: {fetching: ['myapp', 'pkg2'], pending: 0},
+             packages: {'myapp' => ['pkg1']}}
           end
 
           it "updates packages" do
             commit('mamiya:fetch-result:remove',
-                   application: 'app', package: 'pkg1', pending: 0)
+                   application: 'myapp', package: 'pkg1', pending: 0)
 
-            expect(new_status["packages"]["app"]).to eq []
+            expect(new_status["packages"]['myapp']).to eq []
           end
         end
       end
