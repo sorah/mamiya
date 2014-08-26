@@ -27,7 +27,7 @@ module Mamiya
     end
 
     def start
-      # Override and stop starting fetcher
+      # Override and stop starting task_queue
       web_start
       serf_start
       monitor_start

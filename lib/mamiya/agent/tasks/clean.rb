@@ -6,7 +6,6 @@ module Mamiya
       class Clean < Abstract
 
         def run
-          # TODO: remove fetcher
           victims.each do |app, victim|
             @logger.info "Cleaning up: remove #{victim}"
             File.unlink(victim) if File.exist?(victim)
