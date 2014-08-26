@@ -89,15 +89,29 @@ module Mamiya
 
         statuses.each do |name, status|
           next if status["master"]
-          if status["packages"] && status["packages"][params[:application]] &&
-            status["packages"][params[:application]].include?(params[:package])
+          queue = status["queues"] && status["queues"]["fetch"]
+          packages = status["packages"] && status["packages"][params[:application]]
+
+          task_matcher = -> (task) do
+             task["task"] == "fetch" &&
+             task["application"] == params[:application] &&
+             task["package"] == params[:package]
+          end
+
+
+          case
+          when packages && packages.include?(params[:package])
 
             result[:distributed] << name
-          elsif status["fetcher"] && status["fetcher"]["fetching"] && status["fetcher"]["fetching"] == pkg_array
+
+          when queue && queue["working"] && task_matcher.call(queue['working'])
+
             result[:fetching] << name
-          elsif status["fetcher"]["pending_jobs"] &&
-                status["fetcher"]["pending_jobs"].include?(pkg_array)
+
+          when queue['queue'].any?(&task_matcher)
+
             result[:queued] << name
+
           else
             result[:not_distributed] << name
           end
@@ -114,7 +128,7 @@ module Mamiya
         when 0 < result[:queued_count] || 0 < result[:fetching_count]
           status = :distributing
         when 0 < result[:distributed_count] && result[:distributed_count] < total
-          status = :well_distributed
+          status = :partially_distributed
         when result[:distributed_count] == total
           status = :distributed
         else

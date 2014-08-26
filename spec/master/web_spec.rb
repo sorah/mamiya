@@ -27,8 +27,16 @@ describe Mamiya::Master::Web do
     end
   end
 
+  let(:agent_statuses) do
+    {}
+  end
+
+  let(:agent_monitor) do
+    double('agent_monitor', statuses: agent_statuses)
+  end
+
   let(:master) do
-    double('master', config: config).tap do |m|
+    double('master', config: config, agent_monitor: agent_monitor).tap do |m|
       allow(m).to receive(:storage) do |app|
         Mamiya::Storages::Mock.new(application: app)
       end
@@ -114,6 +122,337 @@ describe Mamiya::Master::Web do
     context "when package not found" do
       it "returns 404" do
         post '/packages/myapp/noexist/distribute'
+        expect(last_response.status).to eq 404
+      end
+    end
+  end
+
+  describe "GET /package/:application/:package/distribution" do
+    subject(:distribution) do
+      res = get('/packages/myapp/mypackage/distribution')
+      expect(res.status).to eq 200
+      JSON.parse res.body
+    end
+
+    context "when package exists" do
+      describe "about status" do
+        subject { distribution['status'] }
+
+        context "if there's fetching agents" do
+          let(:agent_statuses) do
+            {
+              'agent1' => {
+                'packages' => {'myapp' => [
+                ]},
+                'queues' => {'fetch' => {
+                  'working' => {
+                    'task' => 'fetch',
+                    'application' => 'myapp',
+                    'package' => 'mypackage'
+                  },
+                  'queue' => [
+                  ]
+                }}
+              },
+              'agent2' => {
+                'packages' => {'myapp' => [
+                  'mypackage',
+                ]},
+                'queues' => {'fetch' => {
+                  'working' => nil,
+                  'queue' => [
+                  ]
+                }}
+              }
+            }
+          end
+
+          it { should eq 'distributing' }
+        end
+
+        context "if there's queued agents" do
+          let(:agent_statuses) do
+            {
+              'agent1' => {
+                'packages' => {'myapp' => [
+                ]},
+                'queues' => {'fetch' => {
+                  'working' => nil,
+                  'queue' => [
+                    {
+                      'task' => 'fetch',
+                      'application' => 'myapp',
+                      'package' => 'mypackage'
+                    }
+                  ]
+                }}
+              },
+              'agent2' => {
+                'packages' => {'myapp' => [
+                  'mypackage',
+                ]},
+                'queues' => {'fetch' => {
+                  'working' => nil,
+                  'queue' => [
+                  ]
+                }}
+              }
+            }
+          end
+
+          it { should eq 'distributing' }
+        end
+
+        context "if any agents have the package" do
+          let(:agent_statuses) do
+            {
+              'agent1' => {
+                'packages' => {'myapp' => [
+                  'mypackage',
+                ]},
+                'queues' => {'fetch' => {
+                  'working' => nil,
+                  'queue' => [
+                  ]
+                }},
+              },
+              'agent2' => {
+                'packages' => {'myapp' => [
+                ]},
+                'queues' => {'fetch' => {
+                  'working' => nil,
+                  'queue' => [
+                  ]
+                }}
+              }
+            }
+          end
+
+          it { should eq 'partially_distributed' }
+        end
+
+        context "if all agents have the package" do
+          let(:agent_statuses) do
+            {
+              'agent1' => {
+                'packages' => {'myapp' => [
+                  'mypackage',
+                ]},
+                'queues' => {'fetch' => {
+                  'working' => nil,
+                  'queue' => [
+                  ]
+                }},
+              },
+              'agent2' => {
+                'packages' => {'myapp' => [
+                  'mypackage',
+                ]},
+                'queues' => {'fetch' => {
+                  'working' => nil,
+                  'queue' => [
+                  ]
+                }}
+              }
+            }
+          end
+
+          it { should eq 'distributed' }
+        end
+
+        context "if no agents relate to the package" do
+          let(:agent_statuses) do
+            {
+              'agent1' => {
+                'packages' => {'myapp' => [
+                ]},
+                'queues' => {'fetch' => {
+                  'working' => nil,
+                  'queue' => [
+                  ]
+                }},
+              },
+              'agent2' => {
+                'packages' => {'myapp' => [
+                ]},
+                'queues' => {'fetch' => {
+                  'working' => nil,
+                  'queue' => [
+                  ]
+                }}
+              }
+            }
+          end
+
+          it { should eq 'unknown' }
+        end
+      end
+
+      describe "about fetching agents" do
+        let(:agent_statuses) do
+          {
+            'agent1' => {
+              'packages' => {'myapp' => [
+              ]},
+              'queues' => {'fetch' => {
+                'working' => {
+                  'task' => 'fetch',
+                  'application' => 'myapp',
+                  'package' => 'mypackage',
+                },
+                'queue' => [
+                ]
+              }},
+            },
+            'agent2' => {
+              'packages' => {'myapp' => [
+                'mypackage'
+              ]},
+              'queues' => {'fetch' => {
+                'working' => nil,
+                'queue' => [
+                ]
+              }}
+            }
+          }
+        end
+
+        it "show in fetching" do
+          expect(distribution['fetching']).to eq %w(agent1)
+          expect(distribution['fetching_count']).to eq 1
+        end
+      end
+
+      describe "about distribued agents" do
+        let(:agent_statuses) do
+          {
+            'agent1' => {
+              'packages' => {'myapp' => [
+              ]},
+              'queues' => {'fetch' => {
+                'working' => {
+                  'task' => 'fetch',
+                  'application' => 'myapp',
+                  'package' => 'mypackage',
+                },
+                'queue' => [
+                ]
+              }},
+            },
+            'agent2' => {
+              'packages' => {'myapp' => [
+                'mypackage'
+              ]},
+              'queues' => {'fetch' => {
+                'working' => nil,
+                'queue' => [
+                ]
+              }}
+            }
+          }
+        end
+
+        it "show in distributed" do
+          expect(distribution['distributed']).to eq %w(agent2)
+          expect(distribution['distributed_count']).to eq 1
+        end
+      end
+
+      describe "about queued agents" do
+        let(:agent_statuses) do
+          {
+            'agent1' => {
+              'packages' => {'myapp' => [
+              ]},
+              'queues' => {'fetch' => {
+                'working' => {
+                    'task' => 'fetch',
+                    'application' => 'myapp',
+                    'package' => 'anotherpackage',
+                },
+                'queue' => [
+                  {
+                    'task' => 'fetch',
+                    'application' => 'myapp',
+                    'package' => 'mypackage',
+                  }
+                ]
+              }},
+            },
+            'agent2' => {
+              'packages' => {'myapp' => [
+                'mypackage'
+              ]},
+              'queues' => {'fetch' => {
+                'working' => nil,
+                'queue' => [
+                ]
+              }}
+            }
+          }
+        end
+
+        it "show in queued" do
+          expect(distribution['queued']).to eq %w(agent1)
+          expect(distribution['queued_count']).to eq 1
+        end
+      end
+
+      describe "about unknown agents" do
+        let(:agent_statuses) do
+          {
+            'agent1' => {
+              'packages' => {'myapp' => [
+              ]},
+              'queues' => {'fetch' => {
+                'working' => nil,
+                'queue' => [
+                ]
+              }},
+            },
+            'agent2' => {
+              'packages' => {'myapp' => [
+                'mypackage'
+              ]},
+              'queues' => {'fetch' => {
+                'working' => nil,
+                'queue' => [
+                ]
+              }}
+            }
+          }
+        end
+
+        it "show in not_distributed" do
+          expect(distribution['not_distributed']).to eq %w(agent1)
+          expect(distribution['not_distributed_count']).to eq 1
+        end
+      end
+
+      context "with count_only" do
+        subject(:distribution) do
+          res = get('/packages/myapp/mypackage/distribution?count_only=1')
+          expect(res.status).to eq 200
+          JSON.parse res.body
+        end
+
+        it "returns only count columns" do
+          expect(distribution.keys).not_to include('distributed')
+          expect(distribution.keys).not_to include('fetching')
+          expect(distribution.keys).not_to include('queued')
+          expect(distribution.keys).not_to include('not_distributed')
+
+          expect(distribution.keys).to include('distributed_count')
+          expect(distribution.keys).to include('fetching_count')
+          expect(distribution.keys).to include('queued_count')
+          expect(distribution.keys).to include('not_distributed_count')
+        end
+      end
+    end
+
+    context "when package not found" do
+      it "returns 404" do
+        get '/packages/myapp/noexist/distribution'
         expect(last_response.status).to eq 404
       end
     end
