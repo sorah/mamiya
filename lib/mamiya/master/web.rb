@@ -94,8 +94,8 @@ module Mamiya
 
           task_matcher = -> (task) do
              task["task"] == "fetch" &&
-             task["application"] == params[:application] &&
-             task["package"] == params[:package]
+             task["app"] == params[:application] &&
+             task["pkg"] == params[:package]
           end
 
 
