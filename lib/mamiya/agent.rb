@@ -5,7 +5,6 @@ require 'mamiya/version'
 require 'mamiya/logger'
 
 require 'mamiya/steps/fetch'
-require 'mamiya/agent/fetcher'
 require 'mamiya/agent/task_queue'
 
 require 'mamiya/agent/tasks/fetch'
@@ -18,7 +17,6 @@ require 'mamiya/agent/actions'
 module Mamiya
   class Agent
     include Mamiya::Agent::Actions
-    FETCH_REMOVE_EVENT = 'mamiya:fetch-result:remove'
 
     def initialize(config, logger: Mamiya::Logger.new, events_only: nil)
       @config = config
@@ -31,12 +29,6 @@ module Mamiya
     end
 
     attr_reader :config, :serf, :logger
-
-    def fetcher
-      @fetcher ||= Mamiya::Agent::Fetcher.new(config, logger: logger).tap do |f|
-        f.cleanup_hook = self.method(:cleanup_handler)
-      end
-    end
 
     def task_queue
       @task_queue ||= Mamiya::Agent::TaskQueue.new(self, logger: logger, task_classes: [
@@ -65,13 +57,11 @@ module Mamiya
 
     def start
       serf_start
-      fetcher_start
       task_queue_start
     end
 
     def terminate
       serf.stop!
-      fetcher.stop!
       task_queue.stop!
     ensure
       @terminate = false
@@ -79,7 +69,6 @@ module Mamiya
 
     def update_tags!
       serf.tags['mamiya'] = ','.tap do |status|
-        status.concat('fetching,') if fetcher.working?
         status.concat('ready,') if status == ','
       end
 
@@ -95,12 +84,6 @@ module Mamiya
         s[:version] = Mamiya::VERSION
 
         s[:queues] = task_queue.status
-
-        s[:fetcher] = {
-          fetching: fetcher.current_job,
-          pending: fetcher.queue_size,
-          pending_jobs: fetcher.pending_jobs.map{ |_| _[0,2] },
-        }
 
         s[:packages] = self.existing_packages
       end
@@ -168,12 +151,6 @@ module Mamiya
       logger.debug "Serf became ready"
     end
 
-    def fetcher_start
-      logger.debug "Starting fetcher"
-
-      fetcher.start!
-    end
-
     def task_queue_start
       logger.debug "Starting task_queue"
       task_queue.start!
@@ -214,14 +191,6 @@ module Mamiya
       raise e if $0.end_with?('rspec')
     rescue JSON::ParserError
       logger.warn("Discarded event[#{event.user_event}] with invalid payload (unable to parse as json)")
-    end
-
-    def cleanup_handler(app, package)
-      trigger('fetch-result', action: 'remove', coalesce: false,
-        name: self.serf.name,
-        application: app,
-        package: package,
-      )
     end
   end
 end
