@@ -56,10 +56,10 @@ module Mamiya
       # XXX: move task finish handlers into tasks/
       def task___fetch__finish(status, task)
         status['packages'] ||= {}
-        status['packages'][task['application']] ||= []
+        status['packages'][task['app']] ||= []
 
-        unless status['packages'][task['application']].include?(task['package'])
-          status['packages'][task['application']] << task['package']
+        unless status['packages'][task['app']].include?(task['pkg'])
+          status['packages'][task['app']] << task['pkg']
         end
       end
 
