@@ -24,9 +24,9 @@ describe Mamiya::Agent::Actions do
 
   describe "#distribute" do
     it "sends fetch request" do
-      expect(agent).to receive(:trigger).with('task', task: 'fetch', application: 'app', package: 'pkg', coalesce: false)
+      expect(agent).to receive(:trigger).with('task', task: 'fetch', app: 'myapp', pkg: 'mypkg', coalesce: false)
 
-      agent.distribute('app', 'pkg')
+      agent.distribute('myapp', 'mypkg')
     end
   end
 end
