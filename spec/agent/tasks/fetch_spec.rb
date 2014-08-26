@@ -11,7 +11,7 @@ describe Mamiya::Agent::Tasks::Fetch do
 
   let(:step) { double('step', run!: nil) }
 
-  let(:job) { {'application' => 'myapp', 'package' => 'mypkg'} }
+  let(:job) { {'app' => 'myapp', 'pkg' => 'mypkg'} }
 
   subject(:task) { described_class.new(task_queue, job, agent: agent, raise_error: true) }
 
