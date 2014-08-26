@@ -150,119 +150,205 @@ describe Mamiya::Master::AgentMonitor do
 
     subject(:new_status) { agent_monitor.statuses["a"] }
 
-    describe "fetch-result" do
-      describe ":ack" do
-        let(:status) do
-          {fetcher: {fetching: nil, pending: 0}}
+    describe "task" do
+      describe ":start" do
+        context "if task is in the queue" do
+          let(:status) do
+            {queues: {
+              a: {queue: [{task: 'a', foo: 'bar'}], working: nil}
+            }}
+          end
+
+          it "removes from queue, set in working" do
+            commit('mamiya:task:start',
+                   task: {task: 'a', foo: 'bar'})
+
+            expect(new_status['queues']['a']['queue']).to be_empty
+            expect(new_status['queues']['a']['working']).to eq('task' => 'a', 'foo' => 'bar')
+          end
         end
 
-        it "updates pending" do
-          commit('mamiya:fetch-result:ack', pending: 72, application: 'foo', package: 'bar')
-          expect(new_status["fetcher"]["pending"]).to eq 72
-          expect(new_status["fetcher"]["pending_jobs"]).to eq [%w(foo bar)]
+        context "if task is not in the queue" do
+          let(:status) do
+            {queues: {
+              a: {queue: [], working: nil}
+            }}
+          end
+
+          it "set in working" do
+            commit('mamiya:task:start',
+                   task: {task: 'a', foo: 'bar'})
+
+            expect(new_status['queues']['a']['working']).to eq('task' => 'a', 'foo' => 'bar')
+          end
         end
       end
 
-      describe ":start" do
-        let(:status) do
-          {fetcher: {fetching: nil, pending: 1, pending_jobs: [%w(app pkg)]}}
+      describe ":finish" do
+        context "if task is working" do
+          let(:status) do
+            {queues: {
+              a: {queue: [], working: {task: 'a', foo: 'bar'}}
+            }}
+          end
+
+          it "removes from working" do
+            commit('mamiya:task:finish',
+                   task: {task: 'a', foo: 'bar'})
+
+            expect(new_status['queues']['a']['working']).to be_nil
+          end
         end
 
-        it "updates fetching" do
-          commit('mamiya:fetch-result:start',
-                 application: 'app', package: 'pkg', pending: 0)
-          expect(new_status["fetcher"]["fetching"]).to eq ['app', 'pkg']
-          expect(new_status["fetcher"]["pending_jobs"]).to be_empty
+        context "if task is in queue" do
+          let(:status) do
+            {queues: {
+              a: {queue: [{task: 'a', foo: 'bar'}, {task: 'a', bar: 'baz'}], working: nil}
+            }}
+          end
+
+          it "removes from queue" do
+            commit('mamiya:task:finish',
+                   task: {task: 'a', foo: 'bar'})
+
+            expect(new_status['queues']['a']['working']).to be_nil
+            expect(new_status['queues']['a']['queue']).to eq [{'task' => 'a', 'bar' => 'baz'}]
+          end
+        end
+
+        context "if task is not working" do
+          let(:status) do
+            {queues: {
+              a: {queue: [], working: {task: 'a', foo: 'baz'}}
+            }}
+          end
+
+          it "does nothing" do
+            commit('mamiya:task:finish',
+                   task: {task: 'a', foo: 'bar'})
+
+            expect(new_status['queues']['a']['working']).to eq('task' => 'a', 'foo' => 'baz')
+            expect(new_status['queues']['a']['queue']).to eq []
+          end
         end
       end
 
       describe ":error" do
-        let(:status) do
-          {fetcher: {fetching: ['app', 'pkg'], pending: 0}}
+        context "if task is working" do
+          let(:status) do
+            {queues: {
+              a: {queue: [], working: {task: 'a', foo: 'bar'}}
+            }}
+          end
+
+          it "removes from working" do
+            commit('mamiya:task:finish',
+                   task: {task: 'a', foo: 'bar'})
+
+            expect(new_status['queues']['a']['working']).to be_nil
+          end
         end
 
-        it "updates fetching" do
-          commit('mamiya:fetch-result:error',
-                 application: 'app', package: 'pkg', pending: 0)
+        context "if task is in queue" do
+          let(:status) do
+            {queues: {
+              a: {queue: [{task: 'a', foo: 'bar'}, {task: 'a', bar: 'baz'}], working: nil}
+            }}
+          end
 
-          expect(new_status["fetcher"]["fetching"]).to eq nil
+          it "removes from queue" do
+            commit('mamiya:task:finish',
+                   task: {task: 'a', foo: 'bar'})
+
+            expect(new_status['queues']['a']['working']).to be_nil
+            expect(new_status['queues']['a']['queue']).to eq [{'task' => 'a', 'bar' => 'baz'}]
+          end
         end
 
-        context "when package doesn't match with present state" do
-          it "doesn't updates fetching" do
-            commit('mamiya:fetch-result:error',
-                   application: 'app', package: 'pkg2', pending: 0)
+        context "if task is not working" do
+          let(:status) do
+            {queues: {
+              a: {queue: [], working: {task: 'a', foo: 'baz'}}
+            }}
+          end
 
-            expect(new_status["fetcher"]["fetching"]).to \
-              eq(['app', 'pkg'])
+          it "does nothing" do
+            commit('mamiya:task:finish',
+                   task: {task: 'a', foo: 'bar'})
+
+            expect(new_status['queues']['a']['working']).to eq('task' => 'a', 'foo' => 'baz')
+            expect(new_status['queues']['a']['queue']).to eq []
+          end
+        end
+      end
+    end
+
+    describe "(task handling)" do
+      describe "pkg" do
+        describe ":remove" do
+          let(:status) do
+            {packages: {'myapp' => ['pkg1']}}
+          end
+
+          it "removes removed package from packages" do
+            commit('mamiya:pkg:remove',
+                   application: 'myapp', package: 'pkg1')
+
+            expect(new_status["packages"]['myapp']).to eq []
+          end
+
+          context "with existing packages" do
+            let(:status) do
+              {packages: {'myapp' => ['pkg1', 'pkg2']}}
+            end
+
+            it "removes removed package from packages" do
+              commit('mamiya:pkg:remove',
+                     application: 'myapp', package: 'pkg1')
+
+              expect(new_status["packages"]['myapp']).to eq ['pkg2']
+            end
+          end
+
+          context "with inexist package" do
+            let(:status) do
+              {packages: {'myapp' => ['pkg1', 'pkg3']}}
+            end
+
+            it "removes removed package from packages" do
+              commit('mamiya:pkg:remove',
+                     application: 'myapp', package: 'pkg2')
+
+              expect(new_status["packages"]['myapp']).to eq ['pkg1', 'pkg3']
+            end
           end
         end
       end
 
-      describe ":success" do
-        let(:status) do
-          {fetcher: {fetching: ['app', 'pkg'], pending: 0},
-           packages: {}}
-        end
-
-        it "updates fetching" do
-          commit('mamiya:fetch-result:success',
-                 application: 'app', package: 'pkg', pending: 0)
-
-          expect(new_status["fetcher"]["fetching"]).to eq nil
-        end
-
-        it "updates packages" do
-          commit('mamiya:fetch-result:success',
-                 application: 'app', package: 'pkg', pending: 0)
-
-          expect(new_status["packages"]["app"]).to eq ["pkg"]
-        end
-
-        context "with existing packages" do
+      describe "fetch" do
+        describe "success" do
           let(:status) do
-            {fetcher: {fetching: ['app', 'pkg2'], pending: 0},
-             packages: {"app" => ['pkg1']}}
+            {packages: {}}
           end
 
           it "updates packages" do
-            commit('mamiya:fetch-result:success',
-                   application: 'app', package: 'pkg2', pending: 0)
+            commit('mamiya:task:finish',
+                   task: {task: 'fetch', app: 'myapp', pkg: 'pkg'})
 
-            expect(new_status["packages"]["app"]).to eq %w(pkg1 pkg2)
-          end
-        end
-
-        context "when package doesn't match with present state" do
-          it "doesn't updates fetching" do
-            commit('mamiya:fetch-result:success',
-                   application: 'app', package: 'pkg2', pending: 0)
-
-            expect(agent_monitor.statuses["a"]["fetcher"]["fetching"]).to \
-              eq(['app', 'pkg'])
+            expect(new_status["packages"]['myapp']).to eq ["pkg"]
           end
 
-          it "updates packages" do
-            commit('mamiya:fetch-result:success',
-                   application: 'app', package: 'pkg', pending: 0)
+          context "with existing packages" do
+            let(:status) do
+              {packages: {'myapp' => ['pkg1']}}
+            end
 
-            expect(new_status["packages"]["app"]).to eq ["pkg"]
-          end
-        end
-      end
+            it "updates packages" do
+              commit('mamiya:task:finish',
+                     task: {task: 'fetch', app: 'myapp', pkg: 'pkg2'})
 
-      describe ":remove" do
-        context "with existing packages" do
-          let(:status) do
-            {fetcher: {fetching: ['app', 'pkg2'], pending: 0},
-             packages: {"app" => ['pkg1']}}
-          end
-
-          it "updates packages" do
-            commit('mamiya:fetch-result:remove',
-                   application: 'app', package: 'pkg1', pending: 0)
-
-            expect(new_status["packages"]["app"]).to eq []
+              expect(new_status["packages"]['myapp']).to eq %w(pkg1 pkg2)
+            end
           end
         end
       end

@@ -10,7 +10,7 @@ require 'thor'
 module Mamiya
   class CLI < Thor
     class Client < Thor
-      class_option :master, aliases: '-u', type: :string
+      class_option :master, aliases: '-u', type: :string, default: 'http://localhost:7761/'
       class_option :application, aliases: %w(-a --app), type: :string
 
       desc "list-applications", "list applications"

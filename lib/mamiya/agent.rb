@@ -5,15 +5,17 @@ require 'mamiya/version'
 require 'mamiya/logger'
 
 require 'mamiya/steps/fetch'
-require 'mamiya/agent/fetcher'
+require 'mamiya/agent/task_queue'
 
-require 'mamiya/agent/handlers/fetch'
+require 'mamiya/agent/tasks/fetch'
+require 'mamiya/agent/tasks/clean'
+
+require 'mamiya/agent/handlers/task'
 require 'mamiya/agent/actions'
 
 module Mamiya
   class Agent
     include Mamiya::Agent::Actions
-    FETCH_REMOVE_EVENT = 'mamiya:fetch-result:remove'
 
     def initialize(config, logger: Mamiya::Logger.new, events_only: nil)
       @config = config
@@ -27,10 +29,11 @@ module Mamiya
 
     attr_reader :config, :serf, :logger
 
-    def fetcher
-      @fetcher ||= Mamiya::Agent::Fetcher.new(config, logger: logger).tap do |f|
-        f.cleanup_hook = self.method(:cleanup_handler)
-      end
+    def task_queue
+      @task_queue ||= Mamiya::Agent::TaskQueue.new(self, logger: logger, task_classes: [
+        Mamiya::Agent::Tasks::Fetch,
+        Mamiya::Agent::Tasks::Clean,
+      ])
     end
 
     def run!
@@ -53,19 +56,18 @@ module Mamiya
 
     def start
       serf_start
-      fetcher_start
+      task_queue_start
     end
 
     def terminate
       serf.stop!
-      fetcher.stop!
+      task_queue.stop!
     ensure
       @terminate = false
     end
 
     def update_tags!
       serf.tags['mamiya'] = ','.tap do |status|
-        status.concat('fetching,') if fetcher.working?
         status.concat('ready,') if status == ','
       end
 
@@ -80,11 +82,7 @@ module Mamiya
         s[:name] = serf.name
         s[:version] = Mamiya::VERSION
 
-        s[:fetcher] = {
-          fetching: fetcher.current_job,
-          pending: fetcher.queue_size,
-          pending_jobs: fetcher.pending_jobs.map{ |_| _[0,2] },
-        }
+        s[:queues] = task_queue.status
 
         s[:packages] = self.existing_packages
       end
@@ -123,13 +121,14 @@ module Mamiya
       name = "mamiya:#{type}"
       name << ":#{action}" if action
 
-      serf.event(name, payload.to_json, coalesce: coalesce)
+      serf.event(name, payload.merge(name: self.serf.name).to_json, coalesce: coalesce)
     end
 
     private
 
     def init_serf
       agent_config = (config[:serf] && config[:serf][:agent]) || {}
+      # agent_config.merge!(log: $stderr)
       Villein::Agent.new(**agent_config).tap do |serf|
         serf.on_user_event do |event|
           user_event_handler(event)
@@ -151,10 +150,9 @@ module Mamiya
       logger.debug "Serf became ready"
     end
 
-    def fetcher_start
-      logger.debug "Starting fetcher"
-
-      fetcher.start!
+    def task_queue_start
+      logger.debug "Starting task_queue"
+      task_queue.start!
     end
 
     def user_event_handler(event)
@@ -174,7 +172,12 @@ module Mamiya
 
       if Handlers.const_defined?(class_name)
         handler = Handlers.const_get(class_name).new(self, event)
-        handler.send(action || :run!)
+        meth = action || :run!
+        if handler.respond_to?(meth)
+          handler.send meth
+        else
+          logger.debug "Handler #{class_name} doesn't respond to #{meth}, skipping"
+        end
       else
         #logger.warn("Discarded event[#{event.user_event}] because we don't handle it")
       end
@@ -187,14 +190,6 @@ module Mamiya
       raise e if $0.end_with?('rspec')
     rescue JSON::ParserError
       logger.warn("Discarded event[#{event.user_event}] with invalid payload (unable to parse as json)")
-    end
-
-    def cleanup_handler(app, package)
-      trigger('fetch-result', action: 'remove', coalesce: false,
-        name: self.serf.name,
-        application: app,
-        package: package,
-      )
     end
   end
 end

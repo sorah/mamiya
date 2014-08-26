@@ -7,7 +7,7 @@ require 'villein/event'
 
 require 'mamiya/version'
 require 'mamiya/agent'
-require 'mamiya/agent/fetcher'
+require 'mamiya/agent/task_queue'
 require 'mamiya/agent/actions'
 
 require_relative './support/dummy_serf.rb'
@@ -15,12 +15,9 @@ require_relative './support/dummy_serf.rb'
 describe Mamiya::Agent do
 
   let(:serf) { DummySerf.new }
-  let(:fetcher) do
-    double('fetcher', start!: nil, working?: false).tap do |f|
-      cleanup_hook = nil
-      allow(f).to receive(:cleanup_hook=) { |_| cleanup_hook = _ }
-      allow(f).to receive(:cleanup_hook)  { cleanup_hook }
-    end
+
+  let(:task_queue) do
+    double('task_queue', start!: nil)
   end
 
   let(:config) do
@@ -29,7 +26,7 @@ describe Mamiya::Agent do
 
   before do
     allow(Villein::Agent).to receive(:new).and_return(serf)
-    allow(Mamiya::Agent::Fetcher).to receive(:new).and_return(fetcher)
+    allow(Mamiya::Agent::TaskQueue).to receive(:new).and_return(task_queue)
   end
 
   subject(:agent) { described_class.new(config) }
@@ -38,32 +35,47 @@ describe Mamiya::Agent do
     expect(described_class.ancestors).to include(Mamiya::Agent::Actions)
   end
 
-  describe "fetcher" do
-    it "sends events on cleanup hook" do
+  describe "#trigger" do
+    it "sends serf event" do
       expect(serf).to receive(:event).with(
-        'mamiya:fetch-result:remove',
+        'mamiya:foo',
         {
-          name: serf.name, application: 'foo', package: 'bar',
+          a: 'b',
+          name: 'my-name',
         }.to_json,
-        coalesce: false,
+        coalesce: true,
       )
 
-      agent.fetcher.cleanup_hook.call('foo', 'bar')
+      agent.trigger(:foo, a: 'b')
+    end
+
+    it "sends serf event with action" do
+      expect(serf).to receive(:event).with(
+        'mamiya:foo:bar',
+        {
+          a: 'b',
+          name: 'my-name',
+        }.to_json,
+        coalesce: true,
+      )
+
+      agent.trigger(:foo, a: 'b', action: 'bar')
     end
   end
 
   describe "#run!" do
-    it "starts serf and fetcher" do
+    it "starts serf, and task_queue" do
       begin
         flag = false
 
-        expect(fetcher).to receive(:start!)
+        expect(task_queue).to receive(:start!)
         expect(serf).to receive(:start!)
         expect(serf).to receive(:auto_stop) do
           flag = true
         end
 
         th = Thread.new { agent.run! }
+        th.abort_on_exception = true
 
         10.times { break if flag; sleep 0.1 }
       ensure
@@ -79,18 +91,6 @@ describe Mamiya::Agent do
           agent.update_tags!
 
           expect(serf.tags['mamiya']).to eq ',ready,'
-        end
-      end
-
-      context "when it is fetching" do
-        before do
-          allow(fetcher).to receive(:working?).and_return(true)
-        end
-
-        it "shows fetching" do
-          agent.update_tags!
-
-          expect(serf.tags['mamiya']).to eq ',fetching,'
         end
       end
 
@@ -111,10 +111,8 @@ describe Mamiya::Agent do
   describe "#status" do
     before do
       allow(agent).to receive(:existing_packages).and_return("app" => ["pkg"])
-      allow(fetcher).to receive(:queue_size).and_return(42)
-      allow(fetcher).to receive(:working?).and_return(false)
-      allow(fetcher).to receive(:current_job).and_return(nil)
-      allow(fetcher).to receive(:pending_jobs).and_return([['app', 'pkg2', nil, nil]])
+
+      allow(task_queue).to receive(:status).and_return({a: {working: nil, queue: []}})
     end
 
     subject(:status) { agent.status }
@@ -131,28 +129,9 @@ describe Mamiya::Agent do
       expect(status[:packages]).to eq agent.existing_packages
     end
 
-    describe "(fetcher)" do
-      it "includes queue_size as pending" do
-        expect(status[:fetcher][:pending]).to eq 42
-      end
-
-      it "includes pendings job" do
-        expect(status[:fetcher][:pending_jobs]).to eq([['app', 'pkg2']])
-      end
-
-      it "shows fetching status" do
-        expect(status[:fetcher][:fetching]).to be_nil
-      end
-
-      context "when it's fetching" do
-        before do
-          allow(fetcher).to receive(:working?).and_return(true)
-          allow(fetcher).to receive(:current_job).and_return(%w(foo bar))
-        end
-
-        it "shows fetching true" do
-          expect(status[:fetcher][:fetching]).to eq ['foo', 'bar']
-        end
+    describe "(task queue)" do
+      it "includes task_queue" do
+        expect(status[:queues]).to eq({a: {working: nil, queue: []}})
       end
     end
   end

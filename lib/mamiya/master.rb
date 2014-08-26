@@ -27,7 +27,7 @@ module Mamiya
     end
 
     def start
-      # Override and stop starting fetcher
+      # Override and stop starting task_queue
       web_start
       serf_start
       monitor_start
@@ -36,11 +36,6 @@ module Mamiya
     def terminate
       @agent_monitor.stop!
       super
-    end
-
-    # XXX: dupe? Mamiya::Agent::Actions#distribute
-    def distribute(application, package)
-      trigger(:fetch, coalesce: false, application: application, package: package)
     end
 
     def storage(app)
@@ -89,9 +84,9 @@ module Mamiya
         options = config[:web] || {}
         rack_options = {
           app: self.web,
-          Port: options[:port].to_i,
-          Host: options[:bind],
-          environment: options[:environment],
+          Port: options[:port] ? options[:port].to_i : 7761,
+          Host: options[:bind] || '0.0.0.0', # TODO: IPv6
+          environment: options[:environment] || :development,
           server: options[:server],
           Logger: logger['web']
         }
