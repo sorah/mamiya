@@ -10,7 +10,7 @@ module Mamiya
       end
 
       def distribute(application, package)
-        order_task('fetch', application: application, package: package)
+        order_task('fetch', app: application, pkg: package)
       end
     end
   end
