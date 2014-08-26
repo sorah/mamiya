@@ -10,7 +10,6 @@ require 'mamiya/agent/task_queue'
 require 'mamiya/agent/tasks/fetch'
 require 'mamiya/agent/tasks/clean'
 
-require 'mamiya/agent/handlers/fetch'
 require 'mamiya/agent/handlers/task'
 require 'mamiya/agent/actions'
 
