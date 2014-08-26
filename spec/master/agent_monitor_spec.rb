@@ -333,7 +333,7 @@ describe Mamiya::Master::AgentMonitor do
 
           it "updates packages" do
             commit('mamiya:task:finish',
-                   task: {task: 'fetch', application: 'myapp', package: 'pkg'})
+                   task: {task: 'fetch', app: 'myapp', pkg: 'pkg'})
 
             expect(new_status["packages"]['myapp']).to eq ["pkg"]
           end
@@ -345,7 +345,7 @@ describe Mamiya::Master::AgentMonitor do
 
             it "updates packages" do
               commit('mamiya:task:finish',
-                     task: {task: 'fetch', application: 'myapp', package: 'pkg2'})
+                     task: {task: 'fetch', app: 'myapp', pkg: 'pkg2'})
 
               expect(new_status["packages"]['myapp']).to eq %w(pkg1 pkg2)
             end
