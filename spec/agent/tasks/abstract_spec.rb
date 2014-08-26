@@ -26,12 +26,19 @@ describe Mamiya::Agent::Tasks::Abstract do
     it "calls after" do
       expect(task).to receive(:run).ordered
       expect(task).to receive(:after).ordered
+      expect(task).not_to receive(:error)
       task.execute
     end
+
     it "handles error" do
+      expect(task).to receive(:after)
+      expect(task).to receive(:errored)
+
       err = RuntimeError.new
       allow(task).to receive(:run).and_raise(err)
+
       task.execute
+
       expect(task.error).to eq err
     end
   end

@@ -34,6 +34,7 @@ module Mamiya
         rescue Exception => error
           @error = error
           raise if raise_error?
+          errored
         ensure
           after
         end
@@ -47,7 +48,6 @@ module Mamiya
         def after
         end
 
-        # TODO: XXX: unused
         def errored
         end
 
