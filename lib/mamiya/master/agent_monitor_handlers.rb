@@ -29,7 +29,7 @@ module Mamiya
 
       def task__finish(status, payload, event)
         task = payload['task']
-        logger.info "#{status['name']} finished task #{task['task']}: #{payload['error']}"
+        logger.info "#{status['name']} has finished task #{task['task'].inspect}"
 
         task__finalize(status, payload, event)
 
@@ -41,7 +41,7 @@ module Mamiya
 
       def task__error(status, payload, event)
         task = payload['task']
-        logger.error "#{status['name']} failed task #{task['task']}: #{payload['error']}"
+        logger.error "#{status['name']} has failed task #{task['task'].inspect}: #{payload['error']}"
 
         task__finalize(status, payload, event)
 
