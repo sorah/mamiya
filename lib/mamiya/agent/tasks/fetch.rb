@@ -9,11 +9,12 @@ module Mamiya
     module Tasks
       class Fetch < Notifyable
         def run
-          logger.info "Fetching #{application}/#{package}"
-
-          take_interval
           prepare_destination
+          take_interval
+
+          logger.info "Fetching #{application}/#{package}"
           step.run!
+
           order_cleaning
         rescue Mamiya::Storages::Abstract::AlreadyFetched
           logger.info "It has already fetched; skipping."
@@ -30,7 +31,10 @@ module Mamiya
         end
 
         def prepare_destination
-          FileUtils.mkdir_p(destination) unless File.exist?(destination)
+          unless File.exist?(destination)
+            @logger.info "Creating #{destination}"
+            FileUtils.mkdir_p(destination)
+          end
         end
 
         def order_cleaning

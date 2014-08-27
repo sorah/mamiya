@@ -28,14 +28,17 @@ module Mamiya
         end
 
         def execute
+          @logger.info "Task started: #{task.inspect}"
           before
           run
         rescue Exception => error
           @error = error
           raise if raise_error?
           errored
+          @logger.error "Encountered error: #{error.inspect}\n\t#{error.backtrace.join("\n\t")}"
         ensure
           after
+          @logger.info "Task finished"
         end
 
         def before
