@@ -14,6 +14,7 @@ module Mamiya
       include AgentMonitorHandlers
 
       STATUS_QUERY = 'mamiya:status'.freeze
+      PACKAGES_QUERY = 'mamiya:packages'.freeze
       DEFAULT_INTERVAL = 60
 
       def initialize(master, raise_exception: false)
@@ -99,14 +100,35 @@ module Mamiya
         end
 
         @commit_lock.synchronize { 
-          response = @master.serf.query(STATUS_QUERY, '', **kwargs)
-          response["Responses"].each do |name, json|
+          status_query_th = Thread.new { @master.serf.query(STATUS_QUERY, '', **kwargs) }
+          packages_query_th = Thread.new { @master.serf.query(PACKAGES_QUERY, '', **kwargs) }
+          status_response = status_query_th.value
+          packages_response = packages_query_th.value
+
+          status_response["Responses"].each do |name, json|
             begin
               new_statuses[name] = JSON.parse(json)
             rescue JSON::ParserError => e
               logger.warn "Failed to parse status from #{name}: #{e.message}"
               new_failed_agents << name
               next
+            end
+          end
+
+          packages_response["Responses"].each do |name, json|
+            next unless new_statuses[name]
+
+            begin
+              new_statuses[name]['packages'] = JSON.parse(json)
+            rescue JSON::ParserError => e
+              logger.warn "Failed to parse packages from #{name}: #{e.message}"
+              next
+            end
+          end
+
+          (new_statuses.keys - packages_response["Responses"].keys).each do |name|
+            if @statuses[name] && @statuses[name]['packages']
+              new_statuses[name]['packages'] = @statuses[name]['packages']
             end
           end
 
