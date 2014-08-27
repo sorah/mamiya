@@ -117,6 +117,10 @@ describe Mamiya::Agent do
 
     subject(:status) { agent.status }
 
+    it "doesn't include master=true" do
+      expect(status[:master]).to be_nil
+    end
+
     it "includes version identifier" do
       expect(status[:version]).to eq Mamiya::VERSION
     end
@@ -127,6 +131,14 @@ describe Mamiya::Agent do
 
     it "includes packages" do
       expect(status[:packages]).to eq agent.existing_packages
+    end
+
+    context "with packages=false" do
+      subject(:status) { agent.status(packages: false) }
+
+      it "doesn't include existing packages" do
+        expect(status.has_key?(:packages)).to be_false
+      end
     end
 
     describe "(task queue)" do
@@ -166,10 +178,17 @@ describe Mamiya::Agent do
 
   describe "query responder" do
     it "responds to 'mamiya:status'" do
-      allow(agent).to receive(:status).and_return("my" => "status")
+      allow(agent).to receive(:status).with(packages: false).and_return("my" => "status")
 
       response = serf.trigger_query('mamiya:status', '')
       expect(JSON.parse(response)).to eq("my" => "status")
+    end
+
+    it "responds to 'mamiya:packages'" do
+      allow(agent).to receive(:existing_packages).and_return(%w(pkg1 pkg2))
+
+      response = serf.trigger_query('mamiya:packages', '')
+      expect(JSON.parse(response)).to eq(%w(pkg1 pkg2))
     end
   end
 

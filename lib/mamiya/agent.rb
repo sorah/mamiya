@@ -76,15 +76,14 @@ module Mamiya
 
     ##
     # Returns agent status. Used for HTTP API and `serf query` inspection.
-    def status
+    def status(packages: true)
       {}.tap do |s|
-        s[:master] = false
         s[:name] = serf.name
         s[:version] = Mamiya::VERSION
 
         s[:queues] = task_queue.status
 
-        s[:packages] = self.existing_packages
+        s[:packages] = self.existing_packages if packages
       end
     end
 
@@ -135,7 +134,11 @@ module Mamiya
         end
 
         serf.respond('mamiya:status') do |event|
-          self.status.to_json
+          self.status(packages: false).to_json
+        end
+
+        serf.respond('mamiya:packages') do |event|
+          self.existing_packages.to_json
         end
       end
     end
