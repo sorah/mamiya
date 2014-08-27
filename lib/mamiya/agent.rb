@@ -134,7 +134,7 @@ module Mamiya
         end
 
         serf.respond('mamiya:status') do |event|
-          self.status.to_json
+          self.status(packages: false).to_json
         end
 
         serf.respond('mamiya:packages') do |event|
