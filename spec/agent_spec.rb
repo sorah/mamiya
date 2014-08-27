@@ -117,6 +117,10 @@ describe Mamiya::Agent do
 
     subject(:status) { agent.status }
 
+    it "doesn't include master=true" do
+      expect(status[:master]).to be_nil
+    end
+
     it "includes version identifier" do
       expect(status[:version]).to eq Mamiya::VERSION
     end
@@ -127,6 +131,14 @@ describe Mamiya::Agent do
 
     it "includes packages" do
       expect(status[:packages]).to eq agent.existing_packages
+    end
+
+    context "with packages=false" do
+      subject(:status) { agent.status(packages: false) }
+
+      it "doesn't include existing packages" do
+        expect(status.has_key?(:packages)).to be_false
+      end
     end
 
     describe "(task queue)" do
