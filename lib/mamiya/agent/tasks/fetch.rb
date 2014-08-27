@@ -1,3 +1,5 @@
+require 'fileutils'
+
 require 'mamiya/agent/tasks/notifyable'
 require 'mamiya/steps/fetch'
 require 'mamiya/storages/abstract'
@@ -10,6 +12,7 @@ module Mamiya
           logger.info "Fetching #{application}/#{package}"
 
           take_interval
+          prepare_destination
           step.run!
           order_cleaning
         rescue Mamiya::Storages::Abstract::AlreadyFetched
@@ -24,6 +27,10 @@ module Mamiya
 
           @logger.info "Sleeping #{wait} sec before starting fetch"
           rand(wait)
+        end
+
+        def prepare_destination
+          FileUtils.mkdir_p(destination) unless File.exist?(destination)
         end
 
         def order_cleaning

@@ -1,11 +1,19 @@
 require 'spec_helper'
+require 'tmpdir'
 
 require 'mamiya/agent/tasks/fetch'
 require 'mamiya/agent/tasks/notifyable'
 require 'mamiya/steps/fetch'
 
 describe Mamiya::Agent::Tasks::Fetch do
-  let(:config) { {packages_dir: File::NULL} }
+  let!(:tmpdir) { Dir.mktmpdir("mamiya-agent-tasks-fetch-spec") }
+  after { FileUtils.remove_entry_secure tmpdir }
+
+  let(:destination) { File.join(tmpdir, 'destination') }
+  let(:app_destination) { File.join(destination, 'myapp') }
+
+  let(:config) { {packages_dir: destination} }
+
   let(:agent) { double('agent', config: config) }
   let(:task_queue) { double('task_queue', enqueue: nil) }
 
@@ -21,10 +29,12 @@ describe Mamiya::Agent::Tasks::Fetch do
 
   describe "#execute" do
     before do
+      FileUtils.mkdir_p(app_destination)
+
       allow(Mamiya::Steps::Fetch).to receive(:new).with(
         application: 'myapp',
         package: 'mypkg',
-        destination: File.join(File::NULL, 'myapp'),
+        destination: app_destination,
         config: config,
       ).and_return(step)
 
@@ -41,6 +51,21 @@ describe Mamiya::Agent::Tasks::Fetch do
       expect(task_queue).to receive(:enqueue).with(:clean, {})
 
       task.execute
+    end
+
+    context "when destination directory not exists" do
+      before do
+        FileUtils.remove_entry_secure(destination)
+      end
+      it "creates directory" do
+        allow(step).to receive(:run!) do
+          expect(Pathname.new(app_destination)).to be_exist
+        end
+
+        task.execute
+
+        expect(Pathname.new(app_destination)).to be_exist
+      end
     end
 
     context "when already fetched" do
