@@ -183,6 +183,13 @@ describe Mamiya::Agent do
       response = serf.trigger_query('mamiya:status', '')
       expect(JSON.parse(response)).to eq("my" => "status")
     end
+
+    it "responds to 'mamiya:packages'" do
+      allow(agent).to receive(:existing_packages).and_return(%w(pkg1 pkg2))
+
+      response = serf.trigger_query('mamiya:packages', '')
+      expect(JSON.parse(response)).to eq(%w(pkg1 pkg2))
+    end
   end
 
   describe "event handler" do
