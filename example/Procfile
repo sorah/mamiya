@@ -1,0 +1,2 @@
+master: bundle exec env MAMIYA_SYNC_OUT=1 mamiya master -d --serf bind=0.0.0.0:7760,rpc_addr=127.0.0.1:17760,node=${HOSTNAME}_${PORT}
+agent: bundle exec env MAMIYA_SYNC_OUT=1 sh -c 'sleep 2; mamiya agent -d --serf bind=0.0.0.0:$PORT,rpc_addr=127.0.0.1:1$PORT,join=127.0.0.1:7760,node=${HOSTNAME}_${PORT}'
