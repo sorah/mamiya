@@ -36,6 +36,12 @@ TODO: Write usage instructions here
 
 ## Upgrade Notes
 
+### 0.0.1.alpha21
+
+#### Configuration now written in Ruby
+
+You should rewrite your configuration yaml in Ruby. See examples/config.rb for example.
+
 ### 0.0.1.alpha20
 
 _tl;dr_ Don't mix alpha19 and alpha20.
