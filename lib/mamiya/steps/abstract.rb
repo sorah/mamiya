@@ -1,11 +1,10 @@
-require 'mamiya/config'
 require 'mamiya/script'
 require 'mamiya/logger'
 
 module Mamiya
   module Steps
     class Abstract
-      def initialize(script: Mamiya::Script.new, config: Mamiya::Config.new, logger: Mamiya::Logger.new, **options)
+      def initialize(script: Mamiya::Script.new, config: Mamiya::Configuration.new, logger: Mamiya::Logger.new, **options)
         @script, @config, @options = script, config, options
         @logger = logger[self.class.name.sub(/^Mamiya::Steps::/,'')]
       end

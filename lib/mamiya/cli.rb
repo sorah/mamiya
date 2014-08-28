@@ -1,6 +1,6 @@
 require 'mamiya'
 
-require 'mamiya/config'
+require 'mamiya/configuration'
 require 'mamiya/script'
 require 'mamiya/logger'
 
@@ -227,15 +227,15 @@ module Mamiya
 
     def config(dont_raise_error = false)
       return @config if @config
-      path = [options[:config], './mamiya.yml', './config.yml'].compact.find { |_| File.exists?(_) }
+      path = [options[:config], './mamiya.conf.rb', './config.rb'].compact.find { |_| File.exists?(_) }
 
       if path
         logger.debug "Using configuration: #{path}"
-        @config = Mamiya::Config.load(File.expand_path(path))
+        @config = Mamiya::Configuration.new.load!(File.expand_path(path))
       else
         logger.debug "Couldn't find configuration file"
         return nil if dont_raise_error
-        fatal! "Configuration File not found (try --config(-C) option or place it at ./mamiya.yml or ./config.yml)"
+        fatal! "Configuration File not found (try --config(-C) option or place it at ./config.rb)"
       end
     end
 
