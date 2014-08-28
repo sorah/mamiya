@@ -52,7 +52,7 @@ module Mamiya
       ).keys
     end
 
-    def status
+    def status(packages: false)
       {name: serf.name, master: true}
     end
 
