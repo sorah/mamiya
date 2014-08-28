@@ -95,8 +95,10 @@ describe Mamiya::DSL do
       expect{ dsl.foo }.to raise_error
       dsl.set :foo, 100
       expect(dsl.foo).to eq 100
+      expect(dsl[:foo]).to eq 100
       dsl.set :foo, 200
       expect(dsl.foo).to eq 200
+      expect(dsl[:foo]).to eq 200
     end
   end
 
@@ -104,6 +106,7 @@ describe Mamiya::DSL do
     it "sets variable" do
       dsl.set_default :foo, 100
       expect(dsl.foo).to eq 100
+      expect(dsl[:foo]).to eq 100
     end
 
     context "when already assigned" do
@@ -111,6 +114,7 @@ describe Mamiya::DSL do
         dsl.set :foo, 100
         dsl.set_default :foo, 200
         expect(dsl.foo).to eq 100
+        expect(dsl[:foo]).to eq 100
       end
     end
   end

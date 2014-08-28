@@ -28,7 +28,7 @@ module Mamiya
       k = name.to_sym
       return if self.instance_methods.include?(k)
 
-      define_method(k) { @variables[k] || self.class.defaults[k] }
+      define_method(k) { self[k] }
     end
 
     ##
@@ -152,6 +152,12 @@ module Mamiya
       k = key.to_sym
       return @variables[k] if @variables.key?(k)
       set(k, value)
+    end
+
+    ##
+    # (DSL) Retrieve value for key +key+. Value can be set using DSL#set .
+    def [](key)
+      @variables[key] || self.class.defaults[key]
     end
 
     ##
