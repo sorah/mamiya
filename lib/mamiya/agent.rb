@@ -66,14 +66,6 @@ module Mamiya
       @terminate = false
     end
 
-    def update_tags!
-      serf.tags['mamiya'] = ','.tap do |status|
-        status.concat('ready,') if status == ','
-      end
-
-      nil
-    end
-
     ##
     # Returns agent status. Used for HTTP API and `serf query` inspection.
     def status(packages: true)
