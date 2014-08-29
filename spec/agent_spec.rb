@@ -84,30 +84,6 @@ describe Mamiya::Agent do
     end
   end
 
-  describe "#update_tags!" do
-    describe "(status)" do
-      context "when it is not busy" do
-        it "shows ready" do
-          agent.update_tags!
-
-          expect(serf.tags['mamiya']).to eq ',ready,'
-        end
-      end
-
-      context "when it is running multiple jobs" do
-        pending
-      end
-    end
-
-    describe "(prepared)" do
-      pending
-    end
-
-    describe "(current)" do
-      pending
-    end
-  end
-
   describe "#status" do
     before do
       allow(agent).to receive(:existing_packages).and_return("app" => ["pkg"])
