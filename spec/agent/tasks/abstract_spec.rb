@@ -41,6 +41,41 @@ describe Mamiya::Agent::Tasks::Abstract do
 
       expect(task.error).to eq err
     end
+
+    context "with _chain" do
+      let(:job) { {'foo' => 'bar', '_chain' => ['another']} }
+
+      it "enqueues next _chain, keeping same task specification" do
+        expect(queue).to receive(:enqueue).with(:another,
+          'foo' => 'bar',
+        )
+
+        task.execute
+      end
+    end
+
+    context "with multiple _chain" do
+      let(:job) { {'foo' => 'bar', '_chain' => ['b', 'c']} }
+
+      it "enqueues next _chain, keeping same task specification" do
+        expect(queue).to receive(:enqueue).with(:b,
+          'foo' => 'bar',
+          '_chain' => ['c'],
+        )
+
+        task.execute
+      end
+    end
+
+    context "with empty _chain" do
+      let(:job) { {'foo' => 'bar', '_chain' => []} }
+
+      it "doesn't enqueue nothing" do
+        expect(queue).not_to receive(:enqueue)
+        task.execute
+      end
+    end
+
   end
 
   describe ".identifier" do
