@@ -37,6 +37,7 @@ module Mamiya
           errored
           @logger.error "Encountered error: #{error.inspect}\n\t#{error.backtrace.join("\n\t")}"
         ensure
+          enqueue_chained unless error
           after
           @logger.info "Task finished"
         end
@@ -54,6 +55,18 @@ module Mamiya
         end
 
         private
+
+        def enqueue_chained
+          return if !task['_chain'] || task['_chain'].empty?
+
+          next_task = task.dup
+          next_task.delete('task')
+
+          next_task_name, *next_task['_chain'] = task['_chain']
+          next_task.delete('_chain') if next_task['_chain'].empty?
+
+          task_queue.enqueue(next_task_name.to_sym, next_task)
+        end
 
         def config
           @config ||= agent ? agent.config : nil
