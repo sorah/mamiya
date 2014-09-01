@@ -10,6 +10,8 @@ require 'mamiya/agent'
 require 'mamiya/agent/task_queue'
 require 'mamiya/agent/actions'
 
+require 'mamiya/configuration'
+
 require_relative './support/dummy_serf.rb'
 
 describe Mamiya::Agent do
@@ -21,7 +23,9 @@ describe Mamiya::Agent do
   end
 
   let(:config) do
-    {serf: {agent: {rpc_addr: '127.0.0.1:17373', bind: '127.0.0.1:17946'}}}
+    Mamiya::Configuration.new.evaluate! do
+      set :serf, {agent: {rpc_addr: '127.0.0.1:17373', bind: '127.0.0.1:17946'}}
+    end
   end
 
   before do
