@@ -91,6 +91,7 @@ describe Mamiya::Agent do
   describe "#status" do
     before do
       allow(agent).to receive(:existing_packages).and_return("app" => ["pkg"])
+      allow(agent).to receive(:labels).and_return([:foo,:bar])
 
       allow(task_queue).to receive(:status).and_return({a: {working: nil, queue: []}})
     end
@@ -111,6 +112,10 @@ describe Mamiya::Agent do
 
     it "includes packages" do
       expect(status[:packages]).to eq agent.existing_packages
+    end
+
+    it "includes status" do
+      expect(status[:labels]).to eq agent.labels
     end
 
     context "with packages=false" do

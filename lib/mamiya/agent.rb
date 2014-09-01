@@ -73,6 +73,7 @@ module Mamiya
       {}.tap do |s|
         s[:name] = serf.name
         s[:version] = Mamiya::VERSION
+        s[:labels] = labels
 
         s[:queues] = task_queue.status
 
