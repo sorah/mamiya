@@ -56,6 +56,10 @@ module Mamiya
       {name: serf.name, master: true}
     end
 
+    def labels
+      []
+    end
+
     private
 
     def init_serf

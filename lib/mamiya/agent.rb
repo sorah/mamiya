@@ -80,6 +80,10 @@ module Mamiya
       end
     end
 
+    def labels
+      config.labels[[]]
+    end
+
     ##
     # Returns hash with existing packages (where valid) by app name.
     # Packages which has json and tarball is considered as valid.

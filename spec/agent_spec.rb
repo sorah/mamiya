@@ -156,6 +156,28 @@ describe Mamiya::Agent do
     end
   end
 
+  describe "#labels" do
+    subject(:labels) { agent.labels }
+
+    context "with config.labels" do
+      before do
+        config.evaluate! do
+          labels { [:foo, :bar, :baz] }
+        end
+      end
+
+      it "retrieves label from configuration" do
+        expect(labels).to eq [:foo, :bar, :baz]
+      end
+    end
+
+    context "without config.labels" do
+      it "returns []" do
+        expect(labels).to eq []
+      end
+    end
+  end
+
   describe "query responder" do
     it "responds to 'mamiya:status'" do
       allow(agent).to receive(:status).with(packages: false).and_return("my" => "status")
