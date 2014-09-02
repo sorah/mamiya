@@ -10,6 +10,8 @@ require 'mamiya/agent'
 require 'mamiya/agent/task_queue'
 require 'mamiya/agent/actions'
 
+require 'mamiya/configuration'
+
 require_relative './support/dummy_serf.rb'
 
 describe Mamiya::Agent do
@@ -21,7 +23,9 @@ describe Mamiya::Agent do
   end
 
   let(:config) do
-    {serf: {agent: {rpc_addr: '127.0.0.1:17373', bind: '127.0.0.1:17946'}}}
+    Mamiya::Configuration.new.evaluate! do
+      set :serf, {agent: {rpc_addr: '127.0.0.1:17373', bind: '127.0.0.1:17946'}}
+    end
   end
 
   before do
@@ -87,6 +91,7 @@ describe Mamiya::Agent do
   describe "#status" do
     before do
       allow(agent).to receive(:existing_packages).and_return("app" => ["pkg"])
+      allow(agent).to receive(:labels).and_return([:foo,:bar])
 
       allow(task_queue).to receive(:status).and_return({a: {working: nil, queue: []}})
     end
@@ -107,6 +112,10 @@ describe Mamiya::Agent do
 
     it "includes packages" do
       expect(status[:packages]).to eq agent.existing_packages
+    end
+
+    it "includes status" do
+      expect(status[:labels]).to eq agent.labels
     end
 
     context "with packages=false" do
@@ -149,6 +158,28 @@ describe Mamiya::Agent do
         "a" => ["valid", "valid-2"],
         "b" => ["valid", "valid-2"],
       )
+    end
+  end
+
+  describe "#labels" do
+    subject(:labels) { agent.labels }
+
+    context "with config.labels" do
+      before do
+        config.evaluate! do
+          labels { [:foo, :bar, :baz] }
+        end
+      end
+
+      it "retrieves label from configuration" do
+        expect(labels).to eq [:foo, :bar, :baz]
+      end
+    end
+
+    context "without config.labels" do
+      it "returns []" do
+        expect(labels).to eq []
+      end
     end
   end
 

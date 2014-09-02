@@ -73,11 +73,16 @@ module Mamiya
       {}.tap do |s|
         s[:name] = serf.name
         s[:version] = Mamiya::VERSION
+        s[:labels] = labels
 
         s[:queues] = task_queue.status
 
         s[:packages] = self.existing_packages if packages
       end
+    end
+
+    def labels
+      config.labels[[]]
     end
 
     ##
