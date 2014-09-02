@@ -50,6 +50,12 @@ describe Mamiya::DSL do
         dsl.load! "#{__dir__}/fixtures/dsl_test_load.rb"
       }.to change { dsl.foo }.from(42).to(72)
     end
+
+    it "sets _file" do
+      expect {
+        dsl.load! "#{__dir__}/fixtures/dsl_test_load.rb"
+      }.to change { dsl._file }.from(nil).to("#{__dir__}/fixtures/dsl_test_load.rb")
+    end
   end
 
   describe "#use" do
