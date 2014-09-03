@@ -43,8 +43,6 @@ module Mamiya
     set_default :exclude_from_package, []
     set_default :dereference_symlinks, true
 
-    set_default :package_to, nil
-
     # TODO: use variable in config.yml
     set_default :deploy_to, nil
     set_default :prepare_to, nil
@@ -52,6 +50,9 @@ module Mamiya
     set_default :logger, Mamiya::Logger.new(outputs: [])
 
     set_default :skip_prepare_build, false
+
+    set_default :script_file, nil
+    set_default :script_additionals, []
 
     def run(*args, allow_failure: false)
       # TODO: Stop when fail

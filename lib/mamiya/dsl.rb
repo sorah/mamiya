@@ -40,6 +40,8 @@ module Mamiya
       self.define_variable_accessor(k)
     end
 
+    set_default :_file, nil
+
     ##
     # Add hook point with name +name+.
     # This defines method with same name in class to call and define hooks.
@@ -118,6 +120,7 @@ module Mamiya
     ##
     # Evaluates specified file +file+ in DSL environment.
     def load!(file)
+      set :_file, file
       evaluate! File.read(file), file, 1
     end
 

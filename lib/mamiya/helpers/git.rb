@@ -3,6 +3,10 @@ require 'time'
 set_default :git_remote, 'origin'
 set_default :commit, "#{self.git_remote}/HEAD"
 
+def git_managed?
+  system *%w(git rev-parse --git-dir), err: File::NULL, out: File::NULL
+end
+
 def git_ignored_files
   git_clean_out = `git clean -ndx`.lines
   prefix = /^Would (?:remove|skip repository) /
@@ -73,3 +77,23 @@ if options[:include_head_commit_to_meta]
     candidate.merge(git: git_head())
   end
 end
+
+options[:manage_script] = true unless options.key?(:manage_script)
+options[:script_auto_additionals] = true unless options.key?(:script_auto_additionals)
+if options[:manage_script] && _file
+  Dir.chdir(File.dirname(_file)) do
+    break unless git_managed?
+
+    script_git_head = git_head()
+    package_meta do |candidate|
+      candidate.merge(script_git: script_git_head)
+    end
+
+    if options[:script_auto_additionals]
+      files = `git ls-files`.lines.map(&:chomp).reject { |_| _ == File.basename(_file) }
+      set :script_additionals, (script_additionals || []) + files
+    end
+  end
+end
+
+

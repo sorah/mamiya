@@ -1,5 +1,6 @@
 require 'mamiya/script'
 require 'mamiya/logger'
+require 'mamiya/configuration'
 
 module Mamiya
   module Steps

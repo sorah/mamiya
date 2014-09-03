@@ -14,6 +14,9 @@ describe Mamiya::Steps::Build do
   let(:build_dir)   { Pathname.new(tmpdir).join('build') }
   let(:package_dir) { Pathname.new(tmpdir).join('pkg') }
   let(:extract_dir) { Pathname.new(tmpdir).join('extract') }
+  let(:script_dir)  { Pathname.new(tmpdir).join('script').tap(&:mkdir) }
+
+  let(:script_file)  { script_dir.join('deploy.rb').tap { |_| File.write _, "p :script\n" } }
 
   let(:exclude_from_package) { [] }
   let(:package_under) { nil }
@@ -36,6 +39,9 @@ describe Mamiya::Steps::Build do
       dereference_symlinks: dereference_symlinks,
       exclude_from_package: exclude_from_package,
       skip_prepare_build: skip_prepare_build,
+      script_file: script_file,
+      script_additionals: [],
+      _file: nil,
     )
   end
   
@@ -97,6 +103,7 @@ describe Mamiya::Steps::Build do
       allow(script).to receive(:exclude_from_package).and_return(['test'])
       allow(script).to receive(:dereference_symlinks).and_return(true)
       allow(script).to receive(:package_under).and_return('foo')
+      build_dir.join('foo').mkdir
 
       expect_any_instance_of(Mamiya::Package).to \
         receive(:build!).with(
@@ -121,6 +128,100 @@ describe Mamiya::Steps::Build do
       }
 
       build_step.run!
+    end
+
+    it "packs script_file into .mamiya.script" do
+      expect_any_instance_of(Mamiya::Package).to receive(:build!) do
+        expect(build_dir.join('.mamiya.script')).to be_a_directory
+        expect(build_dir.join('.mamiya.script', 'deploy.rb').read).to match(/:script/)
+      end
+
+      build_step.run!
+
+      expect(build_dir.join('.mamiya.script')).not_to be_exist
+    end
+
+    it "writes script_file in meta" do
+      meta = {}
+      allow_any_instance_of(Mamiya::Package).to receive(:meta).and_return(meta)
+      expect_any_instance_of(Mamiya::Package).to receive(:build!) do
+        expect(meta[:script]).to eq 'deploy.rb'
+      end
+
+      build_step.run!
+
+      expect(build_dir.join('.mamiya.script')).not_to be_exist
+    end
+
+    context "when package_under is specified" do
+      let(:package_under) { 'hoge' }
+
+      before do
+        build_dir.join('hoge').mkdir
+        File.write build_dir.join('hoge', 'test'), "hello\n"
+      end
+
+      it "places .mamiya.script under :package_under" do
+        expect_any_instance_of(Mamiya::Package).to receive(:build!) do
+          expect(build_dir.join('hoge', '.mamiya.script')).to be_a_directory
+          expect(build_dir.join('hoge', '.mamiya.script', 'deploy.rb').read).to match(/:script/)
+        end
+
+        build_step.run!
+
+        expect(build_dir.join('.mamiya.script')).not_to be_exist
+      end
+    end
+
+    context "with :script_additionals" do
+      before do
+        allow(script).to receive(:script_additionals).and_return(%w(test))
+      end
+
+      it "packs them into .mamiya.script" do
+        File.write script_dir.join('test'), "this is test\n"
+
+        expect_any_instance_of(Mamiya::Package).to receive(:build!) do
+          expect(build_dir.join('.mamiya.script')).to be_a_directory
+          expect(build_dir.join('.mamiya.script', 'deploy.rb').read).to match(/:script/)
+          expect(build_dir.join('.mamiya.script', 'test').read).to match(/this is test/)
+        end
+
+        build_step.run!
+
+        expect(build_dir.join('.mamiya.script')).not_to be_exist
+      end
+    end
+
+    context "without script_file and when script is loaded from a file" do
+      before do
+        allow(script).to receive(:_file).and_return(script_file)
+        allow(script).to receive(:script_file).and_return(nil)
+      end
+
+      it "assumes loaded file's directory as script_dir and loaded file as script_file" do
+        expect_any_instance_of(Mamiya::Package).to receive(:build!) do
+          expect(build_dir.join('.mamiya.script')).to be_a_directory
+          expect(build_dir.join('.mamiya.script', 'deploy.rb').read).to match(/:script/)
+        end
+
+        build_step.run!
+
+        expect(build_dir.join('.mamiya.script')).not_to be_exist
+      end
+    end
+
+    context "without script_file and when script is not loaded from a file" do
+      before do
+        allow(script).to receive(:_file).and_return(nil)
+        allow(script).to receive(:script_file).and_return(nil)
+      end
+
+      it "raises an error" do
+        expect {
+          build_step.run!
+        }.to raise_error Mamiya::Steps::Build::ScriptFileNotSpecified
+      end
     end
 
     context "with package name determiner" do
