@@ -103,6 +103,7 @@ describe Mamiya::Steps::Build do
       allow(script).to receive(:exclude_from_package).and_return(['test'])
       allow(script).to receive(:dereference_symlinks).and_return(true)
       allow(script).to receive(:package_under).and_return('foo')
+      build_dir.join('foo').mkdir
 
       expect_any_instance_of(Mamiya::Package).to \
         receive(:build!).with(
@@ -150,6 +151,26 @@ describe Mamiya::Steps::Build do
       build_step.run!
 
       expect(build_dir.join('.mamiya.script')).not_to be_exist
+    end
+
+    context "when package_under is specified" do
+      let(:package_under) { 'hoge' }
+
+      before do
+        build_dir.join('hoge').mkdir
+        File.write build_dir.join('hoge', 'test'), "hello\n"
+      end
+
+      it "places .mamiya.script under :package_under" do
+        expect_any_instance_of(Mamiya::Package).to receive(:build!) do
+          expect(build_dir.join('hoge', '.mamiya.script')).to be_a_directory
+          expect(build_dir.join('hoge', '.mamiya.script', 'deploy.rb').read).to match(/:script/)
+        end
+
+        build_step.run!
+
+        expect(build_dir.join('.mamiya.script')).not_to be_exist
+      end
     end
 
     context "with :script_additionals" do

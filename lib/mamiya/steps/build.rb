@@ -45,15 +45,20 @@ module Mamiya
           Dir.chdir old_pwd
         end
 
+        # XXX: TODO: move to another class?
         logger.info "Copying script files..."
-        script_dest = Pathname.new File.join(script.build_from, '.mamiya.script')
+        if script.package_under
+          script_dest = Pathname.new File.join(script.build_from, script.package_under, '.mamiya.script')
+        else
+          script_dest = Pathname.new File.join(script.build_from, '.mamiya.script')
+        end
         if script_dest.exist?
           logger.warn "Removing existing .mamiya.script"
           FileUtils.remove_entry_secure script_dest
         end
         script_dest.mkdir
 
-        logger.info "- #{script_file} -> .mamiya.script/"
+        logger.info "- #{script_file} -> #{script_dest}"
         FileUtils.cp script_file, script_dest
 
         if script.script_additionals
@@ -62,6 +67,7 @@ module Mamiya
             src = script_dir.join(additional)
             dst = script_dest.join(additional)
             logger.info "- #{src} -> #{dst}"
+            FileUtils.mkdir_p dst.dirname
             FileUtils.cp_r src, dst
           end
         end
