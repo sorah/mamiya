@@ -53,6 +53,9 @@ module Mamiya
 
     set_default :skip_prepare_build, false
 
+    set_default :script_file, nil
+    set_default :script_additionals, []
+
     def run(*args, allow_failure: false)
       # TODO: Stop when fail
       actual = -> do
