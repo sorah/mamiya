@@ -12,8 +12,6 @@ module Mamiya
       def run!
         @exception = nil
 
-        script_file = script.script_file || script._file
-
         unless script_file
           raise ScriptFileNotSpecified, "Set script files to :script_file"
         end
@@ -24,16 +22,51 @@ module Mamiya
 
         logger.info "Initiating package build"
 
+        run_before_build
+        run_prepare_build
+        run_build
+
+        copy_deploy_scripts
+
+        set_metadata
+
+        build_package
+
+        logger.info "Packed."
+
+      rescue Exception => e
+        @exception = e
+        raise
+      ensure
+        logger.warn "Exception occured, cleaning up..." if @exception
+
+        if script_dest.exist?
+          FileUtils.remove_entry_secure script_dest
+        end
+
+        logger.info "Running script.after_build"
+        script.after_build[@exception]
+
+        logger.info "DONE!" unless @exception
+      end
+
+      private
+
+      def run_before_build
         logger.info "Running script.before_build"
         script.before_build[]
+      end
 
+      def run_prepare_build
         unless script.skip_prepare_build
           logger.info "Running script.prepare_build"
           script.prepare_build[File.exists?(script.build_from)]
         else
           logger.debug "prepare_build skipped due to script.skip_prepare_build"
         end
+      end
 
+      def run_build
         old_pwd = Dir.pwd
         begin
           # Using without block because chdir in block shows warning
@@ -44,14 +77,12 @@ module Mamiya
         ensure
           Dir.chdir old_pwd
         end
+      end
 
+      def copy_deploy_scripts
         # XXX: TODO: move to another class?
         logger.info "Copying script files..."
-        if script.package_under
-          script_dest = Pathname.new File.join(script.build_from, script.package_under, '.mamiya.script')
-        else
-          script_dest = Pathname.new File.join(script.build_from, '.mamiya.script')
-        end
+
         if script_dest.exist?
           logger.warn "Removing existing .mamiya.script"
           FileUtils.remove_entry_secure script_dest
@@ -71,24 +102,17 @@ module Mamiya
             FileUtils.cp_r src, dst
           end
         end
+      end
 
-        logger.debug "Determining package name..."
-        package_name = Dir.chdir(script.build_from) {
-          script.package_name[
-            [Time.now.strftime("%Y-%m-%d_%H.%M.%S"), script.application]
-          ].join('-')
-        }
-        logger.info "Package name determined: #{package_name}"
-
-        package_path = File.join(script.build_to, package_name)
-        package = Mamiya::Package.new(package_path)
+      def set_metadata
         package.meta[:application] = script.application
         package.meta[:script] = File.basename(script_file)
-
         Dir.chdir(script.build_from) do
           package.meta.replace script.package_meta[package.meta]
         end
+      end
 
+      def build_package
         logger.info "Packaging to: #{package.path}"
         logger.debug "meta=#{package.meta.inspect}"
         package.build!(script.build_from,
@@ -96,22 +120,39 @@ module Mamiya
            dereference_symlinks: script.dereference_symlinks || false,
            package_under: script.package_under || nil,
            logger: logger)
-        logger.info "Packed."
+      end
 
-      rescue Exception => e
-        @exception = e
-        raise
-      ensure
-        logger.warn "Exception occured, cleaning up..." if @exception
-
-        if script_dest && File.exist?(script_dest)
-          FileUtils.remove_entry_secure script_dest
+      def package_name
+        @package_name ||= begin
+          logger.debug "Determining package name..."
+          name = Dir.chdir(script.build_from) {
+            script.package_name[
+              [Time.now.strftime("%Y-%m-%d_%H.%M.%S"), script.application]
+            ].join('-')
+          }
+          logger.info "Package name determined: #{name}"
+          name
         end
+      end
 
-        logger.info "Running script.after_build"
-        script.after_build[@exception]
+      def package_path
+        @package_path ||= File.join(script.build_to, package_name)
+      end
 
-        logger.info "DONE!" unless @exception
+      def package
+        @package ||= Mamiya::Package.new(package_path)
+      end
+
+      def script_file
+        @script_file ||= script.script_file || script._file
+      end
+
+      def script_dest
+        @script_dest ||= if script.package_under
+          Pathname.new File.join(script.build_from, script.package_under, '.mamiya.script')
+        else
+          Pathname.new File.join(script.build_from, '.mamiya.script')
+        end
       end
     end
   end
