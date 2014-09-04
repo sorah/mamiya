@@ -12,8 +12,8 @@ module Mamiya
     add_hook :build
     add_hook :after_build
 
-    add_hook :before_distribute
-    add_hook :after_distribute
+    #add_hook :before_distribute
+    #add_hook :after_distribute
 
     add_hook :before_prepare
     add_hook :prepare
