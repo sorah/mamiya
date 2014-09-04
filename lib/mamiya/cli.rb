@@ -161,11 +161,13 @@ module Mamiya
     end
 
     desc "prepare TARGET", "Prepare package."
+    method_option :labels, type: :string
     def prepare(target)
       Mamiya::Steps::Prepare.new(
         script: nil,
         config: config,
         target: target,
+        labels: labels,
       ).run!
     end
 
@@ -260,6 +262,11 @@ module Mamiya
         return nil if dont_raise_error
         fatal! "Deploy Script File not found (try --script(-S) option or place it at ./mamiya.rb or ./deploy.rb)"
       end
+    end
+
+    def labels
+      c = config(:no_error)
+      options[:labels] ? options[:labels].split(/,/).map(&:to_sym) : (c ? c.labels[[]] : [])
     end
 
     def fatal!(message)
