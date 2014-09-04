@@ -13,8 +13,8 @@ module Mamiya
 
         logger.info "Preparing #{target}..."
 
-        script.before_prepare[]
-        script.prepare[]
+        script.before_prepare(labels)[]
+        script.prepare(labels)[]
       rescue Exception => e
         @exception = e
         raise e
@@ -22,7 +22,7 @@ module Mamiya
         Dir.chdir old_pwd if old_pwd
         logger.warn "Exception occured, cleaning up..." if @exception
 
-        script.after_prepare[@exception]
+        script.after_prepare(labels)[@exception]
 
         logger.info "DONE!" unless @exception
       end
@@ -47,6 +47,11 @@ module Mamiya
 
       def target_meta
         @target_meta ||= JSON.parse target.join('.mamiya.meta.json').read
+      end
+
+      def labels
+        # XXX: TODO: is it sure that passing labels via options of step?
+        options[:labels]
       end
     end
   end
