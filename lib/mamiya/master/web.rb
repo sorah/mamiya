@@ -148,6 +148,7 @@ module Mamiya
       end
 
       get '/agents' do
+        last_refresh_at = agent_monitor.last_refresh_at
         statuses = agent_monitor.statuses
         members = agent_monitor.agents
         failed_agents = agent_monitor.failed_agents
@@ -174,6 +175,7 @@ module Mamiya
         content_type :json
 
         {
+          last_refresh_at: agent_monitor.last_refresh_at,
           agents: agents,
           failed_agents: failed_agents,
         }.to_json

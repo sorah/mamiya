@@ -30,9 +30,10 @@ module Mamiya
         @failed_agents = [].freeze
         @statuses = {}
         @commit_lock = Mutex.new
+        @last_refresh_at = nil
       end
 
-      attr_reader :statuses, :agents, :failed_agents
+      attr_reader :statuses, :agents, :failed_agents, :last_refresh_at
 
       def start!
         @thread ||= Thread.new do
@@ -153,6 +154,7 @@ module Mamiya
           @agents = new_agents.freeze
           @failed_agents = new_failed_agents.freeze
           @statuses = new_statuses
+          @last_refresh_at = Time.now
         }
 
         self
