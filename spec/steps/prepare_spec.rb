@@ -42,7 +42,7 @@ describe Mamiya::Steps::Prepare do
   before do
     File.write target_dir.join('.mamiya.meta.json'), target_meta.to_json
     allow(Mamiya::Script).to receive(:new).and_return(script)
-    allow(script).to receive(:load).with(target_dir.join('.mamiya.script', 'script.rb')).and_return(script)
+    allow(script).to receive(:load!).with(target_dir.realpath.join('.mamiya.script', 'script.rb')).and_return(script)
     allow(script).to receive(:set).and_return(script)
   end
 

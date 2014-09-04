@@ -42,7 +42,7 @@ module Mamiya
       private
 
       def target
-        @target ||= Pathname.new options[:target]
+        @target ||= Pathname.new(options[:target]).realpath
       end
 
       def target_meta
