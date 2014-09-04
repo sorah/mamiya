@@ -103,9 +103,9 @@ module Mamiya
             @file = filename if filename
 
             if str && filename && lineno
-              self.instance_eval(str, filename, lineno)
+              self.instance_eval(str, filename.to_s, lineno)
             elsif str && filename
-              self.instance_eval(str, filename)
+              self.instance_eval(str, filename.to_s)
             elsif str
               self.instance_eval(str)
             end
