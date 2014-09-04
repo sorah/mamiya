@@ -114,5 +114,17 @@ module Mamiya
       logger.info "$ cd #{args[0]}"
       Dir.chdir *args
     end
+
+    def deploy_to
+      self[:deploy_to] && Pathname.new(self[:deploy_to])
+    end
+
+    def release_path
+      self[:release_path] && Pathname.new(self[:release_path])
+    end
+
+    def shared_path
+      deploy_to && deploy_to.join('shared')
+    end
   end
 end
