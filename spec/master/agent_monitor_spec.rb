@@ -69,6 +69,18 @@ describe Mamiya::Master::AgentMonitor do
       }.to('bar')
     end
 
+    it "updates #last_refresh_at" do
+      agent_monitor.refresh
+      expect(agent_monitor.last_refresh_at).to be_a_kind_of(Time)
+
+      expect {
+        agent_monitor.refresh
+      }.to change {
+        agent_monitor.last_refresh_at
+      }
+    end
+
+
     it "updates status .packages by packages query" do
       expect {
         agent_monitor.refresh
