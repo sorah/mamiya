@@ -8,6 +8,7 @@ require 'mamiya/steps/build'
 require 'mamiya/steps/push'
 require 'mamiya/steps/fetch'
 require 'mamiya/steps/extract'
+require 'mamiya/steps/prepare'
 
 require 'mamiya/agent'
 require 'mamiya/master'
@@ -159,8 +160,13 @@ module Mamiya
     def distribute
     end
 
-    desc "prepare", "Prepare package on clients."
-    def prepare
+    desc "prepare TARGET", "Prepare package."
+    def prepare(target)
+      Mamiya::Steps::Prepare.new(
+        script: nil,
+        config: config,
+        target: target,
+      ).run!
     end
 
     desc "finalize", "Finalize (start) prepared package on clients."
