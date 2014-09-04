@@ -31,7 +31,12 @@ module Mamiya
       alias given_script script 
 
       def script
-        @target_script ||= Mamiya::Script.new.load target.join('.mamiya.script', target_meta['script'])
+        @target_script ||= Mamiya::Script.new.load!(
+          target.join('.mamiya.script', target_meta['script'])).tap do |script|
+          # XXX: release_path is set by options[:target] but deploy_to is set by script?
+          script.set(:release_path, target)
+          script.set(:logger, logger)
+        end
       end
 
       private

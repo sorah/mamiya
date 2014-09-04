@@ -43,6 +43,7 @@ describe Mamiya::Steps::Prepare do
     File.write target_dir.join('.mamiya.meta.json'), target_meta.to_json
     allow(Mamiya::Script).to receive(:new).and_return(script)
     allow(script).to receive(:load).with(target_dir.join('.mamiya.script', 'script.rb')).and_return(script)
+    allow(script).to receive(:set).and_return(script)
   end
 
   describe "#run!" do
@@ -85,6 +86,12 @@ describe Mamiya::Steps::Prepare do
       }.not_to change { Dir.pwd }
 
       expect(File.realpath(pwd)).to eq target_dir.realpath.to_s
+    end
+
+    it "sets release_path" do
+      expect(script).to receive(:set).with(:release_path, target_dir.realpath)
+      expect(script).to receive(:set).with(:logger, step.logger)
+      step.run!
     end
   end
 end
