@@ -19,9 +19,9 @@ module Mamiya
     add_hook :prepare
     add_hook :after_prepare
 
-    add_hook :before_finalize
-    add_hook :finalize
-    add_hook :after_finalize
+    add_hook :before_switch
+    add_hook :release
+    add_hook :after_switch
 
     add_hook :before_rollback
     add_hook :rollback
@@ -125,6 +125,10 @@ module Mamiya
 
     def shared_path
       deploy_to && deploy_to.join('shared')
+    end
+
+    def current_path
+      deploy_to && deploy_to.join('current')
     end
   end
 end

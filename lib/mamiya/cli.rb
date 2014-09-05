@@ -6,9 +6,11 @@ require 'mamiya/logger'
 
 require 'mamiya/steps/build'
 require 'mamiya/steps/push'
+
 require 'mamiya/steps/fetch'
 require 'mamiya/steps/extract'
 require 'mamiya/steps/prepare'
+require 'mamiya/steps/switch'
 
 require 'mamiya/agent'
 require 'mamiya/master'
@@ -171,10 +173,18 @@ module Mamiya
       ).run!
     end
 
-    desc "finalize", "Finalize (start) prepared package on clients."
-    def finalize
+    desc "switch TARGET", "Switch current dir then release."
+    method_option :no_release, type: :boolean, default: false
+    method_option :labels, type: :string
+    def switch(target)
+      Mamiya::Steps::Switch.new(
+        script: nil,
+        config: config,
+        target: target,
+        labels: labels,
+        no_release: options[:no_release],
+      ).run!
     end
-
 
     # ---
 
