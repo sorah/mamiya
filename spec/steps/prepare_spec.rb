@@ -77,7 +77,7 @@ describe Mamiya::Steps::Prepare do
         from(nil).to(e)
     end
 
-    it "calls hook in :target_dir (pwd)" do
+    it "calls hook in :target (pwd)" do
       pwd = nil
       script.stub(prepare: proc { pwd = Dir.pwd })
 
