@@ -34,7 +34,7 @@ describe Mamiya::Steps::Prepare do
   end
 
   let(:options) do
-    {target: target_dir}
+    {target: target_dir, labels: [:foo, :bar]}
   end
 
   subject(:step) { described_class.new(script: nil, config: config, **options) }
@@ -91,6 +91,14 @@ describe Mamiya::Steps::Prepare do
     it "sets release_path" do
       expect(script).to receive(:set).with(:release_path, target_dir.realpath)
       expect(script).to receive(:set).with(:logger, step.logger)
+      step.run!
+    end
+
+    it "calls hooks using labels" do
+      allow(script).to receive(:before_prepare).with(%i(foo bar)).and_return(proc {})
+      allow(script).to receive(:prepare).with(%i(foo bar)).and_return(proc {})
+      allow(script).to receive(:after_prepare).with(%i(foo bar)).and_return(proc {})
+
       step.run!
     end
   end
