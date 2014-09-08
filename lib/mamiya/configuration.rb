@@ -28,6 +28,8 @@ module Mamiya
     def storage_class
       Storages.find(self[:storage][:type])
     end
+
+    # XXX: TODO: prepare prereleases_dir, packages_dir method to return Pathname
   end
 end
 

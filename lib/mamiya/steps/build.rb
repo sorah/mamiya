@@ -26,6 +26,7 @@ module Mamiya
         run_prepare_build
         run_build
 
+        # XXX: Is this really suitable here? Package class should do?
         copy_deploy_scripts
 
         set_metadata
