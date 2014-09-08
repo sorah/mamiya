@@ -30,7 +30,7 @@ describe Mamiya::Master::AgentMonitor do
     {
       "Acks" => ['a'],
       "Responses" => {
-        'a' => {"foo" => "bar", 'packages' => ['pkg1']}.to_json,
+        'a' => {"foo" => "bar", 'packages' => {"app" => ['pkg1']}}.to_json,
       },
     }
   end
@@ -103,7 +103,7 @@ describe Mamiya::Master::AgentMonitor do
           agent_monitor.refresh
         }.to change {
           agent_monitor.statuses["a"] && agent_monitor.statuses["a"]['packages']
-        }.to(%w(pkg1))
+        }.to("app" => %w(pkg1))
       end
     end
 
