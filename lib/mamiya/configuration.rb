@@ -14,8 +14,10 @@ module Mamiya
 
     # agent
     set_default :packages_dir, nil
+    set_default :prereleases_dir, nil
     set_default :fetch_sleep, 12
     set_default :keep_packages, 3
+    set_default :keep_prereleases, 3
 
     # master
     set_default :master, {monitor: {refresh_interval: nil}} # TODO: don't nest
