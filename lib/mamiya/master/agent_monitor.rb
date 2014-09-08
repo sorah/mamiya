@@ -120,7 +120,13 @@ module Mamiya
             next unless new_statuses[name]
 
             begin
-              new_statuses[name]['packages'] = JSON.parse(json)
+              resp = JSON.parse(json)
+              if resp.keys.sort == ['packages', 'prereleases']
+                new_statuses[name]['packages'] = resp['packages']
+                new_statuses[name]['prereleases'] = resp['prereleases']
+              else # TODO: Compatibility; should remove soon
+                new_statuses[name]['packages'] = resp
+              end
             rescue JSON::ParserError => e
               logger.warn "Failed to parse packages from #{name}: #{e.message}"
               next

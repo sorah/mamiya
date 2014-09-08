@@ -30,7 +30,7 @@ describe Mamiya::Master::AgentMonitor do
     {
       "Acks" => ['a'],
       "Responses" => {
-        'a' => {"foo" => "bar", 'packages' => {"app" => ['pkg1']}}.to_json,
+        'a' => {"foo" => "bar", 'packages' => {"app" => ['pkg1']}, 'prereleases' => {"app" => ['pkg2']}}.to_json,
       },
     }
   end
@@ -39,7 +39,7 @@ describe Mamiya::Master::AgentMonitor do
     {
       "Acks" => ['a'],
       "Responses" => {
-        'a' => {"app" => ['pkg1','pkg2']}.to_json,
+        'a' => {"packages" => {"app" => ['pkg1','pkg2']}, "prereleases" => {"app" => ['pkg2']}}.to_json,
       },
     }
   end
@@ -89,6 +89,14 @@ describe Mamiya::Master::AgentMonitor do
       }.to("app" => %w(pkg1 pkg2))
     end
 
+    it "updates status .prereleases by packages query" do
+      expect {
+        agent_monitor.refresh
+      }.to change {
+        agent_monitor.statuses["a"] && agent_monitor.statuses["a"]['prereleases']
+      }.to("app" => %w(pkg2))
+    end
+
     context "when packages query unavailable, but available in status query" do
       let(:packages_query_response) do
         {
@@ -104,6 +112,14 @@ describe Mamiya::Master::AgentMonitor do
         }.to change {
           agent_monitor.statuses["a"] && agent_monitor.statuses["a"]['packages']
         }.to("app" => %w(pkg1))
+      end
+
+      it "updates status .prereleases from status" do
+        expect {
+          agent_monitor.refresh
+        }.to change {
+          agent_monitor.statuses["a"] && agent_monitor.statuses["a"]['prereleases']
+        }.to("app" => %w(pkg2))
       end
     end
 

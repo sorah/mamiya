@@ -77,7 +77,10 @@ module Mamiya
 
         s[:queues] = task_queue.status
 
-        s[:packages] = self.existing_packages if packages
+        if packages
+          s[:packages] = self.existing_packages
+          s[:prereleases] = self.existing_prereleases
+        end
       end
     end
 
@@ -155,7 +158,9 @@ module Mamiya
         end
 
         serf.respond('mamiya:packages') do |event|
-          self.existing_packages.to_json
+          {'packages' => self.existing_packages,
+           'prereleases' => self.existing_prereleases,
+          }.to_json
         end
       end
     end

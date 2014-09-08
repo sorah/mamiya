@@ -91,6 +91,7 @@ describe Mamiya::Agent do
   describe "#status" do
     before do
       allow(agent).to receive(:existing_packages).and_return("app" => ["pkg"])
+      allow(agent).to receive(:existing_prereleases).and_return("app" => ["pkg"])
       allow(agent).to receive(:labels).and_return([:foo,:bar])
 
       allow(task_queue).to receive(:status).and_return({a: {working: nil, queue: []}})
@@ -114,6 +115,10 @@ describe Mamiya::Agent do
       expect(status[:packages]).to eq agent.existing_packages
     end
 
+    it "includes prereleases" do
+      expect(status[:prereleases]).to eq agent.existing_prereleases
+    end
+
     it "includes status" do
       expect(status[:labels]).to eq agent.labels
     end
@@ -123,6 +128,10 @@ describe Mamiya::Agent do
 
       it "doesn't include existing packages" do
         expect(status.has_key?(:packages)).to be_false
+      end
+
+      it "doesn't include existing packages" do
+        expect(status.has_key?(:prereleases)).to be_false
       end
     end
 
@@ -215,10 +224,19 @@ describe Mamiya::Agent do
     end
 
     it "responds to 'mamiya:packages'" do
-      allow(agent).to receive(:existing_packages).and_return(%w(pkg1 pkg2))
+      allow(agent).to receive(:existing_packages).and_return("app" => %w(pkg1 pkg2))
+      allow(agent).to receive(:existing_prereleases).and_return("app" => %w(pkg2))
 
       response = serf.trigger_query('mamiya:packages', '')
-      expect(JSON.parse(response)).to eq(%w(pkg1 pkg2))
+
+      expect(JSON.parse(response)).to eq(
+        "packages" => {
+          "app" => %w(pkg1 pkg2)
+        },
+        "prereleases" => {
+          "app" => %w(pkg2)
+        },
+      )
     end
   end
 
