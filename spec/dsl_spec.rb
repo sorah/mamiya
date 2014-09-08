@@ -290,12 +290,4 @@ describe Mamiya::DSL do
       end
     end
   end
-
-  describe "#servers" do
-    pending "Hey!"
-  end
-
-  describe "#use_servers" do
-    pending "Hey!"
-  end
 end
