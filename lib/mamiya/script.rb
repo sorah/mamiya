@@ -45,7 +45,6 @@ module Mamiya
 
     # TODO: use variable in config.yml
     set_default :deploy_to, nil
-    set_default :prepare_to, nil
 
     set_default :logger, Mamiya::Logger.new(outputs: [])
 
