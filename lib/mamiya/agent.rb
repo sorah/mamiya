@@ -130,7 +130,7 @@ module Mamiya
               File.exist? File.join(path, '.mamiya.prepared')
             }.map { |path|
               File.basename(path)
-            }
+            }.sort
           ]
         }
       ]
