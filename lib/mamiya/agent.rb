@@ -90,7 +90,7 @@ module Mamiya
     # Packages which has json and tarball is considered as valid.
     def existing_packages
       paths_by_app = Dir[File.join(config[:packages_dir], '*', '*.{tar.gz,json}')].group_by { |path|
-        path.split('/')[-2]
+        path.split(File::SEPARATOR)[-2]
       }
 
       Hash[
