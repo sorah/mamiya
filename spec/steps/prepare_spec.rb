@@ -61,20 +61,40 @@ describe Mamiya::Steps::Prepare do
         to(hooks)
     end
 
-    it "calls after hook even if exception occured" do
-      e = Exception.new("Good bye, the cruel world")
-      allow(script).to receive(:prepare).and_return(proc { raise e })
+    context "if exception occured" do
+      let(:error) { Exception.new("Good bye, the cruel world") }
+      before do
+        e = error
+        allow(script).to receive(:prepare).and_return(proc { raise e })
+      end
 
-      received = nil
-      allow(script).to receive(:after_prepare).and_return(proc { |_| received = _ })
+      it "calls after hook with error" do
+        received = nil
+        allow(script).to receive(:after_prepare).and_return(proc { |_| received = _ })
 
-      expect {
-        begin
+        expect {
+          begin
+            step.run!
+          rescue Exception; end
+        }.
+          to change { received }.
+          from(nil).to(error)
+      end
+
+      it "does not create .mamiya.prepared" do
+        expect {
           step.run!
-        rescue Exception; end
-      }.
-        to change { received }.
-        from(nil).to(e)
+        }.to raise_error(error)
+        expect(target_dir.join('.mamiya.prepared')).not_to be_exist
+      end
+    end
+
+    it "creates .mamiya.prepared" do
+      expect {
+        step.run!
+      }.to change {
+        target_dir.join('.mamiya.prepared').exist?
+      }.from(false).to(true)
     end
 
     it "calls hook in :target (pwd)" do

@@ -15,6 +15,8 @@ module Mamiya
 
         script.before_prepare(labels)[]
         script.prepare(labels)[]
+
+        File.write target.join('.mamiya.prepared'), "#{Time.now.to_i}\n"
       rescue Exception => e
         @exception = e
         raise e
