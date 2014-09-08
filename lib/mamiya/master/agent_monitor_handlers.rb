@@ -63,6 +63,17 @@ module Mamiya
         end
       end
 
+      def task___prepare__finish(status, task)
+        status['prereleases'] ||= {}
+        status['prereleases'][task['app']] ||= []
+
+        unless status['prereleases'][task['app']].include?(task['pkg'])
+          status['prereleases'][task['app']] << task['pkg']
+        end
+      end
+
+
+
       def pkg__remove(status, payload, event)
         status['packages'] ||= {}
         packages = status['packages'][payload['application']]
@@ -74,7 +85,6 @@ module Mamiya
         prereleases = status['prereleases'][payload['app']]
         prereleases.delete(payload['pkg']) if prereleases
       end
-
     end
   end
 end

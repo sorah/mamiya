@@ -462,7 +462,6 @@ describe Mamiya::Master::AgentMonitor do
         end
       end
 
-
       describe "fetch" do
         describe "success" do
           let(:status) do
@@ -486,6 +485,34 @@ describe Mamiya::Master::AgentMonitor do
                      task: {task: 'fetch', app: 'myapp', pkg: 'pkg2'})
 
               expect(new_status["packages"]['myapp']).to eq %w(pkg1 pkg2)
+            end
+          end
+        end
+      end
+
+      describe "prepare" do
+        describe "success" do
+          let(:status) do
+            {prereleases: {}}
+          end
+
+          it "updates prereleases" do
+            commit('mamiya:task:finish',
+                   task: {task: 'prepare', app: 'myapp', pkg: 'pkg'})
+
+            expect(new_status["prereleases"]['myapp']).to eq ["pkg"]
+          end
+
+          context "with existing prerelease" do
+            let(:status) do
+              {prereleases: {'myapp' => ['pkg1']}}
+            end
+
+            it "updates prereleases" do
+              commit('mamiya:task:finish',
+                     task: {task: 'prepare', app: 'myapp', pkg: 'pkg2'})
+
+              expect(new_status["prereleases"]['myapp']).to eq %w(pkg1 pkg2)
             end
           end
         end
