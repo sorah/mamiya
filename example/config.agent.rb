@@ -4,8 +4,16 @@ set :storage, {
   region: ENV["AWS_REGION"] || 'ap-northeast-1',
 }
 
-set :packages_dir, "#{File.dirname(__FILE__)}/packages"
-set :prereleases_dir, "#{File.dirname(__FILE__)}/target/prereleases"
+require 'pathname'
+
+targets = Pathname.new(File.dirname(__FILE__)).join('targets')
+targets.mkpath
+
+agent_name = self.serf[:agent][:node] or raise 'no node name'
+target = targets.join(agent_name).tap(&:mkpath)
+
+set :packages_dir, target.join('packages')
+set :prereleases_dir, target.join('prereleases')
 
 # To test
 Dir.mkdir packages_dir unless File.exist?(packages_dir)
