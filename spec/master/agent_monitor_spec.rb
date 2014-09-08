@@ -421,6 +421,48 @@ describe Mamiya::Master::AgentMonitor do
         end
       end
 
+      describe "prerelease" do
+        describe ":remove" do
+          let(:status) do
+            {prereleases: {'myapp' => ['pkg1']}}
+          end
+
+          it "removes removed release from prereleases" do
+            commit('mamiya:prerelease:remove',
+                   app: 'myapp', pkg: 'pkg1')
+
+            expect(new_status["prereleases"]['myapp']).to eq []
+          end
+
+          context "with existing packages" do
+            let(:status) do
+              {prereleases: {'myapp' => ['pkg1', 'pkg2']}}
+            end
+
+            it "removes removed release from prereleases" do
+              commit('mamiya:prerelease:remove',
+                     app: 'myapp', pkg: 'pkg1')
+
+              expect(new_status["prereleases"]['myapp']).to eq ['pkg2']
+            end
+          end
+
+          context "with inexist package" do
+            let(:status) do
+              {prereleases: {'myapp' => ['pkg1', 'pkg3']}}
+            end
+
+            it "removes removed release from packages" do
+              commit('mamiya:prerelease:remove',
+                     app: 'myapp', pkg: 'pkg2')
+
+              expect(new_status["prereleases"]['myapp']).to eq ['pkg1', 'pkg3']
+            end
+          end
+        end
+      end
+
+
       describe "fetch" do
         describe "success" do
           let(:status) do

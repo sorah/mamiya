@@ -68,6 +68,13 @@ module Mamiya
         packages = status['packages'][payload['application']]
         packages.delete(payload['package']) if packages
       end
+
+      def prerelease__remove(status, payload, event)
+        status['prereleases'] ||= {}
+        prereleases = status['prereleases'][payload['app']]
+        prereleases.delete(payload['pkg']) if prereleases
+      end
+
     end
   end
 end
