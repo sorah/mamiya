@@ -114,6 +114,10 @@ module Mamiya
       Dir.chdir *args
     end
 
+    def build_from
+      self[:build_from] && Pathname.new(self[:build_from])
+    end
+
     def deploy_to
       self[:deploy_to] && Pathname.new(self[:deploy_to])
     end
