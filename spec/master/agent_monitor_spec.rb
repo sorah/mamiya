@@ -39,7 +39,7 @@ describe Mamiya::Master::AgentMonitor do
     {
       "Acks" => ['a'],
       "Responses" => {
-        'a' => ['pkg1','pkg2'].to_json,
+        'a' => {"app" => ['pkg1','pkg2']}.to_json,
       },
     }
   end
@@ -86,7 +86,7 @@ describe Mamiya::Master::AgentMonitor do
         agent_monitor.refresh
       }.to change {
         agent_monitor.statuses["a"] && agent_monitor.statuses["a"]['packages']
-      }.to(%w(pkg1 pkg2))
+      }.to("app" => %w(pkg1 pkg2))
     end
 
     context "when packages query unavailable, but available in status query" do
