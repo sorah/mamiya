@@ -1,5 +1,6 @@
 require 'mamiya/util/label_matcher'
 require 'thread'
+require 'pathname'
 
 module Mamiya
   class DSL
@@ -120,7 +121,7 @@ module Mamiya
     ##
     # Evaluates specified file +file+ in DSL environment.
     def load!(file)
-      set :_file, file
+      set :_file, Pathname.new(file)
       evaluate! File.read(file), file, 1
     end
 

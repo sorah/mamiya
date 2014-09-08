@@ -54,7 +54,7 @@ describe Mamiya::DSL do
     it "sets _file" do
       expect {
         dsl.load! "#{__dir__}/fixtures/dsl_test_load.rb"
-      }.to change { dsl._file }.from(nil).to("#{__dir__}/fixtures/dsl_test_load.rb")
+      }.to change { dsl._file }.from(nil).to(Pathname.new("#{__dir__}/fixtures/dsl_test_load.rb"))
     end
   end
 
