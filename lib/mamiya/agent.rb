@@ -114,6 +114,25 @@ module Mamiya
       ]
     end
 
+    def existing_prereleases
+      paths_by_app = Dir[File.join(config[:prereleases_dir], '*', '*')].group_by { |path|
+        path.split(File::SEPARATOR)[-2]
+      }
+
+      Hash[
+        paths_by_app.map { |app, paths|
+          [
+            app,
+            paths.select { |path|
+              File.exist? File.join(path, '.mamiya.prepared')
+            }.map { |path|
+              File.basename(path)
+            }
+          ]
+        }
+      ]
+    end
+
     def trigger(type, action: nil, coalesce: true, **payload)
       name = "mamiya:#{type}"
       name << ":#{action}" if action

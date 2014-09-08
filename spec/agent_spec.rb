@@ -161,6 +161,29 @@ describe Mamiya::Agent do
     end
   end
 
+  describe "#existing_prereleases" do
+    let!(:prereleases_dir) { Pathname.new Dir.mktmpdir('mamiya-agent-spec') }
+    after { FileUtils.remove_entry_secure(prereleases_dir) }
+
+    let(:config) { {prereleases_dir: prereleases_dir} }
+
+    subject(:existing_prereleases) { agent.existing_prereleases }
+
+    before do
+      prereleases_dir.join('a').mkdir
+      prereleases_dir.join('a', '1').mkdir
+      File.write prereleases_dir.join('a', '1', '.mamiya.prepared'), "#{Time.now.to_s}\n"
+      prereleases_dir.join('a', '2').mkdir
+      File.write prereleases_dir.join('a', '2', '.mamiya.prepared'), "#{Time.now.to_s}\n"
+      prereleases_dir.join('a', '3').mkdir
+    end
+
+    it "returns prepared prereleases" do
+      expect(existing_prereleases).to eq('a' => ['1', '2'])
+    end
+  end
+
+
   describe "#labels" do
     subject(:labels) { agent.labels }
 
