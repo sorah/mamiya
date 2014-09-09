@@ -90,6 +90,8 @@ module Mamiya
         end
 
         task.delete '_labels'
+        task.delete 'task'
+        task['task'] = task_name
 
         @logger.debug "enqueue #{task_name.inspect}, #{task.inspect}, #{@external_queue.inspect}"
         @external_queue << [task_name, task]

@@ -170,12 +170,12 @@ describe Mamiya::Agent::TaskQueue do
 
         100.times { break unless task_class_a.locks.empty?; sleep 0.01 }
         expect(task_class_a.locks).not_to be_empty
-        expect(queue.status[:a][:working]).to eq('wait' => true, 'id' => 1)
+        expect(queue.status[:a][:working]).to eq('wait' => true, 'id' => 1, 'task' => :a)
 
         queue.enqueue(:a, 'id' => 2)
         100.times { break unless queue.status[:a][:queue].empty?; sleep 0.01 }
         expect(queue.status[:a][:queue].size).to eq 1
-        expect(queue.status[:a][:queue].first).to eq('id' => 2)
+        expect(queue.status[:a][:queue].first).to eq('id' => 2, 'task' => :a)
 
         task_class_a.locks.values.last << true
 
@@ -236,16 +236,16 @@ describe Mamiya::Agent::TaskQueue do
           expect(task_class_a.locks).not_to be_empty
           expect(task_class_b.locks).not_to be_empty
 
-          expect(queue.status[:a][:working]).to eq('wait' => true, 'id' => 1)
-          expect(queue.status[:b][:working]).to eq('wait' => true, 'id' => 2)
+          expect(queue.status[:a][:working]).to eq('wait' => true, 'id' => 1, 'task' => :a)
+          expect(queue.status[:b][:working]).to eq('wait' => true, 'id' => 2, 'task' => :b)
 
           queue.enqueue(:a, 'id' => 3)
           queue.enqueue(:b, 'id' => 4)
           100.times { break if !queue.status[:a][:queue].empty? && !queue.status[:b][:queue].empty?; sleep 0.01 }
           expect(queue.status[:a][:queue].size).to eq 1
-          expect(queue.status[:a][:queue].first).to eq('id' => 3)
+          expect(queue.status[:a][:queue].first).to eq('id' => 3, 'task' => :a)
           expect(queue.status[:b][:queue].size).to eq 1
-          expect(queue.status[:b][:queue].first).to eq('id' => 4)
+          expect(queue.status[:b][:queue].first).to eq('id' => 4, 'task' => :b)
 
           task_class_a.locks.values.last << true
           task_class_b.locks.values.last << true
