@@ -2,6 +2,38 @@ require 'spec_helper'
 require 'mamiya/util/label_matcher'
 
 describe Mamiya::Util::LabelMatcher do
+  describe ".parse_string_expr" do
+    let(:str) { '' }
+    subject { described_class.parse_string_expr(str) }
+
+    it { should eq [] }
+
+    describe "(simple)" do
+      let(:str) { 'foo' }
+      it { should eq [['foo']] }
+    end
+
+    describe "(and)" do
+      let(:str) { 'foo,bar' }
+      it { should eq [['foo','bar']] }
+    end
+
+    describe "(or)" do
+      let(:str) { 'foo|bar' }
+      it { should eq [['foo'],['bar']] }
+    end
+
+    describe "(and/or)" do
+      let(:str) { 'foo,bar|baz' }
+      it { should eq [['foo','bar'],['baz']] }
+    end
+
+    describe "(and/or 2)" do
+      let(:str) { '1,2|3,4' }
+      it { should eq [['1','2'],['3','4']] }
+    end
+  end
+
   describe "#match?(expression)" do
     let(:klass) {
       Class.new {

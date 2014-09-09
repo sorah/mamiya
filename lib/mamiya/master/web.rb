@@ -1,6 +1,7 @@
 require 'mamiya/version'
 require 'mamiya/agent'
 require 'sinatra/base'
+require 'mamiya/util/label_matcher'
 require 'json'
 
 module Mamiya
@@ -17,6 +18,20 @@ module Mamiya
 
         def storage(app)
           master.storage(app)
+        end
+
+        def parse_label_matcher_expr(str)
+          Mamiya::Util::LabelMatcher.parse_string_expr(str)
+        end
+      end
+
+      before do
+        if request.content_type == 'application/json'
+          begin
+            params.merge! JSON.parse(request.body.read)
+          rescue JSON::ParserError
+            halt :bad_request
+          end
         end
       end
 
@@ -58,7 +73,7 @@ module Mamiya
         # TODO: filter with label
         if storage(params[:application]).meta(params[:package])
           status 204
-          master.distribute(params[:application], params[:package])
+          master.distribute(params[:application], params[:package], labels: params['labels'])
         else
           status 404
           content_type :json
@@ -70,7 +85,7 @@ module Mamiya
         # TODO: filter with label
         if storage(params[:application]).meta(params[:package])
           status 204
-          master.prepare(params[:application], params[:package])
+          master.prepare(params[:application], params[:package], labels: params['labels'])
         else
           status 404
           content_type :json
@@ -95,7 +110,12 @@ module Mamiya
           queued: [],
           not_distributed: []
         }
-        statuses = agent_monitor.statuses
+        if params[:labels]
+          expr = parse_label_matcher_expr(params[:labels])
+          statuses = agent_monitor.statuses(labels: expr)
+        else
+          statuses = agent_monitor.statuses
+        end
 
         pkg_array = [params[:application], params[:package]]
 
@@ -160,8 +180,10 @@ module Mamiya
       end
 
       get '/agents' do
+        expr = params[:labels] ? parse_label_matcher_expr(params[:labels]) : nil
+
         last_refresh_at = agent_monitor.last_refresh_at
-        statuses = agent_monitor.statuses
+        statuses = agent_monitor.statuses(labels: expr)
         members = agent_monitor.agents
         failed_agents = agent_monitor.failed_agents
 
@@ -183,6 +205,9 @@ module Mamiya
           agents[name]["status"] = status
         end
 
+        if params[:labels]
+          agents.select! { |k,v| v['status'] }
+        end
 
         content_type :json
 

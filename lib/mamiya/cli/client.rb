@@ -42,8 +42,10 @@ module Mamiya
       end
 
       desc "list-agents", 'list agents'
+      method_option :labels, type: :string
       def list_agents
-        payload = master_get("/agents")
+        params = options[:labels] ? {labels: options[:labels]} : {}
+        payload = master_get("/agents", params)
 
         agents = payload["agents"].keys
 
@@ -76,8 +78,10 @@ module Mamiya
       desc "show-distribution package", "Show package distribution status"
       method_option :format, aliases: %w(-f), type: :string, default: 'text'
       method_option :verbose, aliases: %w(-v), type: :boolean
+      method_option :labels, type: :string
       def show_distribution(package)
-        dist = master_get("/packages/#{application}/#{package}/distribution")
+        params = options[:labels] ? {labels: options[:labels]} : {}
+        dist = master_get("/packages/#{application}/#{package}/distribution", params)
 
         case options[:format]
         when 'json'
@@ -155,7 +159,8 @@ not distributed: #{dist['not_distributed_count']} agents
         options[:application] or fatal!('specify application')
       end
 
-      def master_get(path)
+      def master_get(path, params={})
+        path += "?#{Rack::Utils.build_query(params)}" unless params.empty?
         master_http.start do |http|
           JSON.parse http.get(path).tap(&:value).body
         end

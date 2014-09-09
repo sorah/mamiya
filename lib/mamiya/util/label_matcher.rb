@@ -1,6 +1,10 @@
 module Mamiya
   module Util
     module LabelMatcher
+      def self.parse_string_expr(str)
+        str.split(/\|/).map{ |_| _.split(/,/) }
+      end
+
       def match?(*expressions)
         labels = self.labels().map(&:to_s)
 

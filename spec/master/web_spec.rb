@@ -112,11 +112,23 @@ describe Mamiya::Master::Web do
 
   describe "POST /packages/:application/:package/distribute" do
     it "dispatchs distribute request" do
-      expect(master).to receive(:distribute).with('myapp', 'mypackage')
+      expect(master).to receive(:distribute).with('myapp', 'mypackage', labels: nil)
 
       post '/packages/myapp/mypackage/distribute'
 
       expect(last_response.status).to eq 204 # no content
+    end
+
+    context "with labels" do
+      it "dispatchs prepare request with labels" do
+        expect(master).to receive(:distribute).with('myapp', 'mypackage', labels: ['foo'])
+
+        post '/packages/myapp/mypackage/distribute',
+          {'labels' =>  ["foo"]}.to_json,
+          'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq 204 # no content
+      end
     end
 
     context "when package not found" do
@@ -129,11 +141,23 @@ describe Mamiya::Master::Web do
 
   describe "POST /packages/:application/:package/prepare" do
     it "dispatchs prepare request" do
-      expect(master).to receive(:prepare).with('myapp', 'mypackage')
+      expect(master).to receive(:prepare).with('myapp', 'mypackage', labels: nil)
 
       post '/packages/myapp/mypackage/prepare'
 
       expect(last_response.status).to eq 204 # no content
+    end
+
+    context "with labels" do
+      it "dispatchs prepare request with labels" do
+        expect(master).to receive(:prepare).with('myapp', 'mypackage', labels: ['foo'])
+
+        post '/packages/myapp/mypackage/prepare',
+          {'labels' =>  ["foo"]}.to_json,
+          'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq 204 # no content
+      end
     end
 
     context "when package not found" do
