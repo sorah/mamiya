@@ -4,6 +4,7 @@ require 'mamiya/steps/abstract'
 module Mamiya
   module Steps
     class Extract < Abstract
+      # XXX: extract step is really needed? doing this in prepare step for consistency with agent/tasks/prepare, is better, I guess.
       def run!
         package = case options[:package]
                   when Mamiya::Package

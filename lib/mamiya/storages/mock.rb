@@ -14,6 +14,7 @@ module Mamiya
       end
 
       def self.find(config={})
+        # TODO: FIXME: Should be an Hash
         storage.keys
       end
 
