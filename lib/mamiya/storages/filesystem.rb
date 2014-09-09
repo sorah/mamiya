@@ -18,7 +18,7 @@ module Mamiya
         }.select { |key, files|
           files.find { |file| file.to_s.end_with?('.tar.gz') } &&
           files.find { |file| file.to_s.end_with?('.json') }
-        }.keys
+        }.keys.sort
       end
 
       def push(package)
