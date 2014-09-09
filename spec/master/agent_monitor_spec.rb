@@ -3,6 +3,8 @@ require 'json'
 
 require 'villein/event'
 
+require 'mamiya/util/label_matcher'
+
 require 'mamiya/master/agent_monitor'
 
 describe Mamiya::Master::AgentMonitor do
@@ -42,6 +44,45 @@ describe Mamiya::Master::AgentMonitor do
         'a' => {"packages" => {"app" => ['pkg1','pkg2']}, "prereleases" => {"app" => ['pkg2']}}.to_json,
       },
     }
+  end
+
+  describe "#statuses" do
+    let(:members) do
+      [
+        {
+          "name"=>"a", "status"=>"alive",
+          "addr"=>"x.x.x.x:7676", "port"=>7676,
+          "protocol"=>{"max"=>4, "min"=>2, "version"=>4},
+          "tags"=>{},
+        },
+      ]
+    end
+
+    let(:status_query_response) do
+      {
+        "Acks" => ['a','b'],
+        "Responses" => {
+          'a' => {'packages' => {}, 'prereleases' => {}, "labels" => ['foo','bar']}.to_json,
+          'b' => {'packages' => {}, 'prereleases' => {}, "labels" => ['baz']}.to_json,
+        },
+      }
+    end
+
+    before do
+      stub_serf_queries()
+      allow(serf).to receive(:members).and_return(members)
+
+      agent_monitor.refresh
+    end
+
+    context "with labels" do
+      it "can filter agents by label" do
+        # FIXME: stub label matcher
+        expect(agent_monitor.statuses.keys.sort).to eq ['a', 'b']
+        expect(agent_monitor.statuses(labels: ['foo']).keys.sort).to eq ['a']
+        expect(agent_monitor.statuses(labels: ['baz']).keys.sort).to eq ['b']
+      end
+    end
   end
 
   describe "#refresh" do

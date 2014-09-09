@@ -33,7 +33,19 @@ module Mamiya
         @last_refresh_at = nil
       end
 
-      attr_reader :statuses, :agents, :failed_agents, :last_refresh_at
+      attr_reader :agents, :failed_agents, :last_refresh_at
+
+      def statuses(labels: nil)
+        if labels
+          @statuses.select { |name, status|
+            status['labels'] &&
+              Mamiya::Util::LabelMatcher::Simple.new(status['labels']).
+              match?(labels)
+          }
+        else
+          @statuses
+        end
+      end
 
       def start!
         @thread ||= Thread.new do
