@@ -84,6 +84,13 @@ module Mamiya
       def enqueue(task_name, task)
         raise Stopped, 'this task queue is stopped' unless running?
 
+        if task['_labels'] && !agent.match?(task['_labels'])
+          @logger.debug "skipping enqueue #{task_name.inspect}, #{task.inspect}, because agent doesn't match"
+          return self
+        end
+
+        task.delete '_labels'
+
         @logger.debug "enqueue #{task_name.inspect}, #{task.inspect}, #{@external_queue.inspect}"
         @external_queue << [task_name, task]
         self

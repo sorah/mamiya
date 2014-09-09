@@ -2,6 +2,8 @@ require 'thread'
 require 'villein'
 require 'mamiya/version'
 
+require 'mamiya/util/label_matcher'
+
 require 'mamiya/logger'
 
 require 'mamiya/steps/fetch'
@@ -88,6 +90,8 @@ module Mamiya
     def labels
       config.labels[[]]
     end
+
+    include Mamiya::Util::LabelMatcher
 
     ##
     # Returns hash with existing packages (where valid) by app name.

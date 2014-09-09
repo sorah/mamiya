@@ -103,6 +103,42 @@ describe Mamiya::Agent::TaskQueue do
       expect(task_class_a.runs[1]['foo']).to eq '2'
     end
 
+    describe "(task with _labels)" do
+      it "runs on matched agent" do
+        queue.start!
+        expect(agent).to receive(:match?).with(['foo', 'bar']).and_return(true)
+
+        queue.enqueue(:a, 'foo' => '1', '_labels' => ['foo', 'bar'])
+
+        100.times { break if task_class_a.runs.size == 1; sleep 0.01 }
+        expect(task_class_a.runs.size).to eq 1
+        expect(task_class_a.runs[0]['foo']).to eq '1'
+      end
+
+      it "doesn't run on not matched agent" do
+        queue.start!
+        expect(agent).to receive(:match?).with(['foo', 'bar']).and_return(false)
+
+        queue.enqueue(:a, 'foo' => '1', '_labels' => ['foo', 'bar'])
+        queue.enqueue(:a, 'foo' => '2')
+
+        100.times { break if task_class_a.runs.size == 1; sleep 0.01 }
+        expect(task_class_a.runs.size).to eq 1
+        expect(task_class_a.runs[0]['foo']).to eq '2'
+      end
+
+      it "removes _labels from task on run" do
+        queue.start!
+        expect(agent).to receive(:match?).with(['foo', 'bar']).and_return(true)
+
+        queue.enqueue(:a, 'foo' => '1', '_labels' => ['foo', 'bar'])
+
+        100.times { break if task_class_a.runs.size == 1; sleep 0.01 }
+        expect(task_class_a.runs.size).to eq 1
+        expect(task_class_a.runs[0].key?('_labels')).to be_false
+      end
+    end
+
     describe "#working?" do
       it "returns true if there're any working tasks" do
         queue.start!

@@ -1,7 +1,8 @@
 module Mamiya
   class Agent
     module Actions
-      def order_task(task, coalesce: false, **payload)
+      def order_task(task, coalesce: false, labels: nil, **payload)
+        payload[:_labels] = labels if labels
         trigger('task',
           coalesce: coalesce,
           task: task,
@@ -9,8 +10,9 @@ module Mamiya
         )
       end
 
-      def distribute(application, package)
-        order_task('fetch', app: application, pkg: package)
+      def distribute(application, package, labels: nil)
+        order_task('fetch', app: application, pkg: package, labels: labels)
+      end
       end
     end
   end

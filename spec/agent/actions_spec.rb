@@ -28,5 +28,14 @@ describe Mamiya::Agent::Actions do
 
       agent.distribute('myapp', 'mypkg')
     end
+
+    context "with labels" do
+      it "adds _labels on task" do
+        expect(agent).to receive(:trigger).with('task', task: 'fetch', app: 'myapp', pkg: 'mypkg', _labels: ['foo'], coalesce: false)
+
+        agent.distribute('myapp', 'mypkg', labels: ['foo'])
+      end
+    end
+
   end
 end
