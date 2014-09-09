@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "aws-sdk-core", "2.0.0.rc15"
   spec.add_runtime_dependency "term-ansicolor", ">= 1.3.0"
   unless ENV["MAMIYA_VILLEIN_PATH"]
-    spec.add_runtime_dependency "villein", ">= 0.3.2"
+    spec.add_runtime_dependency "villein", ">= 0.5.0"
   end
 
   spec.add_runtime_dependency "sinatra", ">= 1.4.5"
