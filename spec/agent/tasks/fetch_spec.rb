@@ -36,6 +36,7 @@ describe Mamiya::Agent::Tasks::Fetch do
         package: 'mypkg',
         destination: app_destination,
         config: config,
+        logger: task.logger,
       ).and_return(step)
 
       allow(agent).to receive(:trigger)

@@ -63,6 +63,7 @@ module Mamiya
             package: package,
             destination: destination,
             config: config,
+            logger: logger,
           )
         end
       end
