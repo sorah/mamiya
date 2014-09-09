@@ -11,11 +11,11 @@ set :dereference_symlinks, true
 
 # http://svn.ruby-lang.org/cgi-bin/viewvc.cgi?revision=45360&view=revision
 set :build_from, "#{File.dirname(__FILE__)}/source"
-set :build_to, "#{File.dirname(__FILE__)}/packages"
+set :build_to, "#{File.dirname(__FILE__)}/builds"
 
 dir = File.dirname(__FILE__)
 if File.basename(dir) == 'example'
-  set :deploy_to, File.join(dir, 'target')
+  set :deploy_to, File.join(dir, 'targets', 'default')
 else
   # target/{releases,prereleases}/<name>/.mamiya.script/../../..
   set :deploy_to, File.expand_path(File.join(dir, '..', '..', '..'))
@@ -23,7 +23,7 @@ end
 
 # to test it
 Dir.mkdir build_to unless File.exist?(build_to)
-Dir.mkdir deploy_to unless File.exist?(deploy_to)
+deploy_to.mkpath unless deploy_to.exist?
 
 set :bundle_without, [:development, :test]
 set :bundle_dir, "#{deploy_to}/shared/bundle"

@@ -1,15 +1,31 @@
-set :storage, {
-  type: :s3,
-  bucket: ENV["MAMIYA_S3_BUCKET"] || ENV["S3_BUCKET"],
-  region: ENV["AWS_REGION"] || 'ap-northeast-1',
-}
-
 require 'pathname'
 
-targets = Pathname.new(File.dirname(__FILE__)).join('targets')
-targets.mkpath
+if ENV['MAMIYA_S3_BUCKET'] || ENV['S3_BUCKET']
+  set :storage, {
+    type: :s3,
+    bucket: ENV["MAMIYA_S3_BUCKET"] || ENV["S3_BUCKET"],
+    region: ENV["AWS_REGION"] || 'ap-northeast-1',
+  }
+else
+  set :storage, {
+    type: :filesystem,
+    path: File.join(File.dirname(__FILE__), 'packages'),
+  }
+end
 
-agent_name = self.serf[:agent][:node] or raise 'no node name'
+set :serf, {
+  agent: {
+    bind: "0.0.0.0:#{ENV['PORT']}",
+    rpc_addr: "127.0.0.1:#{ENV['PORT']}",
+    join: "127.0.0.1:7760",
+    node: "#{ENV['HOSTNAME']}_#{ENV['PORT']}",
+  }
+}
+p serf
+
+agent_name = ENV['PORT'].to_s
+
+targets = Pathname.new(File.dirname(__FILE__)).join('targets')
 target = targets.join(agent_name).tap(&:mkpath)
 
 set :packages_dir, target.join('packages')
