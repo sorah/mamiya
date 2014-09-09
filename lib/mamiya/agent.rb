@@ -20,6 +20,7 @@ module Mamiya
     def initialize(config, logger: Mamiya::Logger.new, events_only: nil)
       @config = config
       @serf = init_serf
+      @trigger_lock = Mutex.new
       @events_only = events_only
 
       @terminate = false
@@ -140,7 +141,11 @@ module Mamiya
       name = "mamiya:#{type}"
       name << ":#{action}" if action
 
-      serf.event(name, payload.merge(name: self.serf.name).to_json, coalesce: coalesce)
+      payload_str = payload.merge(name: self.serf.name).to_json
+
+      @trigger_lock.synchronize do
+        serf.event(name, payload_str, coalesce: coalesce)
+      end
     end
 
     private
