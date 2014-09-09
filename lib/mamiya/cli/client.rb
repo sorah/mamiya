@@ -136,6 +136,15 @@ not distributed: #{dist['not_distributed_count']} agents
         p master_post("/packages/#{application}/#{package}/distribute", params, type: :json)
       end
 
+      desc "prepare PACKAGE", "order preparing package to agents"
+      method_option :labels, type: :string
+      def prepare(package)
+        params = options[:labels] ?
+          {labels: Mamiya::Util::LabelMatcher.parse_string_expr(options[:labels])} : {}
+
+        p master_post("/packages/#{application}/#{package}/prepare", params, type: :json)
+      end
+
       desc "refresh", "order refreshing agent status"
       def refresh
         p master_post('/agents/refresh')
