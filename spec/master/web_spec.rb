@@ -127,6 +127,24 @@ describe Mamiya::Master::Web do
     end
   end
 
+  describe "POST /packages/:application/:package/prepare" do
+    it "dispatchs prepare request" do
+      expect(master).to receive(:prepare).with('myapp', 'mypackage')
+
+      post '/packages/myapp/mypackage/prepare'
+
+      expect(last_response.status).to eq 204 # no content
+    end
+
+    context "when package not found" do
+      it "returns 404" do
+        post '/packages/myapp/noexist/prepare'
+        expect(last_response.status).to eq 404
+      end
+    end
+  end
+
+
   describe "GET /package/:application/:package/distribution" do
     subject(:distribution) do
       res = get('/packages/myapp/mypackage/distribution')

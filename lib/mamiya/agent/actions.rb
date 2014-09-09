@@ -13,6 +13,9 @@ module Mamiya
       def distribute(application, package, labels: nil)
         order_task('fetch', app: application, pkg: package, labels: labels)
       end
+
+      def prepare(application, package, labels: nil)
+        order_task('prepare', app: application, pkg: package, labels: labels)
       end
     end
   end

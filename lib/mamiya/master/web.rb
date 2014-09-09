@@ -66,6 +66,18 @@ module Mamiya
         end
       end
 
+      post '/packages/:application/:package/prepare' do
+        # TODO: filter with label
+        if storage(params[:application]).meta(params[:package])
+          status 204
+          master.prepare(params[:application], params[:package])
+        else
+          status 404
+          content_type :json
+          {error: 'not found'}.to_json
+        end
+      end
+
       get '/packages/:application/:package/distribution' do
         # TODO: filter with label
         content_type :json

@@ -38,4 +38,20 @@ describe Mamiya::Agent::Actions do
     end
 
   end
+
+  describe "#prepare" do
+    it "sends prepare request" do
+      expect(agent).to receive(:trigger).with('task', task: 'prepare', app: 'myapp', pkg: 'mypkg', coalesce: false)
+
+      agent.prepare('myapp', 'mypkg')
+    end
+
+    context "with labels" do
+      it "adds _labels on task" do
+        expect(agent).to receive(:trigger).with('task', task: 'prepare', app: 'myapp', pkg: 'mypkg', _labels: ['foo'], coalesce: false)
+
+        agent.prepare('myapp', 'mypkg', labels: ['foo'])
+      end
+    end
+  end
 end
