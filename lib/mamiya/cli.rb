@@ -193,9 +193,11 @@ module Mamiya
     method_option :daemonize, aliases: '-D', type: :boolean, default: false
     method_option :log, aliases: '-l', type: :string
     method_option :pidfile, aliases: '-p', type: :string
+    method_option :labels, type: :array
     def agent
       prepare_agent_behavior!
       merge_serf_option!
+      override_labels!
 
       @agent = Agent.new(config, logger: logger)
       @agent.run!
@@ -293,6 +295,20 @@ module Mamiya
           config[:serf][:agent][k.to_sym] = v
         end
       end
+    end
+
+    def override_labels!
+      return unless config(:no_error)
+      return unless options[:labels]
+
+      labels = options[:labels].flat_map{ |_| _.split(/,/) }.map(&:to_sym)
+      return if labels.empty?
+
+      config.labels do
+        labels
+      end
+
+      logger.info "Overriding labels: #{labels.inspect}"
     end
 
     def application
