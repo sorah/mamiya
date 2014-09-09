@@ -7,6 +7,8 @@ require 'mamiya/util/label_matcher'
 require 'mamiya/logger'
 
 require 'mamiya/steps/fetch'
+require 'mamiya/steps/prepare'
+require 'mamiya/steps/extract'
 require 'mamiya/agent/task_queue'
 
 require 'mamiya/agent/tasks/fetch'
