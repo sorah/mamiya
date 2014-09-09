@@ -2,7 +2,7 @@ module Mamiya
   module Util
     module LabelMatcher
       def match?(*expressions)
-        labels = self.labels()
+        labels = self.labels().map(&:to_s)
 
         if expressions.all? { |_| _.kind_of?(Symbol) || _.kind_of?(String) }
           return self.match?(expressions)
@@ -11,12 +11,12 @@ module Mamiya
         expressions.any? do |expression|
           case expression
           when Symbol, String
-            labels.include?(expression)
+            labels.include?(expression.to_s)
           when Array
             if expression.any? { |_| _.kind_of?(Array) }
               self.match?(*expression)
             else
-              expression.all? { |_| labels.include?(_) }
+              expression.all? { |_| labels.include?(_.to_s) }
             end
           end
         end
