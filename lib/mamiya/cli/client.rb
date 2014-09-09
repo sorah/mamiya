@@ -7,6 +7,8 @@ require 'uri'
 require 'json'
 require 'thor'
 
+require 'mamiya/util/label_matcher'
+
 module Mamiya
   class CLI < Thor
     class Client < Thor
@@ -126,8 +128,12 @@ not distributed: #{dist['not_distributed_count']} agents
       end
 
       desc "distribute package", "order distributing package to agents"
+      method_option :labels, type: :string
       def distribute(package)
-        p master_post("/packages/#{application}/#{package}/distribute")
+        params = options[:labels] ?
+          {labels: Mamiya::Util::LabelMatcher.parse_string_expr(options[:labels])} : {}
+
+        p master_post("/packages/#{application}/#{package}/distribute", params, type: :json)
       end
 
       desc "refresh", "order refreshing agent status"
@@ -166,14 +172,22 @@ not distributed: #{dist['not_distributed_count']} agents
         end
       end
 
-      def master_post(path, data='')
+      def master_post(path, data='', type: :text)
         response = nil
         master_http.start do |http|
+          headers = {}
+
           if Hash === data
-            data = Rack::Utils.build_nested_query(data)
+            case type
+            when :json
+              data = data.to_json
+              headers['Content-Type'] = 'application/json'
+            when :text
+              data = Rack::Utils.build_nested_query(data)
+            end
           end
 
-          response = http.post(path, data)
+          response = http.post(path, data, headers)
           response.value
           response.code == '204' ? true : JSON.parse(response.body)
         end
