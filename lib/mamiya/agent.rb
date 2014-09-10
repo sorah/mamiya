@@ -205,8 +205,10 @@ module Mamiya
 
       class_name = type.capitalize.gsub(/-./) { |_| _[1].upcase }
 
-      logger.debug "Received user event #{type}"
-      logger.debug payload.inspect
+      if config.debug_all_events
+        logger.debug "Received user event #{type}"
+        logger.debug payload.inspect
+      end
 
       if Handlers.const_defined?(class_name)
         handler = Handlers.const_get(class_name).new(self, event)

@@ -8,7 +8,9 @@ module Mamiya
     # common
     set_default :serf, {}
     set_default :storage, {}
+
     set_default :show_backtrace_in_fatal, true
+    set_default :debug_all_events, false
 
     set_default :application, nil
 
