@@ -133,7 +133,7 @@ not distributed: #{dist['not_distributed_count']} agents
         params = options[:labels] ?
           {labels: Mamiya::Util::LabelMatcher.parse_string_expr(options[:labels])} : {}
 
-        p master_post("/packages/#{application}/#{package}/distribute", params, type: :json)
+        p master_post("/packages/#{application}/#{package}/distribute", params.merge(type: :json))
       end
 
       desc "prepare PACKAGE", "order preparing package to agents"
@@ -142,7 +142,7 @@ not distributed: #{dist['not_distributed_count']} agents
         params = options[:labels] ?
           {labels: Mamiya::Util::LabelMatcher.parse_string_expr(options[:labels])} : {}
 
-        p master_post("/packages/#{application}/#{package}/prepare", params, type: :json)
+        p master_post("/packages/#{application}/#{package}/prepare", params.merge(type: :json))
       end
 
       desc "refresh", "order refreshing agent status"
@@ -181,17 +181,17 @@ not distributed: #{dist['not_distributed_count']} agents
         end
       end
 
-      def master_post(path, data='', type: :text)
+      def master_post(path, data='')
         response = nil
         master_http.start do |http|
           headers = {}
 
           if Hash === data
-            case type
+            case data.delete(:type) || :query
             when :json
               data = data.to_json
               headers['Content-Type'] = 'application/json'
-            when :text
+            when :query
               data = Rack::Utils.build_nested_query(data)
             end
           end
