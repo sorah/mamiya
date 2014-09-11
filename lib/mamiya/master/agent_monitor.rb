@@ -133,12 +133,9 @@ module Mamiya
 
             begin
               resp = JSON.parse(json)
-              if resp.keys.sort == ['packages', 'prereleases']
-                new_statuses[name]['packages'] = resp['packages']
-                new_statuses[name]['prereleases'] = resp['prereleases']
-              else # TODO: Compatibility; should remove soon
-                new_statuses[name]['packages'] = resp
-              end
+
+              new_statuses[name]['packages'] = resp['packages']
+              new_statuses[name]['prereleases'] = resp['prereleases']
             rescue JSON::ParserError => e
               logger.warn "Failed to parse packages from #{name}: #{e.message}"
               next
