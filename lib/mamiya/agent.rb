@@ -218,7 +218,9 @@ module Mamiya
         if handler.respond_to?(meth)
           handler.send meth
         else
-          logger.debug "Handler #{class_name} doesn't respond to #{meth}, skipping"
+          if config.debug_all_events
+            logger.debug "Handler #{class_name} doesn't respond to #{meth}, skipping"
+          end
         end
       else
         #logger.warn("Discarded event[#{event.user_event}] because we don't handle it")
