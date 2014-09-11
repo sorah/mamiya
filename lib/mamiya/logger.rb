@@ -55,6 +55,16 @@ module Mamiya
       @logdev.remove_output(*outputs)
     end
 
+    alias orig_dup dup
+
+    def dup
+      self.orig_dup.tap  do |new_logger|
+        new_logger.instance_eval do
+          @logger = @logger.dup
+        end
+      end
+    end
+
     def with_clean_progname
       self.dup.tap do |new|
         new.progname = nil
@@ -64,9 +74,8 @@ module Mamiya
     def [](progname)
       self.dup.tap do |new_logger|
         new_logger.instance_eval do
-          @logger = @logger.dup
           if @logger.progname && !@logger.progname.empty?
-            @logger.progname += "/#{progname}"
+            @logger.progname = "#{@logger.progname}/#{progname}"
           else
             @logger.progname = progname
           end
