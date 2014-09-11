@@ -111,28 +111,9 @@ describe Mamiya::Storages::Filesystem do
       end
     end
 
-    context "when meta already exists" do
+    context "when meta and tarball already exists" do
       before do
         File.write metafile, "\n"
-      end
-
-      it "raises error" do
-        expect {
-          fetch
-        }.to raise_error(Mamiya::Storages::Abstract::AlreadyFetched)
-      end
-
-      it "doesn't remove anything" do
-        begin
-          fetch
-        rescue Mamiya::Storages::Abstract::AlreadyFetched; end
-
-        expect(File.exist?(metafile)).to be_true
-      end
-    end
-
-    context "when tarball already exists" do
-      before do
         File.write tarball, "\n"
       end
 
@@ -147,7 +128,7 @@ describe Mamiya::Storages::Filesystem do
           fetch
         rescue Mamiya::Storages::Abstract::AlreadyFetched; end
 
-        expect(File.exist?(tarball)).to be_true
+        expect(File.exist?(metafile)).to be_true
       end
     end
 

@@ -154,9 +154,10 @@ describe Mamiya::Storages::S3 do
       end
     end
 
-    context "when meta already exists" do
+    context "when meta and tarball already exists" do
       before do
         File.write metafile, "\n"
+        File.write tarball, "\n"
       end
 
       it "raises error" do
@@ -174,25 +175,6 @@ describe Mamiya::Storages::S3 do
       end
     end
 
-    context "when tarball already exists" do
-      before do
-        File.write tarball, "\n"
-      end
-
-      it "raises error" do
-        expect {
-          fetch
-        }.to raise_error(Mamiya::Storages::Abstract::AlreadyFetched)
-      end
-
-      it "doesn't remove anything" do
-        begin
-          fetch
-        rescue Mamiya::Storages::Abstract::AlreadyFetched; end
-
-        expect(File.exist?(tarball)).to be_true
-      end
-    end
 
     context "when name has .json" do
       let(:package_name) { 'test.json' }

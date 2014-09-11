@@ -42,7 +42,7 @@ module Mamiya
         package_path = File.join(destination, "#{package_name}.tar.gz")
         meta_path = File.join(destination, "#{package_name}.json")
 
-        if File.exists?(package_path) || File.exists?(meta_path)
+        if File.exists?(package_path) && File.exists?(meta_path)
           raise AlreadyFetched
         end
 
