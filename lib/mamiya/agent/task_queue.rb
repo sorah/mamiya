@@ -5,6 +5,7 @@ require 'thread'
 module Mamiya
   class Agent
     class TaskQueue
+      class Stopped < Exception; end
       GRACEFUL_TIMEOUT = 30
       JOIN_TIMEOUT = 30
 
