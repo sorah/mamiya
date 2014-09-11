@@ -18,7 +18,7 @@ module Mamiya
         @queueing_thread = nil
         @lifecycle_mutex = Mutex.new
         @terminate = false
-        @logger = logger['task_queue']
+        @logger = logger.with_clean_progname['task_queue']
       end
 
       attr_reader :worker_threads, :task_classes, :agent
@@ -118,7 +118,8 @@ module Mamiya
               status[:pending].delete task
               status[:working] = task
             end
-            task_class.new(self, task, agent: @agent, logger: @logger).execute
+            task_logger = @logger.with_clean_progname
+            task_class.new(self, task, agent: @agent, logger: task_logger).execute
           rescue Exception => e
             @logger.error "#{task_class} worker catched error: #{e}\n\t#{e.backtrace.join("\n\t")}"
           ensure

@@ -181,7 +181,7 @@ module Mamiya
       private
 
       def logger
-        @logger ||= @master.logger['agent-monitor']
+        @logger ||= @master.logger.with_clean_progname['agent-monitor']
       end
     end
   end
