@@ -10,6 +10,7 @@ module Mamiya
         script.before_switch(labels)[]
 
         # TODO: link with relative if available?
+        # TODO: Restore this if FAILED
         File.unlink script.current_path if script.current_path.symlink?
         script.current_path.make_symlink(target.realpath)
 
