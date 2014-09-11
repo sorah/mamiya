@@ -18,6 +18,8 @@ require 'mamiya/agent/tasks/clean'
 require 'mamiya/agent/handlers/task'
 require 'mamiya/agent/actions'
 
+require 'sigdump/setup' unless ENV['DISABLE_SIGDUMP'] == '1'
+
 module Mamiya
   class Agent
     include Mamiya::Agent::Actions
