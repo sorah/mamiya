@@ -56,7 +56,9 @@ module Mamiya
     def run(*args, allow_failure: false)
       # TODO: Stop when fail
       actual = -> do
-        logger = self.logger['RUN']
+        started_at = Time.now
+        run_id = generate_run_id()
+        logger = self.logger["run:#{run_id}"]
 
         logger.info("$ #{args.shelljoin}")
 
@@ -68,18 +70,32 @@ module Mamiya
         [out_w, err_w].each(&:close)
 
         buf = ""
+        last_out = Time.now
 
-        ths = {:debug => out_r, :warn => err_r}.map do |severity, io|
+        ths = {:info => out_r, :warn => err_r}.map do |severity, io|
           Thread.new {
             until io.eof?
               str = io.gets
               logger.__send__(severity, str.chomp)
               buf << str
+              last_out = Time.now
             end
           }.tap { |_| _.abort_on_exception = true }
         end
 
+        timekeeper_th = Thread.new do
+          l = logger['timekeeper']
+          loop do
+            if 90 < (Time.now - last_out)
+              l.warn "pid #{pid} still running; since #{started_at}"
+            end
+            sleep 60
+          end
+        end
+        timekeeper_th.abort_on_exception = true
+
         pid, status = Process.waitpid2(pid)
+        timekeeper_th.kill if timekeeper_th.alive?
 
         begin
           timeout(3) { ths.each(&:join) }
@@ -90,14 +106,19 @@ module Mamiya
         [out_r, err_r].each(&:close)
 
         unless allow_failure || status.success?
-          raise CommandFailed,
-            "Excecution failed (" \
+          failure_msg = "Execution failed (" \
             "status=#{status.exitstatus}" \
             " pid=#{status.pid}" \
             "#{status.signaled? ? "termsig=#{status.termsig.inspect} stopsig=#{status.stopsig.inspect}" : nil}" \
             "#{status.stopped? ? " stopped" : nil}" \
             "): #{args.inspect}"
+
+          logger.error failure_msg
+          raise CommandFailed, failure_msg
+
         end
+
+        logger.info "pid #{pid} completed: #{args.inspect}"
 
         buf
       end
@@ -132,6 +153,29 @@ module Mamiya
 
     def current_path
       deploy_to && deploy_to.join('current')
+    end
+
+    private
+
+    RUN_ID_BASE_TIME = Time.new(2014,01,01,0,0,0).to_i
+    def generate_run_id
+      (@run_id_mutex ||= Mutex.new).synchronize do
+        t = Time.now.to_i
+        id = (t - RUN_ID_BASE_TIME).to_i.to_s(36)
+
+        @last_run_id_time ||= 0
+        if (t - @last_run_id_time) < 1
+          @run_id_seq ||= 0
+          @run_id_seq += 1
+          id << @run_id_seq.to_s(36)
+        else
+          @run_id_seq = nil
+          id << '0'
+        end
+
+        @last_run_id_time = t
+        id
+      end
     end
   end
 end

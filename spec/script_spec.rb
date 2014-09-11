@@ -15,7 +15,7 @@ describe Mamiya::Script do
   let(:logger) {
     double("logger").tap do |_|
       _.stub(:[]) { _ }
-      %i(info warn debug).each do |severity|
+      %i(info warn debug error).each do |severity|
         _.stub(severity) { |*args| log << [severity, *args]; _ }
       end
     end
@@ -38,6 +38,14 @@ describe Mamiya::Script do
     end
 
     context "when the command failed" do
+      it "logs error" do
+        begin
+          script.run("false")
+        rescue Mamiya::Script::CommandFailed
+        end
+        expect(log.map(&:first)).to include(:error)
+      end
+
       it "raises error" do
         expect {
           script.run("false")
@@ -53,15 +61,14 @@ describe Mamiya::Script do
       end
     end
 
-
     it "logs command as information" do
       script.run("echo", "foo", "bar'", " baz")
       expect(log).to include([:info, "$ echo foo bar\\' \\ baz"])
     end
 
-    it "logs stdout as debug" do
+    it "logs stdout as info" do
       script.run("echo", "foo")
-      expect(log).to include([:debug, "foo"])
+      expect(log).to include([:info, "foo"])
     end
 
     it "logs stderr as warn" do
