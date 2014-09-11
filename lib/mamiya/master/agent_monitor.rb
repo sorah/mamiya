@@ -113,6 +113,12 @@ module Mamiya
         end
 
         @commit_lock.synchronize { 
+          if kwargs[:node]
+            new_statuses = statuses.reject do |name, status|
+              kwargs[:node].include?(name)
+            end
+          end
+
           status_query_th = Thread.new { @master.serf.query(STATUS_QUERY, '', **kwargs) }
           packages_query_th = Thread.new { @master.serf.query(PACKAGES_QUERY, '', **kwargs) }
           status_response = status_query_th.value

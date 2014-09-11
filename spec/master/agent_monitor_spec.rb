@@ -121,7 +121,6 @@ describe Mamiya::Master::AgentMonitor do
       }
     end
 
-
     it "updates status .packages by packages query" do
       expect {
         agent_monitor.refresh
@@ -231,6 +230,97 @@ describe Mamiya::Master::AgentMonitor do
       it "passes args to serf query", pending: 'stub_serf_queries cannot handle kwarg' do
         stub_serf_queries(expected_kwargs: {node: 'foo'})
         agent_monitor.refresh(node: 'foo')
+      end
+    end
+
+    context "with nodes list" do
+      before do
+        stub_serf_queries()
+        agent_monitor.refresh
+
+        allow(serf).to receive(:query) do |query, payload, kwargs={}|
+          expect(payload).to eq ''
+          #expect(kwargs).to eq(node: ['b'])
+          expect(%w(mamiya:status mamiya:packages)).to include(query)
+
+          {'mamiya:status' => status_query_response_part, 'mamiya:packages' => packages_query_response_part}[query]
+        end
+      end
+
+      let(:status_query_response) do
+        {
+          "Acks" => ['a'],
+          "Responses" => {
+            'a' => {"foo" => "bar"}.to_json,
+          },
+        }
+      end
+
+      let(:packages_query_response) do
+        {
+          "Acks" => ['a'],
+          "Responses" => {
+            'a' => {"packages" => {"app" => ['pkg1','pkg2']}, "prereleases" => {"app" => ['pkg2']}}.to_json,
+          },
+        }
+      end
+
+      let(:status_query_response_part) do
+        {
+          "Acks" => ['a'],
+          "Responses" => {
+            'b' => {"foo" => "bar"}.to_json,
+          },
+        }
+      end
+
+      let(:packages_query_response_part) do
+        {
+          "Acks" => ['a'],
+          "Responses" => {
+            'b' => {"packages" => {"app" => ['pkg1']}, "prereleases" => {"app" => ['pkg2']}}.to_json,
+          },
+        }
+      end
+
+      let(:members) do
+        [
+          {
+            "name"=>"a", "status"=>"alive",
+            "addr"=>"x.x.x.x:7676", "port"=>7676,
+            "protocol"=>{"max"=>4, "min"=>2, "version"=>4},
+            "tags"=>{},
+          },
+          {
+            "name"=>"b", "status"=>"alive",
+            "addr"=>"x.x.y.y:7676", "port"=>7676,
+            "protocol"=>{"max"=>4, "min"=>2, "version"=>4},
+            "tags"=>{},
+          },
+        ]
+      end
+
+      it "updates partially" do
+        expect(agent_monitor.statuses['b']).to be_nil
+
+        expect {
+          agent_monitor.refresh(node: ['b'])
+        }.not_to change {
+          [agent_monitor.statuses['a'], agent_monitor.agents['a']]
+        }
+
+        expect(agent_monitor.failed_agents).to eq []
+        expect(agent_monitor.statuses['b']).to eq(
+          {"foo" => "bar", "packages" => {"app" => ['pkg1']}, "prereleases" => {"app" => ['pkg2']}}
+        )
+        expect(agent_monitor.agents['b']).to eq(
+          {
+            "name"=>"b", "status"=>"alive",
+            "addr"=>"x.x.y.y:7676", "port"=>7676,
+            "protocol"=>{"max"=>4, "min"=>2, "version"=>4},
+            "tags"=>{},
+          }
+        )
       end
     end
   end
