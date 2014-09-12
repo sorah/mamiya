@@ -12,7 +12,7 @@ describe Mamiya::Agent::Tasks::Notifyable do
 
   describe "#execute" do
     it "notifies first, then :run" do
-      expect(agent).to receive(:trigger).with('task', action: 'start', task: job).ordered
+      expect(agent).to receive(:trigger).with('task', action: 'start', task: job, coalesce: false).ordered
       expect(task).to receive(:before).ordered
       expect(task).to receive(:run).ordered
       task.execute
@@ -21,12 +21,12 @@ describe Mamiya::Agent::Tasks::Notifyable do
     it "calls after, then notify" do
       expect(task).to receive(:run).ordered
       expect(task).to receive(:after).ordered
-      expect(agent).to receive(:trigger).with('task', action: 'finish', task: job).ordered
+      expect(agent).to receive(:trigger).with('task', action: 'finish', task: job, coalesce: false).ordered
       task.execute
     end
 
     it "handles error" do
-      expect(agent).to receive(:trigger).with('task', action: 'error', task: job, error: RuntimeError.name)
+      expect(agent).to receive(:trigger).with('task', action: 'error', task: job, error: RuntimeError.name, coalesce: false)
       err = RuntimeError.new
       allow(task).to receive(:run).and_raise(err)
       task.execute
