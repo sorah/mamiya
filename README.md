@@ -2,11 +2,34 @@
 
 [![Build Status](https://travis-ci.org/sorah/mamiya.png?branch=master)](https://travis-ci.org/sorah/mamiya)
 
-Mamiya allows you to deploy using without ssh -- tarballs in such storage (Amazon S3), and [serf](http://www.serfdom.io/).
+Mamiya allows you to deploy using without ssh -- using tarballs, some storages (S3, etc), and [Serf](http://www.serfdom.io/).
 
-_Still developing_
+## Installation
 
-## Problem for other deploy tool
+    $ gem install mamiya
+
+or bundle it:
+
+``` ruby
+gem 'mamiya'
+```
+
+## Usage
+
+(Detailed documentation coming soon)
+
+1. Prepare master node for `mamiya master` process
+  - master has HTTP API to allow control the cluster via HTTP
+  - master watches agents in the cluster
+2. Then install `mamiya agent` in your deployment target hosts
+3. Write deploy script for your own
+  - how to build package, how to prepare release, how to release, etc.
+4. Build then push package
+5. Time to deploy
+
+[example](./example) directory contains configuration files that work out-of-the-box. Try Mamiya in your local machine: `foreman start`
+
+## Problems in existing deploy tool
 
 Existing major deploy tools (capistrano, mina, ...) use SSH to operate servers.
 But connecting to lot of servers via SSH makes deployment slow.
@@ -16,23 +39,6 @@ This solves such problem by using [Serf](http://www.serfdom.io/) and tarball on 
 Also, I'm planning to allow to distribute files before the deploy command. I guess this can skip or shorten
 file transferring phase in deploy.
 
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'mamiya'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install mamiya
-
-## Usage
-
-TODO: Write usage instructions here
 
 ## Upgrade Notes
 
