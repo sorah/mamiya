@@ -164,6 +164,15 @@ describe Mamiya::Master::AgentMonitor do
     end
 
     context "when failed to retrieve package list, but it was available previously in packages query" do
+      let(:status_query_response) do
+        {
+          "Acks" => ['a'],
+          "Responses" => {
+            'a' => {"foo" => "bar"}.to_json,
+          },
+        }
+      end
+
       before do
         agent_monitor.refresh
         packages_query_response['Responses'] = {}
@@ -173,7 +182,7 @@ describe Mamiya::Master::AgentMonitor do
         expect {
           agent_monitor.refresh
         }.not_to change {
-          agent_monitor.statuses["a"]['packages']
+          agent_monitor.statuses["a"].values_at('packages', 'prereleases')
         }
       end
     end
@@ -267,7 +276,7 @@ describe Mamiya::Master::AgentMonitor do
 
       let(:status_query_response_part) do
         {
-          "Acks" => ['a'],
+          "Acks" => ['b'],
           "Responses" => {
             'b' => {"foo" => "bar"}.to_json,
           },
