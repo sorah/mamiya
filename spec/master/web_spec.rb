@@ -4,6 +4,7 @@ require 'fileutils'
 
 require 'mamiya/storages/mock'
 require 'mamiya/package'
+require 'mamiya/master/package_status'
 
 require 'mamiya/master/web'
 
@@ -32,7 +33,11 @@ describe Mamiya::Master::Web do
   end
 
   let(:agent_monitor) do
-    double('agent_monitor', statuses: agent_statuses)
+    double('agent_monitor', statuses: agent_statuses).tap do |a|
+      allow(a).to receive(:package_status).with('myapp','mypackage',labels: nil) do
+        Mamiya::Master::PackageStatus.new(a, 'myapp', 'mypackage')
+      end
+    end
   end
 
   let(:master) do

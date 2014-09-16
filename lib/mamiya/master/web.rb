@@ -102,59 +102,24 @@ module Mamiya
           next {error: 'not found'}.to_json
         end
 
+        expr = params[:labels] && parse_label_matcher_expr(params[:labels])
+        pkgstatus = agent_monitor.package_status(params[:application], params[:package], labels: expr)
+
         result = {
           application: params[:application],
           package: params[:package],
-          distributed: [],
-          fetching: [],
-          queued: [],
-          not_distributed: []
+          distributed: pkgstatus.fetched_agents,
+          fetching: pkgstatus.fetching_agents,
+          queued: pkgstatus.fetch_queued_agents,
+          not_distributed: pkgstatus.non_participants,
         }
-        if params[:labels]
-          expr = parse_label_matcher_expr(params[:labels])
-          statuses = agent_monitor.statuses(labels: expr)
-        else
-          statuses = agent_monitor.statuses
-        end
-
-        pkg_array = [params[:application], params[:package]]
-
-        statuses.each do |name, status|
-          next if status["master"]
-          queue = status["queues"] && status["queues"]["fetch"]
-          packages = status["packages"] && status["packages"][params[:application]]
-
-          task_matcher = -> (task) do
-             task["task"] == "fetch" &&
-             task["app"] == params[:application] &&
-             task["pkg"] == params[:package]
-          end
-
-
-          case
-          when packages && packages.include?(params[:package])
-
-            result[:distributed] << name
-
-          when queue && queue["working"] && task_matcher.call(queue['working'])
-
-            result[:fetching] << name
-
-          when queue['queue'].any?(&task_matcher)
-
-            result[:queued] << name
-
-          else
-            result[:not_distributed] << name
-          end
-        end
 
         result[:distributed_count] = result[:distributed].size
         result[:fetching_count] = result[:fetching].size
         result[:not_distributed_count] = result[:not_distributed].size
         result[:queued_count] = result[:queued].size
 
-        total = statuses.size
+        total = agent_monitor.statuses.size
 
         case
         when 0 < result[:queued_count] || 0 < result[:fetching_count]

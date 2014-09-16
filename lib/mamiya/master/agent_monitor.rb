@@ -4,6 +4,7 @@ require 'thread'
 
 require 'mamiya/master'
 require 'mamiya/master/agent_monitor_handlers'
+require 'mamiya/master/package_status'
 
 module Mamiya
   class Master
@@ -47,6 +48,10 @@ module Mamiya
         else
           @statuses
         end
+      end
+
+      def package_status(app, pkg, labels: nil)
+        PackageStatus.new(self, app, pkg, labels: labels)
       end
 
       def start!
