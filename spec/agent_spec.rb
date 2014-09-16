@@ -92,7 +92,12 @@ describe Mamiya::Agent do
     before do
       allow(agent).to receive(:existing_packages).and_return("app" => ["pkg"])
       allow(agent).to receive(:existing_prereleases).and_return("app" => ["pkg"])
+
+      allow(agent).to receive(:releases).and_return("app" => ["pkg"])
+      allow(agent).to receive(:currents).and_return("app" => "pkg")
+
       allow(agent).to receive(:labels).and_return([:foo,:bar])
+
 
       allow(task_queue).to receive(:status).and_return({a: {working: nil, queue: []}})
     end
@@ -119,6 +124,14 @@ describe Mamiya::Agent do
       expect(status[:prereleases]).to eq agent.existing_prereleases
     end
 
+    it "includes releases" do
+      expect(status[:releases]).to eq agent.releases
+    end
+
+    it "includes currents" do
+      expect(status[:currents]).to eq agent.currents
+    end
+
     it "includes status" do
       expect(status[:labels]).to eq agent.labels
     end
@@ -130,8 +143,16 @@ describe Mamiya::Agent do
         expect(status.has_key?(:packages)).to be_false
       end
 
-      it "doesn't include existing packages" do
+      it "doesn't include existing prereleases" do
         expect(status.has_key?(:prereleases)).to be_false
+      end
+
+      it "doesn't include existing releases" do
+        expect(status.has_key?(:releases)).to be_false
+      end
+
+      it "doesn't include existing currents" do
+        expect(status.has_key?(:currents)).to be_false
       end
     end
 
@@ -192,6 +213,113 @@ describe Mamiya::Agent do
     end
   end
 
+  describe "#releases" do
+    let!(:tmpdir) { Pathname.new Dir.mktmpdir('mamiya-agent-spec') }
+    after { FileUtils.remove_entry_secure(tmpdir) }
+
+    let(:deploy_to_a) { tmpdir.join('a').tap(&:mkdir) }
+    let(:deploy_to_b) { tmpdir.join('b').tap(&:mkdir) }
+
+    let(:config) do
+      _a, _b = deploy_to_a, deploy_to_b
+      Mamiya::Configuration.new.evaluate! do
+        set :applications, {
+          a: {deploy_to: _a.to_s},
+          b: {deploy_to: _b.to_s},
+        }
+      end
+    end
+
+    before do
+      deploy_to_a.join('releases').tap do |releases|
+        releases.mkdir
+
+        releases.join('1').mkdir
+        releases.join('2').mkdir
+      end
+
+      deploy_to_b.join('releases').tap do |releases|
+        releases.mkdir
+
+        releases.join('3').mkdir
+        releases.join('4').mkdir
+        releases.join('5').mkdir
+      end
+    end
+
+    subject(:releases) { agent.releases }
+
+    it "returns releases" do
+      expect(releases).to eq(
+        a: ['1','2'],
+        b: ['3','4','5'],
+      )
+    end
+  end
+
+  describe "#currents" do
+    let!(:tmpdir) { Pathname.new Dir.mktmpdir('mamiya-agent-spec') }
+    after { FileUtils.remove_entry_secure(tmpdir) }
+
+    let(:deploy_to_a) { tmpdir.join('a').tap(&:mkdir) }
+    let(:deploy_to_b) { tmpdir.join('b').tap(&:mkdir) }
+
+    let(:release_a) { deploy_to_a.join('releases', '1').tap(&:mkpath) }
+    let(:release_b) { deploy_to_b.join('releases', '2').tap(&:mkpath) }
+
+    let(:current_a) { deploy_to_a.join('current') }
+    let(:current_b) { deploy_to_b.join('current') }
+
+    let(:target_a) { release_a.realpath }
+    let(:target_b) { release_b.realpath }
+
+    let(:config) do
+      _a, _b = deploy_to_a, deploy_to_b
+      Mamiya::Configuration.new.evaluate! do
+        set :applications, {
+          a: {deploy_to: _a.to_s},
+          b: {deploy_to: _b.to_s},
+        }
+      end
+    end
+
+    before do
+      deploy_to_a.join('current').make_symlink(target_a)
+      deploy_to_b.join('current').make_symlink(target_b)
+    end
+
+    subject(:currents) { agent.currents }
+
+    it "returns releases" do
+      expect(currents).to eq(
+        a: '1',
+        b: '2',
+      )
+    end
+
+    context "when relative" do
+      let(:target_a) { release_a.relative_path_from(deploy_to_a) }
+      let(:target_b) { release_b.relative_path_from(deploy_to_b) }
+
+      it "returns releases" do
+        expect(currents).to eq(
+          a: '1',
+          b: '2',
+        )
+      end
+    end
+
+    context "when noexist" do
+      before do
+        FileUtils.remove_entry_secure release_a
+        FileUtils.remove_entry_secure release_b
+      end
+
+      it "returns releases" do
+        expect(currents).to eq({})
+      end
+    end
+  end
 
   describe "#labels" do
     subject(:labels) { agent.labels }
@@ -226,6 +354,8 @@ describe Mamiya::Agent do
     it "responds to 'mamiya:packages'" do
       allow(agent).to receive(:existing_packages).and_return("app" => %w(pkg1 pkg2))
       allow(agent).to receive(:existing_prereleases).and_return("app" => %w(pkg2))
+      allow(agent).to receive(:currents).and_return("app" => 'pkg2')
+      allow(agent).to receive(:releases).and_return("app" => %w(pkg3))
 
       response = serf.trigger_query('mamiya:packages', '')
 
@@ -235,6 +365,12 @@ describe Mamiya::Agent do
         },
         "prereleases" => {
           "app" => %w(pkg2)
+        },
+        "currents" => {
+          "app" => 'pkg2'
+        },
+        "releases" => {
+          "app" => %w(pkg3)
         },
       )
     end

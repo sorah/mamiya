@@ -91,6 +91,8 @@ module Mamiya
         if packages
           s[:packages] = self.existing_packages
           s[:prereleases] = self.existing_prereleases
+          s[:releases] = self.releases
+          s[:currents] = self.currents
         end
       end
     end
@@ -149,6 +151,32 @@ module Mamiya
       ]
     end
 
+    def releases
+      Hash[config.applications.map do |name, app|
+        deploy_to = Pathname.new(app[:deploy_to])
+        [
+          name,
+          deploy_to.join('releases').children.map do |release|
+            release.basename.to_s
+          end.sort
+        ]
+      end]
+    end
+
+    def currents
+      # TODO: when the target is in outside?
+      Hash[config.applications.map do |name, app|
+        deploy_to = Pathname.new(app[:deploy_to])
+        current = deploy_to.join('current')
+        next unless current.exist?
+
+        [
+          name,
+          current.realpath.basename.to_s
+        ]
+      end.compact]
+    end
+
     def trigger(type, action: nil, coalesce: true, **payload)
       name = "mamiya:#{type}"
       name << ":#{action}" if action
@@ -175,8 +203,11 @@ module Mamiya
         end
 
         serf.respond('mamiya:packages') do |event|
-          {'packages' => self.existing_packages,
-           'prereleases' => self.existing_prereleases,
+          {
+            'packages' => self.existing_packages,
+            'prereleases' => self.existing_prereleases,
+            'releases' => self.releases,
+            'currents' => self.currents,
           }.to_json
         end
       end
