@@ -17,6 +17,8 @@ module Mamiya
       PACKAGES_QUERY = 'mamiya:packages'.freeze
       DEFAULT_INTERVAL = 60
 
+      PACKAGE_STATUS_KEYS = %w(packages prereleases releases currents).map(&:freeze).freeze
+
       def initialize(master, raise_exception: false)
         @master = master
         @interval = (master.config[:master] && 
@@ -140,8 +142,9 @@ module Mamiya
             begin
               resp = JSON.parse(json)
 
-              new_statuses[name]['packages'] = resp['packages']
-              new_statuses[name]['prereleases'] = resp['prereleases']
+              PACKAGE_STATUS_KEYS.each do |k|
+                new_statuses[name][k] = resp[k]
+              end
             rescue JSON::ParserError => e
               logger.warn "Failed to parse packages from #{name}: #{e.message}"
               next
@@ -149,8 +152,10 @@ module Mamiya
           end
 
           (new_statuses.keys - packages_response["Responses"].keys).each do |name|
-            if @statuses[name] && @statuses[name]['packages']
-              new_statuses[name]['packages'] = @statuses[name]['packages']
+            PACKAGE_STATUS_KEYS.each do |k|
+              if @statuses[name] && @statuses[name][k]
+                new_statuses[name][k] = @statuses[name][k]
+              end
             end
           end
 
