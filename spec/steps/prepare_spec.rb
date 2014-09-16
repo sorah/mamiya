@@ -23,6 +23,7 @@ describe Mamiya::Steps::Prepare do
 
   let(:script) do
     double('script',
+      application: 'myapp',
       before_prepare: proc {},
       prepare: proc {},
       after_prepare: proc {},
@@ -30,7 +31,10 @@ describe Mamiya::Steps::Prepare do
   end
 
   let(:config) do
-    double('config')
+    double('config').tap do |config|
+      allow(config).to receive(:deploy_to_for).with('myapp') \
+        .and_return(Pathname.new('/dev/null'))
+    end
   end
 
   let(:options) do
@@ -109,6 +113,7 @@ describe Mamiya::Steps::Prepare do
     end
 
     it "sets release_path" do
+      expect(script).to receive(:set).with(:deploy_to, Pathname.new('/dev/null'))
       expect(script).to receive(:set).with(:release_path, target_dir.realpath)
       expect(script).to receive(:set).with(:logger, step.logger)
       step.run!

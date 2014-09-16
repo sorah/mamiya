@@ -31,9 +31,12 @@ target = targets.join(agent_name).tap(&:mkpath)
 set :packages_dir, target.join('packages')
 set :prereleases_dir, target.join('prereleases')
 
+applications[:myapp] = {deploy_to: target}
+
 # To test
 Dir.mkdir packages_dir unless File.exist?(packages_dir)
 Dir.mkdir prereleases_dir unless File.exist?(prereleases_dir)
+deploy_to_for(:myapp).mkpath unless deploy_to_for(:myapp).exist?
 
 set :keep_packages, 3
 set :keep_prereleases, 3

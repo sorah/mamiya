@@ -35,7 +35,7 @@ module Mamiya
       def script
         @target_script ||= Mamiya::Script.new.load!(
           target.join('.mamiya.script', target_meta['script'])).tap do |script|
-          # XXX: release_path is set by options[:target] but deploy_to is set by script?
+          script.set(:deploy_to, config.deploy_to_for(script.application))
           script.set(:release_path, target)
           script.set(:logger, logger)
         end

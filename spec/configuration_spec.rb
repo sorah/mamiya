@@ -32,4 +32,27 @@ describe Mamiya::Configuration do
       expect(storage_class).to eq klass
     end
   end
+
+  describe "#deploy_to_for(app)" do
+    before do
+      config.evaluate! do
+        applications[:myapp] = {deploy_to: '/apps/myapp'}
+      end
+    end
+
+    it "returns deploy_to" do
+      expect(config.deploy_to_for(:myapp)).to eq Pathname.new('/apps/myapp')
+    end
+
+    it "returns deploy_to" do
+      expect(config.deploy_to_for('myapp')).to eq Pathname.new('/apps/myapp')
+    end
+
+    context "for nonexistent" do
+      it "returns nil" do
+      expect(config.deploy_to_for('nonexistent')).to be_nil
+      expect(config.deploy_to_for(:nonexistent)).to be_nil
+      end
+    end
+  end
 end

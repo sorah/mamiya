@@ -25,7 +25,7 @@ describe Mamiya::Steps::Switch do
 
   let(:script) do
     double('script',
-      deploy_to: deploy_to,
+      application: 'myapp',
       before_switch: proc {},
       release: proc {},
       after_switch: proc {},
@@ -34,7 +34,10 @@ describe Mamiya::Steps::Switch do
   end
 
   let(:config) do
-    double('config')
+    double('config').tap do |config|
+      allow(config).to receive(:deploy_to_for).with('myapp') \
+        .and_return(deploy_to)
+    end
   end
 
   let(:options) do
@@ -94,6 +97,7 @@ describe Mamiya::Steps::Switch do
     end
 
     it "sets release_path" do
+      expect(script).to receive(:set).with(:deploy_to, deploy_to)
       expect(script).to receive(:set).with(:release_path, release_path.realpath)
       expect(script).to receive(:set).with(:logger, step.logger)
       step.run!

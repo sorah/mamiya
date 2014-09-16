@@ -20,10 +20,12 @@ module Mamiya
     set_default :fetch_sleep, 12
     set_default :keep_packages, 3
     set_default :keep_prereleases, 3
+    set_default :applications, {}
 
     # master
     set_default :master, {monitor: {refresh_interval: nil}} # TODO: don't nest
     set_default :web, {port: 7761, bind: '0.0.0.0', environment: :development} # TODO: IPv6
+
 
     add_hook :labels, chain: true
 
@@ -37,6 +39,13 @@ module Mamiya
 
     def prereleases_dir
       self[:prereleases_dir] && Pathname.new(self[:prereleases_dir])
+    end
+
+    # XXX: `config.app(app_name).deploy_to` form is better?
+    def deploy_to_for(app)
+      # XXX: to_sym
+      application = applications[app.to_sym] || applications[app.to_s]
+      application && application[:deploy_to] && Pathname.new(application[:deploy_to])
     end
   end
 end

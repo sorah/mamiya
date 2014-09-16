@@ -13,20 +13,11 @@ set :dereference_symlinks, true
 set :build_from, "#{File.dirname(__FILE__)}/source"
 set :build_to, "#{File.dirname(__FILE__)}/builds"
 
-dir = File.dirname(__FILE__)
-if File.basename(dir) == 'example'
-  set :deploy_to, File.join(dir, 'targets', 'default')
-else
-  # target/{releases,prereleases}/<name>/.mamiya.script/../../..
-  set :deploy_to, File.expand_path(File.join(dir, '..', '..', '..'))
-end
-
 # to test it
 Dir.mkdir build_to unless File.exist?(build_to)
-deploy_to.mkpath unless deploy_to.exist?
 
-set :bundle_without, [:development, :test]
-set :bundle_dir, "#{deploy_to}/shared/bundle"
+#set :bundle_without, [:development, :test]
+#set :bundle_dir, "#{deploy_to}/shared/bundle"
 
 #use :git, exclude_git_clean_targets: true
 
@@ -46,5 +37,17 @@ end
 #build("assets compile") do
 #  run "bundle", "exec", "rake", "assets:precompile"
 #end
+
+prepare 'test' do
+  # run 'bundle', 'install'
+  logger.info "- prep/deploy_to: #{deploy_to}"
+  logger.info "- prep/release_path: #{release_path}"
+end
+
+release 'test' do
+  # run 'bundle', 'install'
+  logger.info "- prep/deploy_to: #{deploy_to}"
+  logger.info "- prep/release_path: #{release_path}"
+end
 
 
