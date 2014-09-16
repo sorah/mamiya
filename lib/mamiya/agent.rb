@@ -14,6 +14,7 @@ require 'mamiya/agent/task_queue'
 require 'mamiya/agent/tasks/fetch'
 require 'mamiya/agent/tasks/prepare'
 require 'mamiya/agent/tasks/clean'
+require 'mamiya/agent/tasks/switch'
 
 require 'mamiya/agent/handlers/task'
 require 'mamiya/agent/actions'
@@ -42,6 +43,7 @@ module Mamiya
         Mamiya::Agent::Tasks::Fetch,
         Mamiya::Agent::Tasks::Prepare,
         Mamiya::Agent::Tasks::Clean,
+        Mamiya::Agent::Tasks::Switch,
       ])
     end
 
