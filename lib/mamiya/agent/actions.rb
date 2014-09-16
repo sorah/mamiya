@@ -17,6 +17,10 @@ module Mamiya
       def prepare(application, package, labels: nil)
         order_task('prepare', app: application, pkg: package, labels: labels)
       end
+
+      def switch(application, package, labels: nil)
+        order_task('switch', app: application, pkg: package, labels: labels)
+      end
     end
   end
 end

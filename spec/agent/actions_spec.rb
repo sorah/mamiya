@@ -36,7 +36,6 @@ describe Mamiya::Agent::Actions do
         agent.distribute('myapp', 'mypkg', labels: ['foo'])
       end
     end
-
   end
 
   describe "#prepare" do
@@ -51,6 +50,23 @@ describe Mamiya::Agent::Actions do
         expect(agent).to receive(:trigger).with('task', task: 'prepare', app: 'myapp', pkg: 'mypkg', _labels: ['foo'], coalesce: false)
 
         agent.prepare('myapp', 'mypkg', labels: ['foo'])
+      end
+    end
+  end
+
+
+  describe "#switch" do
+    it "sends switch request" do
+      expect(agent).to receive(:trigger).with('task', task: 'switch', app: 'myapp', pkg: 'mypkg', coalesce: false)
+
+      agent.switch('myapp', 'mypkg')
+    end
+
+    context "with labels" do
+      it "adds _labels on task" do
+        expect(agent).to receive(:trigger).with('task', task: 'switch', app: 'myapp', pkg: 'mypkg', _labels: ['foo'], coalesce: false)
+
+        agent.switch('myapp', 'mypkg', labels: ['foo'])
       end
     end
   end
