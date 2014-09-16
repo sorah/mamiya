@@ -128,7 +128,7 @@ module Mamiya
           logger.debug "Determining package name..."
           name = Dir.chdir(script.build_from) {
             script.package_name[
-              [Time.now.strftime("%Y-%m-%d_%H.%M.%S"), script.application]
+              [Time.now.strftime("%Y%m%d%H%M%S"), script.application]
             ].join('-')
           }
           logger.info "Package name determined: #{name}"

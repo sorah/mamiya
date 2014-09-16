@@ -235,7 +235,7 @@ describe Mamiya::Steps::Build do
 
         # Default candidates
         expect(received.size).to eq 2
-        expect(received[0]).to match(/\A\d{4}-\d{2}-\d{2}_\d{2}\.\d{2}\.\d{2}\z/)
+        expect(received[0]).to match(/\A\d{14}\z/)
         expect(received[1]).to eq script.application
       end
 
