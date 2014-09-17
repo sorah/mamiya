@@ -41,6 +41,8 @@ module Mamiya
 
           extract_step.run!
           prepare_step.run!
+
+          task_queue.enqueue(:clean, {})
         end
 
         private

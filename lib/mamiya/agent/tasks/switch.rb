@@ -57,6 +57,8 @@ module Mamiya
 
           logger.info "Switching"
           switch_step.run!
+
+          task_queue.enqueue(:clean, {})
         end
 
         private
