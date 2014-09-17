@@ -86,7 +86,7 @@ module Mamiya
       end
 
       def fetch_queued_agents
-        agents.select do |name, agent|
+        @fetch_queued_agents ||= agents.select do |name, agent|
           queue = agent['queues'] && agent['queues']['fetch'] && agent['queues']['fetch']['queue']
           queue && queue.any? { |task|
             app_and_pkg == task.values_at('app', 'pkg')
@@ -95,21 +95,21 @@ module Mamiya
       end
 
       def fetching_agents
-        agents.select do |name, agent|
+        @fetching_agents ||= agents.select do |name, agent|
           task = agent['queues'] && agent['queues']['fetch'] && agent['queues']['fetch'] && agent['queues']['fetch']['working']
           task && app_and_pkg == task.values_at('app', 'pkg')
         end.keys
       end
 
       def fetched_agents
-        agents.select do |name, agent|
+        @fetched_agents ||= agents.select do |name, agent|
           packages = agent['packages'] && agent['packages'][application]
           packages && packages.include?(package)
         end.keys
       end
 
       def prepare_queued_agents
-        agents.select do |name, agent|
+        @prepare_queued_agents ||= agents.select do |name, agent|
           queue = agent['queues'] && agent['queues']['prepare'] && agent['queues']['prepare']['queue']
           queue && queue.any? { |task|
             app_and_pkg == task.values_at('app', 'pkg')
@@ -118,21 +118,21 @@ module Mamiya
       end
 
       def preparing_agents
-        agents.select do |name, agent|
+        @preparing_agents ||= agents.select do |name, agent|
           task = agent['queues'] && agent['queues']['prepare'] && agent['queues']['prepare'] && agent['queues']['prepare']['working']
           task && app_and_pkg == task.values_at('app', 'pkg')
         end.keys
       end
 
       def prepared_agents
-        agents.select do |name, agent|
+        @prepare_agents ||= agents.select do |name, agent|
           packages = agent['prereleases'] && agent['prereleases'][application]
           packages && packages.include?(package)
         end.keys
       end
 
       def switch_queued_agents
-        agents.select do |name, agent|
+        @switch_queued_agents ||= agents.select do |name, agent|
           queue = agent['queues'] && agent['queues']['switch'] && agent['queues']['switch']['queue']
           queue && queue.any? { |task|
             app_and_pkg == task.values_at('app', 'pkg')
@@ -141,14 +141,14 @@ module Mamiya
       end
 
       def switching_agents
-        agents.select do |name, agent|
+        @switching_agents ||= agents.select do |name, agent|
           task = agent['queues'] && agent['queues']['switch'] && agent['queues']['switch'] && agent['queues']['switch']['working']
           task && app_and_pkg == task.values_at('app', 'pkg')
         end.keys
       end
 
       def current_agents
-        agents.select do |name, agent|
+        @current_agents ||= agents.select do |name, agent|
           current = agent['currents'] && agent['currents'][application]
           current == package
         end.keys
