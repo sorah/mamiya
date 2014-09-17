@@ -91,14 +91,14 @@ module Mamiya
           queue && queue.any? { |task|
             app_and_pkg == task.values_at('app', 'pkg')
           }
-        end.keys
+        end.keys - fetched_agents
       end
 
       def fetching_agents
         @fetching_agents ||= agents.select do |name, agent|
           task = agent['queues'] && agent['queues']['fetch'] && agent['queues']['fetch'] && agent['queues']['fetch']['working']
           task && app_and_pkg == task.values_at('app', 'pkg')
-        end.keys
+        end.keys - fetched_agents
       end
 
       def fetched_agents
@@ -114,14 +114,14 @@ module Mamiya
           queue && queue.any? { |task|
             app_and_pkg == task.values_at('app', 'pkg')
           }
-        end.keys
+        end.keys - prepared_agents
       end
 
       def preparing_agents
         @preparing_agents ||= agents.select do |name, agent|
           task = agent['queues'] && agent['queues']['prepare'] && agent['queues']['prepare'] && agent['queues']['prepare']['working']
           task && app_and_pkg == task.values_at('app', 'pkg')
-        end.keys
+        end.keys - prepared_agents
       end
 
       def prepared_agents
@@ -137,14 +137,14 @@ module Mamiya
           queue && queue.any? { |task|
             app_and_pkg == task.values_at('app', 'pkg')
           }
-        end.keys
+        end.keys - current_agents
       end
 
       def switching_agents
         @switching_agents ||= agents.select do |name, agent|
           task = agent['queues'] && agent['queues']['switch'] && agent['queues']['switch'] && agent['queues']['switch']['working']
           task && app_and_pkg == task.values_at('app', 'pkg')
-        end.keys
+        end.keys - current_agents
       end
 
       def current_agents
