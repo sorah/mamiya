@@ -128,48 +128,19 @@ not distributed: #{dist['not_distributed_count']} agents
         end
       end
 
-      desc "package-status PACKAGE", "Show package distribution status"
+      desc "status [PACKAGE]", "Show application or package status"
       method_option :format, aliases: %w(-f), type: :string, default: 'text'
       method_option :labels, type: :string
       method_option :show_done, type: :boolean, default: false
-      def package_status(package)
-        params = options[:labels] ? {labels: options[:labels]} : {}
-        status = master_get("/packages/#{application}/#{package}/status", params)
-
-        case options[:format]
-        when 'json'
-          require 'json'
-          puts status.to_json
-          return
-
-        when 'yaml'
-          require 'yaml'
-          puts status.to_yaml
-          return
-
-        end
-
-        total = status['participants_count']
-
-        puts <<-EOF
-at:#{Time.now.inspect}
-package:#{application}/#{package}
-status:#{status['status'].join(',')}
-
-participants:\t#{total} agents
-        EOF
-
-        %w(fetch prepare switch).each do |key|
-          status[key].tap do |st|
-            puts "#{key}:\t\tqueued:#{st['queued'].size}\tworking:#{st['working'].size}\tdone:#{st['done'].size}"
-            puts "  * queued: #{st['queued'].join(', ')}" unless st['queued'].empty?
-            puts "  * working: #{st['working'].join(', ')}" unless st['working'].empty?
-            puts "  * done: #{st['done'].join(', ')}" if !st['done'].empty? && options[:show_done]
-          end
+      def status(package=nil)
+        if package
+          pkg_status package
+        else
+          app_status
         end
       end
 
-
+          
       desc "distribute package", "order distributing package to agents"
       method_option :labels, type: :string
       def distribute(package)
@@ -271,6 +242,84 @@ participants:\t#{total} agents
         url = ENV["MAMIYA_MASTER_URL"] || options[:master]
         fatal! 'specify master URL via --master(-u) option or $MAMIYA_MASTER_URL' unless url
         URI.parse(url)
+      end
+
+      def app_status
+        params = options[:labels] ? {labels: options[:labels]} : {}
+        status = master_get("/applications/#{application}/status", params)
+
+        case options[:format]
+        when 'json'
+          require 'json'
+          puts status.to_json
+          return
+
+        when 'yaml'
+          require 'yaml'
+          puts status.to_yaml
+          return
+
+        end
+
+        puts <<-EOF
+at: #{Time.now.inspect}
+application: #{application}
+participants: #{status['participants_count']} agents
+
+major_current: #{status['major_current']}
+currents:
+#{status['currents'].sort_by { |pkg, as| -(as.size) }.flat_map { |pkg, as|
+["  - #{pkg} (#{as.size} agents)"] + (pkg == status['major_current'] ? ["    + (omitted)"] : as.map{ |_| "    * #{_['name']}" })
+}.join("\n")}
+
+common_previous_release: #{status['common_previous_release']}
+common_releases:
+#{status['common_releases'].map { |_| _.prepend('  - ') }.join("\n")}
+        EOF
+      end
+
+      def pkg_status(package, short=false)
+        params = options[:labels] ? {labels: options[:labels]} : {}
+        status = master_get("/packages/#{application}/#{package}/status", params)
+
+        case options[:format]
+        when 'json'
+          require 'json'
+          puts status.to_json
+          return
+
+        when 'yaml'
+          require 'yaml'
+          puts status.to_yaml
+          return
+
+        end
+
+        total = status['participants_count']
+
+        if short
+          "at:#{Time.now.strftime("%H:%M:%S")}  app:#{application} pkg:#{package}  agents:#{total}"
+        else
+          puts <<-EOF
+at: #{Time.now.inspect}
+package: #{application}/#{package}
+status: #{status['status'].join(',')}
+
+participants: #{total} agents
+
+          EOF
+        end
+
+          %w(fetch prepare switch).each do |key|
+            status[key].tap do |st|
+              puts "#{key}: queued=#{st['queued'].size}, working=#{st['working'].size}, done=#{st['done'].size}"
+              puts "  * queued:  #{st['queued'].join(', ')}" if !st['queued'].empty? && st['queued'].size != total
+              puts "  * working: #{st['working'].join(', ')}" if !st['working'].empty? && st['working'].size != total
+              puts "  * done:    #{st['done'].join(', ')}" if !st['done'].empty? && options[:show_done] && st['done'].size != total
+            end
+          end
+
+        status
       end
     end
 

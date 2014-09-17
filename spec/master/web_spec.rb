@@ -5,6 +5,7 @@ require 'fileutils'
 require 'mamiya/storages/mock'
 require 'mamiya/package'
 require 'mamiya/master/package_status'
+require 'mamiya/master/application_status'
 
 require 'mamiya/master/web'
 
@@ -36,10 +37,19 @@ describe Mamiya::Master::Web do
     Mamiya::Master::PackageStatus.new(agent_monitor, 'myapp', 'mypackage')
   end
 
+  let(:application_status) do
+    Mamiya::Master::ApplicationStatus.new(agent_monitor, 'myapp')
+  end
+
+
   let(:agent_monitor) do
     double('agent_monitor', statuses: agent_statuses).tap do |a|
       allow(a).to receive(:package_status).with('myapp','mypackage',labels: nil) do
         package_status
+      end
+
+      allow(a).to receive(:application_status).with('myapp', labels: nil) do
+        application_status
       end
     end
   end
@@ -73,6 +83,36 @@ describe Mamiya::Master::Web do
 
       expect(last_response.status).to eq 200
       expect(last_response.body).to match(/^mamiya/)
+    end
+  end
+
+  describe "GET /applications/:application/status" do
+    subject(:status) do
+      res = get('/applications/myapp/status')
+      expect(res.status).to eq 200
+      JSON.parse res.body
+    end
+
+    context "when application exists" do
+      before do
+        allow(application_status).to receive(:to_hash).and_return(foo: :bar)
+        allow(application_status).to receive(:participants).and_return('foo' => {'currents' => {'myapp' => nil}})
+      end
+
+      it "returns status.to_hash JSON" do
+        expect(status).to eq('foo' => 'bar')
+      end
+    end
+
+    context "when application has no participants" do
+      before do
+        allow(application_status).to receive(:participants).and_return({})
+      end
+
+      it "returns 404" do
+        res = get('/applications/myapp/status')
+        expect(res.status).to eq 404
+      end
     end
   end
 

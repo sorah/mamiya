@@ -40,6 +40,20 @@ module Mamiya
         "mamiya v#{Mamiya::VERSION}\n"
       end
 
+      get '/applications/:application/status' do
+        content_type :json
+
+        expr = params[:labels] && parse_label_matcher_expr(params[:labels])
+        appstatus = agent_monitor.application_status(params[:application], labels: expr)
+
+        if appstatus.participants.empty?
+          status 404
+          {error: 'not found'}.to_json
+        else
+          appstatus.to_hash.to_json
+        end
+      end
+
       get '/packages/:application' do
         content_type :json
         packages = storage(params[:application]).packages
