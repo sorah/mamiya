@@ -42,12 +42,15 @@ prepare 'test' do
   # run 'bundle', 'install'
   logger.info "- prep/deploy_to: #{deploy_to}"
   logger.info "- prep/release_path: #{release_path}"
+  sleep 5
+  File.write release_path.join('prepared_at'), Time.now
 end
 
 release 'test' do
-  # run 'bundle', 'install'
   logger.info "- prep/deploy_to: #{deploy_to}"
   logger.info "- prep/release_path: #{release_path}"
+  sleep 5
+  File.write release_path.join('released_at'), Time.now
 end
 
 
