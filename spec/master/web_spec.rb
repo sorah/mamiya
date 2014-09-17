@@ -177,6 +177,47 @@ describe Mamiya::Master::Web do
     end
   end
 
+  describe "POST /packages/:application/:package/switch" do
+    it "dispatchs switch request" do
+      expect(master).to receive(:switch).with('myapp', 'mypackage', labels: nil, no_release: false)
+
+      post '/packages/myapp/mypackage/switch'
+
+      expect(last_response.status).to eq 204 # no content
+    end
+
+    context "with no_release" do
+      it "dispatchs switch request" do
+        expect(master).to receive(:switch).with('myapp', 'mypackage', labels: nil, no_release: true)
+
+        post '/packages/myapp/mypackage/switch',
+          {'no_release' => true}.to_json,
+          'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq 204 # no content
+      end
+    end
+
+    context "with labels" do
+      it "dispatchs prepare request with labels" do
+        expect(master).to receive(:switch).with('myapp', 'mypackage', labels: ['foo'], no_release: false)
+
+        post '/packages/myapp/mypackage/switch',
+          {'labels' =>  ["foo"]}.to_json,
+          'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq 204 # no content
+      end
+    end
+
+    context "when package not found" do
+      it "returns 404" do
+        post '/packages/myapp/noexist/prepare'
+        expect(last_response.status).to eq 404
+      end
+    end
+  end
+
   describe "GET /package/:application/:package/status" do
     subject(:status) do
       res = get('/packages/myapp/mypackage/status')

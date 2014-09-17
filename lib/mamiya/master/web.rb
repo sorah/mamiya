@@ -93,6 +93,17 @@ module Mamiya
         end
       end
 
+      post '/packages/:application/:package/switch' do
+        if storage(params[:application]).meta(params[:package])
+          status 204
+          master.switch(params[:application], params[:package], labels: params['labels'], no_release: !!(params['no_release'] || params[:no_release]))
+        else
+          status 404
+          content_type :json
+          {error: 'not found'}.to_json
+        end
+      end
+
       get '/packages/:application/:package/status' do
         content_type :json
         meta = storage(params[:application]).meta(params[:package])
