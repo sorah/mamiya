@@ -8,7 +8,7 @@ module Mamiya
       def initialize(agent_monitor, application, package, labels: nil)
         @application = application
         @package = package
-        @agents = agent_monitor.statuses(labels: @labels)
+        @agents = agent_monitor.statuses(labels: @labels).reject { |_, s| s['master'] }
         @labels = labels
       end
 
