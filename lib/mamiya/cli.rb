@@ -228,7 +228,7 @@ module Mamiya
 
     def config(dont_raise_error = false)
       return @config if @config
-      path = [options[:config], './mamiya.conf.rb', './config.rb'].compact.find { |_| File.exists?(_) }
+      path = [options[:config], './mamiya.conf.rb', './config.rb', '/etc/mamiya/config.rb'].compact.find { |_| File.exists?(_) }
 
       if path
         logger.debug "Using configuration: #{path}"
