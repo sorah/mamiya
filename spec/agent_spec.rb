@@ -220,12 +220,16 @@ describe Mamiya::Agent do
     let(:deploy_to_a) { tmpdir.join('a').tap(&:mkdir) }
     let(:deploy_to_b) { tmpdir.join('b').tap(&:mkdir) }
 
+    # To test unexist directory (should return empty element)
+    let(:deploy_to_c) { tmpdir.join('c') }
+
     let(:config) do
-      _a, _b = deploy_to_a, deploy_to_b
+      _a, _b, _c = deploy_to_a, deploy_to_b, deploy_to_c
       Mamiya::Configuration.new.evaluate! do
         set :applications, {
           a: {deploy_to: _a.to_s},
           b: {deploy_to: _b.to_s},
+          c: {deploy_to: _c.to_s},
         }
       end
     end
@@ -253,6 +257,7 @@ describe Mamiya::Agent do
       expect(releases).to eq(
         a: ['1','2'],
         b: ['3','4','5'],
+        c: [],
       )
     end
   end

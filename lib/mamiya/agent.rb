@@ -154,13 +154,16 @@ module Mamiya
     def releases
       Hash[config.applications.map do |name, app|
         deploy_to = Pathname.new(app[:deploy_to])
+        releases = deploy_to.join('releases')
+        next [name, []] unless releases.exist?
+
         [
           name,
-          deploy_to.join('releases').children.map do |release|
+          releases.children.map do |release|
             release.basename.to_s
           end.sort
         ]
-      end]
+      end.compact]
     end
 
     def currents
