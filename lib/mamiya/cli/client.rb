@@ -77,6 +77,7 @@ module Mamiya
         end
       end
 
+      # TODO: Deprecated. Remove this
       desc "show-distribution package", "Show package distribution status"
       method_option :format, aliases: %w(-f), type: :string, default: 'text'
       method_option :verbose, aliases: %w(-v), type: :boolean
@@ -126,6 +127,48 @@ not distributed: #{dist['not_distributed_count']} agents
 
         end
       end
+
+      desc "package-status PACKAGE", "Show package distribution status"
+      method_option :format, aliases: %w(-f), type: :string, default: 'text'
+      method_option :labels, type: :string
+      method_option :show_done, type: :boolean, default: false
+      def package_status(package)
+        params = options[:labels] ? {labels: options[:labels]} : {}
+        status = master_get("/packages/#{application}/#{package}/status", params)
+
+        case options[:format]
+        when 'json'
+          require 'json'
+          puts status.to_json
+          return
+
+        when 'yaml'
+          require 'yaml'
+          puts status.to_yaml
+          return
+
+        end
+
+        total = status['participants_count']
+
+        puts <<-EOF
+at:#{Time.now.inspect}
+package:#{application}/#{package}
+status:#{status['status'].join(',')}
+
+participants:\t#{total} agents
+        EOF
+
+        %w(fetch prepare switch).each do |key|
+          status[key].tap do |st|
+            puts "#{key}:\t\tqueued:#{st['queued'].size}\tworking:#{st['working'].size}\tdone:#{st['done'].size}"
+            puts "  * queued: #{st['queued'].join(', ')}" unless st['queued'].empty?
+            puts "  * working: #{st['working'].join(', ')}" unless st['working'].empty?
+            puts "  * done: #{st['done'].join(', ')}" if !st['done'].empty? && options[:show_done]
+          end
+        end
+      end
+
 
       desc "distribute package", "order distributing package to agents"
       method_option :labels, type: :string
