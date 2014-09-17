@@ -7,8 +7,8 @@ module Mamiya
     class ApplicationStatus
       def initialize(agent_monitor, application, labels: nil)
         @application = application
-        @agents = agent_monitor.statuses(labels: @labels).reject { |_, s| s['master'] }
         @labels = labels
+        @agents = agent_monitor.statuses(labels: labels).reject { |_, s| s['master'] }
       end
 
       attr_reader :labels, :application, :agents
