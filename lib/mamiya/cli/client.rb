@@ -189,12 +189,14 @@ not distributed: #{dist['not_distributed_count']} agents
 
         show_package(package)
 
-        config.set :application, application
-        config.set :package_name, package
-        config.set :package, @meta
+        if config
+          config.set :application, application
+          config.set :package_name, package
+          config.set :package, @meta
 
-        config.before_deploy_or_rollback[]
-        config.before_deploy[]
+          config.before_deploy_or_rollback[]
+          config.before_deploy[]
+        end
 
         do_prep = -> do
           puts "=> Preparing..."
@@ -237,8 +239,8 @@ not distributed: #{dist['not_distributed_count']} agents
         $stderr.puts "ERROR: #{e.inspect}"
         $stderr.puts "\t#{e.backtrace("\n\t")}"
       ensure
-        config.after_deploy[@deploy_exception]
-        config.after_deploy_or_rollback[@deploy_exception]
+        config.after_deploy[@deploy_exception] if config
+        config.after_deploy_or_rollback[@deploy_exception] if config
         puts "=> Done."
       end
 
@@ -261,12 +263,14 @@ not distributed: #{dist['not_distributed_count']} agents
 
         show_package(package)
 
-        config.set :application, application
-        config.set :package_name, package
-        config.set :package, @meta
+        if config
+          config.set :application, application
+          config.set :package_name, package
+          config.set :package, @meta
 
-        config.before_deploy_or_rollback[]
-        config.before_rollback[]
+          config.before_deploy_or_rollback[]
+          config.before_rollback[]
+        end
 
         switch(package)
 
@@ -282,8 +286,8 @@ not distributed: #{dist['not_distributed_count']} agents
         @deploy_exception = e
         raise e
       ensure
-        config.after_rollback[@deploy_exception]
-        config.after_deploy_or_rollback[@deploy_exception]
+        config.after_rollback[@deploy_exception] if config
+        config.after_deploy_or_rollback[@deploy_exception] if config
         puts "=> Done."
       end
 
@@ -412,7 +416,7 @@ common_releases:
         total = status['participants_count']
 
         if short
-          puts "at:#{Time.now.strftime("%H:%M:%S")}  app:#{application} pkg:#{package}  agents:#{total}"
+          puts "#{Time.now.strftime("%H:%M:%S")}  app:#{application} pkg:#{package}  agents:#{total}"
         else
           puts <<-EOF
 at: #{Time.now.inspect}
