@@ -41,3 +41,7 @@ deploy_to_for(:myapp).mkpath unless deploy_to_for(:myapp).exist?
 set :keep_packages, 3
 set :keep_prereleases, 3
 set :fetch_sleep, 2
+
+labels do
+  [:"p#{ENV['PORT']}"]
+end
