@@ -28,7 +28,7 @@ module Mamiya
       desc "show-package", "show package meta data"
       method_option :format, aliases: %w(-f), type: :string, default: 'pp'
       def show_package(package)
-        meta =  master_get("/packages/#{application}/#{package}")
+        meta = @meta =  master_get("/packages/#{application}/#{package}")
 
         case options[:format]
         when 'pp'
@@ -176,12 +176,115 @@ not distributed: #{dist['not_distributed_count']} agents
         p master_post('/agents/refresh')
       end
 
-      desc "deploy PACKAGE", "Run distribute->prepare->finalize"
-      def deploy
+      desc "deploy PACKAGE", "Prepare, then switch"
+      method_option :labels, type: :string
+      method_option :no_release, type: :boolean, default: false
+      method_option :config, aliases: '-C', type: :string
+      method_option :no_switch, type: :boolean, default: false
+      def deploy(package)
+        @deploy_exception = nil
+        # TODO: move this run on master node side
+        puts "=> Deploying #{application}/#{package}"
+        puts " * with labels: #{options[:labels].inspect}" if options[:labels] && !options[:labels].empty?
+
+        show_package(package)
+
+        config.set :application, application
+        config.set :package_name, package
+        config.set :package, @meta
+
+        config.before_deploy_or_rollback[]
+        config.before_deploy[]
+
+        do_prep = -> do
+          puts "=> Preparing..."
+          prepare(package)
+        end
+
+        do_prep[]
+
+        puts " * Wait until prepared"
+        puts ""
+
+        i = 0
+        loop do
+          i += 1
+          do_prep[] if i % 25 == 0
+
+          s = pkg_status(package, :short)
+          puts ""
+          break if 0 < s['participants_count'] && s['participants_count'] == s['prepare']['done'].size
+          sleep 2
+        end
+
+        ###
+
+        unless options[:no_switch]
+          puts "=> Switching..."
+          switch(package)
+
+          puts " * Wait until switch"
+          puts ""
+          loop do
+            s = pkg_status(package, :short)
+            puts ""
+            break if s['participants_count'] == s['switch']['done'].size
+            sleep 2
+          end
+        end
+      rescue Exception => e
+        @deploy_exception = e
+        $stderr.puts "ERROR: #{e.inspect}"
+        $stderr.puts "\t#{e.backtrace("\n\t")}"
+      ensure
+        config.after_deploy[@deploy_exception]
+        config.after_deploy_or_rollback[@deploy_exception]
+        puts "=> Done."
       end
 
       desc "rollback", "Switch back to previous release then finalize"
+      method_option :labels, type: :string
+      method_option :no_release, type: :boolean, default: false
+      method_option :config, aliases: '-C', type: :string
       def rollback
+        @deploy_exception = nil
+        # TODO: move this run on master node side
+        appstatus = master_get("/applications/#{application}/status", options[:labels] ? {labels: options[:labels]} : {})
+        package = appstatus['common_previous_release']
+
+        unless package
+          raise 'there is no common_previous_release for specified application'
+        end
+
+        puts "=> Rolling back #{application} to #{package}"
+        puts " * with labels: #{options[:labels].inspect}" if options[:labels] && !options[:labels].empty?
+
+        show_package(package)
+
+        config.set :application, application
+        config.set :package_name, package
+        config.set :package, @meta
+
+        config.before_deploy_or_rollback[]
+        config.before_rollback[]
+
+        switch(package)
+
+        puts " * Wait until switch"
+        puts ""
+        loop do
+          s = pkg_status(package, :short)
+          puts ""
+          break if 0 < s['participants_count'] && s['participants_count'] == s['switch']['done'].size
+          sleep 2
+        end
+      rescue Exception => e
+        @deploy_exception = e
+        raise e
+      ensure
+        config.after_rollback[@deploy_exception]
+        config.after_deploy_or_rollback[@deploy_exception]
+        puts "=> Done."
       end
 
       desc "join HOST", "let serf to join to HOST"
@@ -198,6 +301,17 @@ not distributed: #{dist['not_distributed_count']} agents
 
       def application
         options[:application] or fatal!('specify application')
+      end
+
+      def config
+        return @config if @config
+        path = [options[:config], './mamiya.conf.rb', './config.rb', '/etc/mamiya/config.rb'].compact.find { |_| File.exists?(_) }
+
+        if path
+          @config = Mamiya::Configuration.new.load!(File.expand_path(path))
+        end
+
+        @config
       end
 
       def master_get(path, params={})
@@ -298,7 +412,7 @@ common_releases:
         total = status['participants_count']
 
         if short
-          "at:#{Time.now.strftime("%H:%M:%S")}  app:#{application} pkg:#{package}  agents:#{total}"
+          puts "at:#{Time.now.strftime("%H:%M:%S")}  app:#{application} pkg:#{package}  agents:#{total}"
         else
           puts <<-EOF
 at: #{Time.now.inspect}

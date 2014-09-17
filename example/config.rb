@@ -24,3 +24,27 @@ deploy_to_for(:myapp).mkpath unless deploy_to_for(:myapp).exist?
 set :keep_packages, 3
 set :keep_prereleases, 3
 set :fetch_sleep, 2
+
+before_deploy do
+  p :before_deploy
+end
+
+after_deploy do |e|
+  p [:after_deploy, e]
+end
+
+before_rollback do
+  p :before_rollback
+end
+
+after_rollback do |e|
+  p [:after_rollback, e]
+end
+
+before_deploy_or_rollback do
+  p :before_deploy_or_rollback
+end
+
+after_deploy_or_rollback do |e|
+  p [:after_deploy_or_rollback, e]
+end

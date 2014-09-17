@@ -49,7 +49,9 @@ end
 release 'test' do
   logger.info "- prep/deploy_to: #{deploy_to}"
   logger.info "- prep/release_path: #{release_path}"
-  sleep 5
+  sl = rand(80)
+  logger.info "!!!!!!!!!!!!!!! sleep #{sl} sec"
+  sleep sl
   File.write release_path.join('released_at'), Time.now
 end
 

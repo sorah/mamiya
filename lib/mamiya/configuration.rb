@@ -27,8 +27,16 @@ module Mamiya
     set_default :master, {monitor: {refresh_interval: nil}} # TODO: don't nest
     set_default :web, {port: 7761, bind: '0.0.0.0', environment: :development} # TODO: IPv6
 
-
     add_hook :labels, chain: true
+
+    add_hook :before_deploy_or_rollback
+    add_hook :after_deploy_or_rollback
+
+    add_hook :before_deploy
+    add_hook :after_deploy
+
+    add_hook :before_rollback
+    add_hook :after_rollback
 
     def storage_class
       Storages.find(self[:storage][:type])
