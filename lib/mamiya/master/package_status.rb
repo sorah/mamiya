@@ -43,17 +43,45 @@ module Mamiya
 
       def status
         [].tap do |s|
+          working = false
+
           case
           when fetched_agents == agents.keys
             s << :distributed
           when !fetching_agents.empty? || !fetch_queued_agents.empty?
+            working = true
             s << :distributing
           end
           if fetched_agents != agents.keys && !fetched_agents.empty?
             s << :partially_distributed
           end
 
+          # TODO: FIXME: tests
+          case
+          when prepared_agents == agents.keys
+            s << :prepared
+          when !preparing_agents.empty? || !prepare_queued_agents.empty?
+            working = true
+            s << :preparing
+          end
+          if prepared_agents != agents.keys && !prepared_agents.empty?
+            s << :partially_prepared
+          end
+
+          # TODO: FIXME: tests
+          case
+          when current_agents == agents.keys
+            s << :active
+          when !current_agents.empty? || !switch_queued_agents.empty?
+            working = true
+            s << :switching
+          end
+          if current_agents != agents.keys && !current_agents.empty?
+            s << :partially_active
+          end
+
           s << :unknown if s.empty?
+          s << :working if working
         end
       end
 
