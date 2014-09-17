@@ -3,6 +3,7 @@ require 'spec_helper'
 require 'mamiya/agent/tasks/clean'
 require 'mamiya/agent/tasks/abstract'
 require 'mamiya/steps/fetch'
+require 'mamiya/configuration'
 
 describe Mamiya::Agent::Tasks::Clean do
   let!(:tmpdir) { Dir.mktmpdir('mamiya-agent-tasks-clean-spec') }
@@ -10,10 +11,21 @@ describe Mamiya::Agent::Tasks::Clean do
 
   let(:packages_dir) { Pathname.new(tmpdir).join('packages').tap(&:mkdir) }
   let(:prereleases_dir) { Pathname.new(tmpdir).join('prereleases').tap(&:mkdir) }
+  
+  let(:deploy_to_a) {  Pathname.new(tmpdir).join('app_a').tap(&:mkdir)  }
+  let(:deploy_to_b) {  Pathname.new(tmpdir).join('app_b').tap(&:mkdir)  }
 
   let(:config) do
-    {packages_dir: packages_dir, keep_packages: 2,
-     prereleases_dir: prereleases_dir, keep_prereleases: 2,}
+    Mamiya::Configuration.new.tap do |c|
+      c.set :packages_dir, packages_dir
+      c.set :prereleases_dir, prereleases_dir 
+      c.set :keep_packages, 2
+      c.set :keep_prereleases, 2
+      c.set :keep_releases, 2
+
+      c.applications[:app_a] = {deploy_to: deploy_to_a}
+      c.applications[:app_b] = {deploy_to: deploy_to_b}
+    end
   end
 
   let(:agent) { double('agent', config: config) }
@@ -115,6 +127,80 @@ describe Mamiya::Agent::Tasks::Clean do
           prereleases_dir.join('b', '1') => true,
           prereleases_dir.join('b', '2') => true,
         )
+      end
+    end
+
+    describe "releases_dir" do
+      before do
+        # TODO: XXX: this may remove ongoing preparing somewhat
+        deploy_to_a.join('releases').tap do |path|
+          path.mkdir
+          path.join('1').mkdir
+          path.join('2').mkdir
+          path.join('3').mkdir
+        end
+
+        deploy_to_b.join('releases').tap do |path|
+          path.mkdir
+          path.join('1').mkdir
+          path.join('2').mkdir
+        end
+      end
+
+      it "cleans up" do
+        expect(agent).to receive(:trigger).with('release', action: 'remove', app: :app_a, pkg: '1', coalesce: false)
+
+        task.execute
+
+        existences = Hash[
+          [
+            deploy_to_a.join('releases', '1'),
+            deploy_to_a.join('releases', '2'),
+            deploy_to_a.join('releases', '3'),
+            deploy_to_b.join('releases', '1'),
+            deploy_to_b.join('releases', '2'),
+          ].map { |file|
+            [file, file.exist?]
+          }
+        ]
+
+        expect(existences).to eq(
+            deploy_to_a.join('releases', '1') => false,
+            deploy_to_a.join('releases', '2') => true,
+            deploy_to_a.join('releases', '3') => true,
+            deploy_to_b.join('releases', '1') => true,
+            deploy_to_b.join('releases', '2') => true,
+        )
+      end
+
+      context "with current release" do
+        before do
+          deploy_to_a.join('current').make_symlink deploy_to_a.join('releases', '1')
+        end
+
+        it "cleans up" do
+          task.execute
+
+          existences = Hash[
+            [
+              deploy_to_a.join('releases', '1'),
+              deploy_to_a.join('releases', '2'),
+              deploy_to_a.join('releases', '3'),
+              deploy_to_b.join('releases', '1'),
+              deploy_to_b.join('releases', '2'),
+            ].map { |file|
+              [file, file.exist?]
+            }
+          ]
+
+          expect(existences).to eq(
+              deploy_to_a.join('releases', '1') => true,
+              deploy_to_a.join('releases', '2') => true,
+              deploy_to_a.join('releases', '3') => true,
+              deploy_to_b.join('releases', '1') => true,
+              deploy_to_b.join('releases', '2') => true,
+          )
+        end
       end
     end
   end

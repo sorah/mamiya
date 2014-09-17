@@ -9,7 +9,10 @@ module Mamiya
           # XXX:
           clean_packages
           clean_prereleases
+          clean_releases
         end
+
+        ###
 
         def clean_packages
           package_victims.each do |app, victim|
@@ -45,6 +48,8 @@ module Mamiya
           end
         end
 
+        ###
+
         def clean_prereleases
           prerelease_victims.each do |app, victim|
             @logger.info "Cleaning prerelease: remove #{victim}"
@@ -70,6 +75,36 @@ module Mamiya
           end
         end
 
+        ###
+
+        def clean_releases
+          release_victims.each do |app, victim|
+            @logger.info "Cleaning release: remove #{victim}"
+            package_name = File.basename(victim)
+            FileUtils.remove_entry_secure victim
+
+            agent.trigger('release', action: 'remove',
+              app: app,
+              pkg: package_name,
+              coalesce: false,
+            )
+          end
+        end
+
+        def release_victims
+          config.applications.flat_map  do |name, app|
+            next unless app[:deploy_to]
+            releases = Dir[File.join(app[:deploy_to], 'releases', '*')].sort_by { |_| [File.mtime(_), _] }
+            current = File.join(app[:deploy_to], 'current')
+            current_realpath = File.exist?(current) ? File.realpath(current) : nil
+
+            releases.reject!{ |rel| File.realpath(rel) == current_realpath }
+
+            releases[0...-(config[:keep_releases])].map do |victim|
+              [name, victim]
+            end
+          end
+        end
       end
     end
   end

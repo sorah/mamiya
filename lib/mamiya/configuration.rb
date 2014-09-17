@@ -20,6 +20,7 @@ module Mamiya
     set_default :fetch_sleep, 12
     set_default :keep_packages, 3
     set_default :keep_prereleases, 3
+    set_default :keep_releases, 3
     set_default :applications, {}
 
     # master
