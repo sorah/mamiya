@@ -47,11 +47,6 @@ module Mamiya
       end
     end
 
-    desc "status", "Show status of servers"
-    def status
-      # TODO:
-    end
-
     desc "list-packages", "List packages in storage"
     method_option :name_only, aliases: '-n'
     def list_packages
@@ -87,14 +82,6 @@ module Mamiya
     end
 
     # ---
-
-    desc "deploy PACKAGE", "Run build->push->distribute->prepare->finalize"
-    def deploy
-    end
-
-    desc "rollback", "Switch back to previous release then finalize"
-    def rollback
-    end
 
     desc "build", "Build package."
     method_option :build_from, aliases: %w(--source -f), type: :string
@@ -215,12 +202,6 @@ module Mamiya
       @agent = Master.new(config, logger: logger)
       @agent.run!
     end
-
-    # def worker
-    # end
-
-    # def event_handler
-    # end
 
     private
 
