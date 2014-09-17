@@ -72,6 +72,10 @@ module Mamiya
         end
       end
 
+      def task___switch__finish(status, task)
+        status['currents'] ||= {}
+        status['currents'][task['app']] = task['pkg']
+      end
 
 
       def pkg__remove(status, payload, event)
@@ -84,6 +88,12 @@ module Mamiya
         status['prereleases'] ||= {}
         prereleases = status['prereleases'][payload['app']]
         prereleases.delete(payload['pkg']) if prereleases
+      end
+
+      def release__remove(status, payload, event)
+        status['releases'] ||= {}
+        releases = status['releases'][payload['app']]
+        releases.delete(payload['pkg']) if releases
       end
     end
   end

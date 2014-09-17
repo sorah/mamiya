@@ -614,6 +614,47 @@ describe Mamiya::Master::AgentMonitor do
         end
       end
 
+      describe "release" do
+        describe ":remove" do
+          let(:status) do
+            {releases: {'myapp' => ['pkg1']}}
+          end
+
+          it "removes removed release from releases" do
+            commit('mamiya:release:remove',
+                   app: 'myapp', pkg: 'pkg1')
+
+            expect(new_status["releases"]['myapp']).to eq []
+          end
+
+          context "with existing packages" do
+            let(:status) do
+              {releases: {'myapp' => ['pkg1', 'pkg2']}}
+            end
+
+            it "removes removed release from releases" do
+              commit('mamiya:release:remove',
+                     app: 'myapp', pkg: 'pkg1')
+
+              expect(new_status["releases"]['myapp']).to eq ['pkg2']
+            end
+          end
+
+          context "with inexist package" do
+            let(:status) do
+              {releases: {'myapp' => ['pkg1', 'pkg3']}}
+            end
+
+            it "removes removed release from packages" do
+              commit('mamiya:release:remove',
+                     app: 'myapp', pkg: 'pkg2')
+
+              expect(new_status["releases"]['myapp']).to eq ['pkg1', 'pkg3']
+            end
+          end
+        end
+      end
+
       describe "fetch" do
         describe "success" do
           let(:status) do
@@ -665,6 +706,34 @@ describe Mamiya::Master::AgentMonitor do
                      task: {task: 'prepare', app: 'myapp', pkg: 'pkg2'})
 
               expect(new_status["prereleases"]['myapp']).to eq %w(pkg1 pkg2)
+            end
+          end
+        end
+      end
+
+      describe "switch" do
+        describe "success" do
+          let(:status) do
+            {currents: {}}
+          end
+
+          it "updates current" do
+            commit('mamiya:task:finish',
+                   task: {task: 'switch', app: 'myapp', pkg: 'pkg'})
+
+            expect(new_status["currents"]['myapp']).to eq "pkg"
+          end
+
+          context "with existing current" do
+            let(:status) do
+              {currents: {'myapp' => 'pkg1'}}
+            end
+
+            it "updates current" do
+              commit('mamiya:task:finish',
+                     task: {task: 'switch', app: 'myapp', pkg: 'pkg2'})
+
+              expect(new_status["currents"]['myapp']).to eq 'pkg2'
             end
           end
         end
