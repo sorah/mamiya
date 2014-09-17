@@ -14,6 +14,33 @@ module Mamiya
 
       attr_reader :labels, :application, :package, :agents
 
+      def to_hash
+        {
+          application: application,
+          package: package,
+          labels: labels,
+          status: status,
+          participants_count: participants.size,
+          non_participants: non_participants,
+          active: current_agents,
+          fetch: {
+            queued: fetch_queued_agents,
+            working: fetching_agents,
+            done: fetched_agents,
+          },
+          prepare: {
+            queued: prepare_queued_agents,
+            working: preparing_agents,
+            done: prepared_agents,
+          },
+          switch: {
+            queued: switch_queued_agents,
+            working: switching_agents,
+            done: current_agents,
+          },
+        }
+      end
+
       def status
         [].tap do |s|
           case
