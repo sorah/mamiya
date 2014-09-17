@@ -52,8 +52,10 @@ module Mamiya
             raise PrereleaseMissing, "Existing release is not prepared but prerelease doesn't exist"
           end
 
-          logger.info "Copying #{prerelease_path} -> #{release_path}"
-          FileUtils.cp_r prerelease_path, release_path
+          unless release_path.exist?
+            logger.info "Copying #{prerelease_path} -> #{release_path}"
+            FileUtils.cp_r prerelease_path, release_path
+          end
 
           logger.info "Switching"
           switch_step.run!
