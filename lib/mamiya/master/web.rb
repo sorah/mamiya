@@ -93,8 +93,22 @@ module Mamiya
         end
       end
 
+      get '/packages/:application/:package/status' do
+        content_type :json
+        meta = storage(params[:application]).meta(params[:package])
+        unless meta
+          status 404
+          next {error: 'not found'}.to_json
+        end
+
+        expr = params[:labels] && parse_label_matcher_expr(params[:labels])
+        pkgstatus = agent_monitor.package_status(params[:application], params[:package], labels: expr)
+
+        pkgstatus.to_hash.to_json
+      end
+
       get '/packages/:application/:package/distribution' do
-        # TODO: filter with label
+        # TODO: Deprecated. Remove this
         content_type :json
         meta = storage(params[:application]).meta(params[:package])
         unless meta

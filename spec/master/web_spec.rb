@@ -32,10 +32,14 @@ describe Mamiya::Master::Web do
     {}
   end
 
+  let(:package_status) do
+    Mamiya::Master::PackageStatus.new(agent_monitor, 'myapp', 'mypackage')
+  end
+
   let(:agent_monitor) do
     double('agent_monitor', statuses: agent_statuses).tap do |a|
       allow(a).to receive(:package_status).with('myapp','mypackage',labels: nil) do
-        Mamiya::Master::PackageStatus.new(a, 'myapp', 'mypackage')
+        package_status
       end
     end
   end
@@ -173,8 +177,33 @@ describe Mamiya::Master::Web do
     end
   end
 
+  describe "GET /package/:application/:package/status" do
+    subject(:status) do
+      res = get('/packages/myapp/mypackage/status')
+      expect(res.status).to eq 200
+      JSON.parse res.body
+    end
+
+    context "when package exists" do
+      before do
+        allow(package_status).to receive(:to_hash).and_return(foo: :bar)
+      end
+
+      it "returns package_status.to_hash JSON" do
+        expect(status).to eq('foo' => 'bar')
+      end
+    end
+
+    context "when package not found" do
+      it "returns 404" do
+        get '/packages/myapp/noexist/status'
+        expect(last_response.status).to eq 404
+      end
+    end
+  end
 
   describe "GET /package/:application/:package/distribution" do
+    # TODO: Deprecated. Remove this
     subject(:distribution) do
       res = get('/packages/myapp/mypackage/distribution')
       expect(res.status).to eq 200
