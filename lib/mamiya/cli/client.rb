@@ -237,7 +237,7 @@ not distributed: #{dist['not_distributed_count']} agents
       rescue Exception => e
         @deploy_exception = e
         $stderr.puts "ERROR: #{e.inspect}"
-        $stderr.puts "\t#{e.backtrace("\n\t")}"
+        $stderr.puts "\t#{e.backtrace.join("\n\t")}"
       ensure
         config.after_deploy[@deploy_exception] if config
         config.after_deploy_or_rollback[@deploy_exception] if config
