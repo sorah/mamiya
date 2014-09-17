@@ -188,6 +188,18 @@ participants:\t#{total} agents
         p master_post("/packages/#{application}/#{package}/prepare", params.merge(type: :json))
       end
 
+      desc "switch PACKAGE", "order switching package to agents"
+      method_option :labels, type: :string
+      method_option :no_release, type: :boolean, default: false
+      def switch(package)
+        params = {no_release: options[:no_release]}
+        if options[:labels]
+          params[:labels] = Mamiya::Util::LabelMatcher.parse_string_expr(options[:labels])
+        end
+
+        p master_post("/packages/#{application}/#{package}/switch", params.merge(type: :json))
+      end
+
       desc "refresh", "order refreshing agent status"
       def refresh
         p master_post('/agents/refresh')
