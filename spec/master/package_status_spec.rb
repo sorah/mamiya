@@ -15,6 +15,8 @@ describe Mamiya::Master::PackageStatus do
 
   subject(:status) { described_class.new(agent_monitor, application, package) }
 
+  # TODO: FIXME: Add test to confirm ignoring master node
+
   describe "#status" do
     subject { status.status }
 
