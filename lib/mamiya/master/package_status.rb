@@ -155,9 +155,9 @@ module Mamiya
       end
 
       def participants
-        fetch_queued_agents   + fetching_agents  + fetched_agents  + \
+        (fetch_queued_agents   + fetching_agents  + fetched_agents  + \
         prepare_queued_agents + preparing_agents + prepared_agents + \
-        switch_queued_agents  + switching_agents + current_agents
+        switch_queued_agents  + switching_agents + current_agents).uniq
       end
 
       def non_participants
