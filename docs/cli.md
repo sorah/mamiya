@@ -2,7 +2,7 @@
 
 ## Global options
 
-- `-C`, `--config`: path to configuration file (default: `./config.yml`)
+- `-C`, `--config`: path to configuration file (default: `./config.rb`)
   - config file won't be required if a command don't need it.
 - `-S`, `--script`: path to script file (default: `./deploy.rb`)
   - script file won't be required if a command don't need it.
@@ -15,13 +15,13 @@
 ### `list-applications` - list application in storage
 
 ```
-$ mamiya list-applications -C ./config.yml
+$ mamiya list-applications -C ./config.rb
 ```
 
 ### `list-packages` - list packages for specified app in storage
 
 ```
-$ mamiya list-packages -C ./config.yml -a myapp
+$ mamiya list-packages -C ./config.rb -a myapp
 ```
 
 - __Requires:__ configuration file, application name
@@ -32,7 +32,7 @@ $ mamiya list-packages -C ./config.yml -a myapp
 ### `show` - show package information
 
 ```
-$ mamiya list-packages -C ./config.yml -a myapp PACKAGE_NAME
+$ mamiya list-packages -C ./config.rb -a myapp PACKAGE_NAME
 ```
 
 - __Requires:__ configuration file, application name, package name
