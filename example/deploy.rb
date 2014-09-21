@@ -16,6 +16,28 @@ set :build_to, "#{File.dirname(__FILE__)}/builds"
 # to test it
 Dir.mkdir build_to unless File.exist?(build_to)
 
+build("test") do
+  # build something...
+  File.write('built_at', "#{Time.now}\n")
+end
+
+prepare 'test' do
+  # run 'bundle', 'install'
+  sleep 5
+  File.write release_path.join('prepared_at'), Time.now
+end
+
+release 'test' do
+  # run '/etc/init.d/app', 'reload'
+  i = rand(10)
+  logger.info "SLEEP #{i} sec"
+  sleep i
+  File.write release_path.join('released_at'), Time.now
+end
+
+
+
+
 #set :bundle_without, [:development, :test]
 #set :bundle_dir, "#{deploy_to}/shared/bundle"
 
@@ -25,10 +47,6 @@ Dir.mkdir build_to unless File.exist?(build_to)
 #  run "bundle", "install"
 #end
 
-build("test") do
-  File.write('built_at', "#{Time.now}\n")
-end
-
 #build("include assets and .bundle") do
 #  exclude_from_package.reject! { |_| _ == 'public/assets/' }
 #  exclude_from_package.reject! { |_| _ == '.bundle/' }
@@ -37,22 +55,5 @@ end
 #build("assets compile") do
 #  run "bundle", "exec", "rake", "assets:precompile"
 #end
-
-prepare 'test' do
-  # run 'bundle', 'install'
-  logger.info "- prep/deploy_to: #{deploy_to}"
-  logger.info "- prep/release_path: #{release_path}"
-  sleep 5
-  File.write release_path.join('prepared_at'), Time.now
-end
-
-release 'test' do
-  logger.info "- prep/deploy_to: #{deploy_to}"
-  logger.info "- prep/release_path: #{release_path}"
-  sl = rand(80)
-  logger.info "!!!!!!!!!!!!!!! sleep #{sl} sec"
-  sleep sl
-  File.write release_path.join('released_at'), Time.now
-end
 
 

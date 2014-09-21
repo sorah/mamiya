@@ -42,6 +42,7 @@ set :keep_packages, 3
 set :keep_prereleases, 3
 set :fetch_sleep, 2
 
+_labels = [rand(2) == 0 ? :a : :b]
 labels do
-  [:"p#{ENV['PORT']}"]
+  [:"p#{ENV['PORT']}", *_labels]
 end
