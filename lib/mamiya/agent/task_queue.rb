@@ -117,6 +117,8 @@ module Mamiya
           begin
             status[:lock].synchronize do
               status[:pending].delete task
+
+              task['start'] = Time.now.to_i
               status[:working] = task
             end
             task_logger = @logger.with_clean_progname

@@ -41,7 +41,6 @@ describe Mamiya::Agent::TaskQueue do
     end
   end
 
-
   let(:task_class_a) do
     Class.new(task_class_root) do
       def self.identifier
@@ -60,6 +59,10 @@ describe Mamiya::Agent::TaskQueue do
 
   subject(:queue) do
     described_class.new(agent, task_classes: [task_class_a, task_class_b])
+  end
+
+  before do
+    allow(Time).to receive(:now).and_return(Time.now)
   end
 
   describe "lifecycle (#start!, #stop!)" do
@@ -170,7 +173,7 @@ describe Mamiya::Agent::TaskQueue do
 
         100.times { break unless task_class_a.locks.empty?; sleep 0.01 }
         expect(task_class_a.locks).not_to be_empty
-        expect(queue.status[:a][:working]).to eq('wait' => true, 'id' => 1, 'task' => :a)
+        expect(queue.status[:a][:working]).to eq('wait' => true, 'id' => 1, 'task' => :a, 'start' => Time.now.to_i)
 
         queue.enqueue(:a, 'id' => 2)
         100.times { break unless queue.status[:a][:queue].empty?; sleep 0.01 }
@@ -236,8 +239,8 @@ describe Mamiya::Agent::TaskQueue do
           expect(task_class_a.locks).not_to be_empty
           expect(task_class_b.locks).not_to be_empty
 
-          expect(queue.status[:a][:working]).to eq('wait' => true, 'id' => 1, 'task' => :a)
-          expect(queue.status[:b][:working]).to eq('wait' => true, 'id' => 2, 'task' => :b)
+          expect(queue.status[:a][:working]).to eq('wait' => true, 'id' => 1, 'task' => :a, 'start' => Time.now.to_i)
+          expect(queue.status[:b][:working]).to eq('wait' => true, 'id' => 2, 'task' => :b, 'start' => Time.now.to_i)
 
           queue.enqueue(:a, 'id' => 3)
           queue.enqueue(:b, 'id' => 4)
