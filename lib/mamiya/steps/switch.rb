@@ -5,28 +5,18 @@ module Mamiya
     class Switch < Abstract
       def run!
         @exception = nil
-        logger.info "Switching to #{target}"
+        @switched = false
 
-        script.before_switch(labels)[]
-
-        # TODO: link with relative if available?
-        # TODO: Restore this if FAILED
-        File.unlink script.current_path if script.current_path.symlink?
-        script.current_path.make_symlink(target.realpath)
-
-        if do_release?
-          begin
-            old_pwd = Dir.pwd
-            Dir.chdir(target)
-
-            logger.info "Releasing..."
-
-            script.release(labels)[@exception]
-          ensure
-            Dir.chdir old_pwd if old_pwd
-          end
+        if current_targets_release?
+          logger.info "Already switched"
         else
-          logger.warn "Skipping release (:no_release is set)"
+          switch
+        end
+
+        if @switched ? do_release? : force_release?
+          release
+        else
+          logger.warn "Skipping release"
         end
 
       rescue Exception => e
@@ -35,9 +25,32 @@ module Mamiya
       ensure
         logger.warn "Exception occured, cleaning up..." if @exception
 
-        script.after_switch(labels)[@exception]
+        script.after_switch(labels)[@exception] if @switched
 
         logger.info "DONE!" unless @exception
+      end
+
+      def switch
+        logger.info "Switching to #{target}"
+        @switched = true
+        script.before_switch(labels)[]
+
+        File.unlink script.current_path if script.current_path.symlink?
+        script.current_path.make_symlink(target.realpath)
+      end
+
+      def release
+        # TODO: link with relative if available?
+        # TODO: Restore this if FAILED
+
+        old_pwd = Dir.pwd
+        Dir.chdir(target)
+
+        logger.info "Releasing..."
+
+        script.release(labels)[@exception]
+      ensure
+        Dir.chdir old_pwd if old_pwd
       end
 
       # XXX: dupe with prepare step. modulize?
@@ -57,8 +70,20 @@ module Mamiya
 
       private
 
+      def current_targets_release?
+        script.current_path.exist? && script.current_path.realpath == target.realpath
+      end
+
       def do_release?
-        !options[:no_release]
+        force_release? ? true : !no_release?
+      end
+
+      def force_release?
+        !!options[:do_release]
+      end
+
+      def no_release?
+        !!options[:no_release]
       end
 
       def target

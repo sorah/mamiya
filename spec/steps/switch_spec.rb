@@ -119,6 +119,42 @@ describe Mamiya::Steps::Switch do
       }.from(nil).to(release_path.realpath)
     end
 
+    context "when current targets the target" do
+      before do
+        current_path.make_symlink(release_path.realpath)
+      end
+
+      it "doesn't call hooks" do
+        called = false
+        allow(script).to receive(:release).and_return(proc { called = true })
+        allow(script).to receive(:before_switch).and_return(proc { called = true })
+        allow(script).to receive(:after_switch).and_return(proc { called = true })
+        step.run!
+
+        expect(called).to be_false
+      end
+
+      context "with do_release" do
+        let(:options) do
+          {target: release_path, do_release: true}
+        end
+
+        it "calls hooks" do
+          hooks = %i(release)
+
+          flags = []
+          hooks.each do |sym|
+            allow(script).to receive(sym).and_return(proc { flags << sym })
+          end
+
+          expect { step.run! }.
+            to change { flags }.
+            from([]).
+            to(hooks)
+        end
+      end
+    end
+
     context "when current already exists" do
       before do
           current_path.make_symlink('releases/20140515000707')
