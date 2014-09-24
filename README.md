@@ -20,7 +20,8 @@ Mamiya allows you to deploy using without ssh -- using tarballs, some storages (
 
 ### Example configuration
 
-[example](./example) directory contains configuration files that work out-of-the-box. Try Mamiya in your local machine: `foreman start`
+[example](./example) directory contains configuration files that work out-of-the-box.
+Try Mamiya in your local machine: `foreman start`
 
 ## Problems in existing deploy tool
 
