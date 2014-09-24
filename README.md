@@ -33,6 +33,9 @@ This solves such problem by using [Serf](http://www.serfdom.io/) and tarball on 
 Also, I'm planning to allow to distribute files before the deploy command. I guess this can skip or shorten
 file transferring phase in deploy.
 
+## Misc.
+
+- [Scalable Deployments - How we deploy Rails app to 150+ hosts in a minute // Speaker Deck](https://speakerdeck.com/sorah/scalable-deployments-how-we-deploy-rails-app-to-150-plus-hosts-in-a-minute)
 
 ## Upgrade Notes
 
