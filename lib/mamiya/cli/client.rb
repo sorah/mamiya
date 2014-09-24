@@ -387,7 +387,7 @@ participants: #{status['participants_count']} agents
 major_current: #{status['major_current']}
 currents:
 #{status['currents'].sort_by { |pkg, as| -(as.size) }.flat_map { |pkg, as|
-["  - #{pkg} (#{as.size} agents)"] + (pkg == status['major_current'] ? ["    + (omitted)"] : as.map{ |_| "    * #{_['name']}" })
+["  - #{pkg} (#{as.size} agents)"] + (pkg == status['major_current'] ? ["    + (omitted)"] : as.map{ |_| "    * #{_}" })
 }.join("\n")}
 
 common_previous_release: #{status['common_previous_release']}
