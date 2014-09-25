@@ -215,7 +215,7 @@ not distributed: #{dist['not_distributed_count']} agents
 
           s = pkg_status(package, :short)
           puts ""
-          break if 0 < s['participants_count'] && s['participants_count'] == s['prepare']['done'].size
+          break if 0 < s['participants_count'] && s['non_participants'].empty? && s['participants_count'] == s['prepare']['done'].size
           sleep 2
         end
 
@@ -382,6 +382,7 @@ not distributed: #{dist['not_distributed_count']} agents
         puts <<-EOF
 at: #{Time.now.inspect}
 application: #{application}
+agents: #{status['agents_count']} agents
 participants: #{status['participants_count']} agents
 
 major_current: #{status['major_current']}
@@ -394,6 +395,13 @@ common_previous_release: #{status['common_previous_release']}
 common_releases:
 #{status['common_releases'].map { |_| _.prepend('  - ') }.join("\n")}
         EOF
+
+        if status['non_participants'] && !status['non_participants'].empty?
+          puts "\nnon_participants:"
+          status['non_participants'].each do |agent|
+            puts "  * #{agent}"
+          end
+        end
       end
 
       def pkg_status(package, short=false)
@@ -426,6 +434,13 @@ status: #{status['status'].join(',')}
 participants: #{total} agents
 
           EOF
+
+          if status['non_participants'] && !status['non_participants'].empty?
+            status['non_participants'].each do |agent|
+              puts "  * #{agent}"
+            end
+            puts
+          end
         end
 
           %w(fetch prepare switch).each do |key|

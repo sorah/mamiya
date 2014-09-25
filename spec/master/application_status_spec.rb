@@ -86,6 +86,36 @@ describe Mamiya::Master::ApplicationStatus do
     end
   end
 
+  describe "#non_participants" do
+    subject { status.non_participants }
+
+    let(:agent_statuses) do
+      {
+        'agent1' => {
+          'packages' => {'myapp' => [
+          ]},
+          'queues' => {'fetch' => {
+            'working' => nil,
+            'queue' => [
+            ]
+          }}
+        },
+        'agent2' => {
+          'queues' => {'fetch' => {
+            'working' => nil,
+            'queue' => [
+              {'app' => 'notmyapp'},
+            ]
+          }}
+        },
+      }
+    end
+
+    it "returns non participants" do
+      expect(subject.sort).to eq %w(agent2)
+    end
+  end
+
   describe "#currents" do
     subject { status.currents }
 

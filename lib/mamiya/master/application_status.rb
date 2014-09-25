@@ -18,6 +18,8 @@ module Mamiya
           application: application,
           labels: labels,
           participants_count: participants.size,
+          agents_count: agents.size,
+          non_participants: non_participants,
 
           major_current: major_current,
           currents: currents,
@@ -39,7 +41,11 @@ module Mamiya
             (q['queue']   && q['queue'].any? { |t| t['app'] == application })
           }
         end]
-    end
+      end
+
+      def non_participants
+        agents.keys - participants.keys
+      end
 
       def currents
         @currents ||= Hash[participants.group_by do |name, status|
