@@ -185,7 +185,7 @@ not distributed: #{dist['not_distributed_count']} agents
         @deploy_exception = nil
         # TODO: move this run on master node side
         puts "=> Deploying #{application}/#{package}"
-        puts " * with labels: #{options[:labels].inspect}" if options[:labels] && !options[:labels].empty?
+        puts " * onto agents which labeled: #{options[:labels].inspect}" if options[:labels] && !options[:labels].empty?
 
         show_package(package)
 
