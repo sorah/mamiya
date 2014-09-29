@@ -79,4 +79,12 @@ describe Mamiya::Agent::Actions do
       end
     end
   end
+
+  describe "#ping" do
+    it "pings cluster" do
+      expect(agent).to receive(:trigger).with('task', task: 'ping', coalesce: false)
+
+      agent.ping
+    end
+  end
 end

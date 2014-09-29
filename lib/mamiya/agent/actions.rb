@@ -21,6 +21,10 @@ module Mamiya
       def switch(application, package, labels: nil, no_release: false)
         order_task('switch', app: application, pkg: package, labels: labels, no_release: no_release)
       end
+
+      def ping
+        order_task('ping')
+      end
     end
   end
 end
