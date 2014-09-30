@@ -112,7 +112,6 @@ module Mamiya
       end
 
       def refresh(**kwargs)
-        # TODO: lock
         logger.debug "Refreshing..."
 
         new_agents = {}
