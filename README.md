@@ -16,7 +16,9 @@ Mamiya allows you to deploy using without ssh -- using tarballs, some storages (
 4. Write deploy script for your own
   - how to build package, how to prepare release, how to release, etc.
 5. Build then push package
-6. Time to deploy
+  - `mamiya build`
+  - `mamiya push path/to/package.tar.gz`
+6. Time to deploy: `mamiya client deploy -a app package`
 
 ### Example configuration
 
