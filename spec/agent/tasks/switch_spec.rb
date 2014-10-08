@@ -94,6 +94,39 @@ describe Mamiya::Agent::Tasks::Switch do
       end
     end
 
+    context "when package fetched but incompletely prepared" do
+      before do
+        File.write packages_app_dir.join('mypkg.tar.gz'), "\n"
+        File.write packages_app_dir.join('mypkg.json'), "{}\n"
+
+        # no .mamiya.prepare
+        prerelease = prereleases_app_dir.join('mypkg').tap(&:mkpath)
+        File.write prerelease.join('hello'), "hola\n"
+
+        expect(Mamiya::Steps::Switch).not_to receive(:new)
+      end
+
+      it "enqueues prepare task and finish" do
+        expect(task_queue).to receive(:enqueue).with(
+          :prepare, job.merge('task' => 'switch', '_chain' => ['switch'])
+        )
+
+        task.execute
+      end
+
+      context "with _chain-ed job" do
+        let(:job) { {'app' => 'myapp', 'pkg' => 'mypkg', '_chain' => ['next']} }
+
+        it "enqueues prepare task and finish" do
+          expect(task_queue).to receive(:enqueue).with(
+            :prepare, job.merge('task' => 'switch', '_chain' => ['switch', 'next'])
+          )
+
+          task.execute
+        end
+      end
+    end
+
     context "when package prepared" do
       before do
         File.write packages_app_dir.join('mypkg.tar.gz'), "\n"

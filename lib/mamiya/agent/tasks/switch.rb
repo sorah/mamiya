@@ -15,7 +15,7 @@ module Mamiya
         end
 
         def check
-          return true if prerelease_path.exist?
+          return true if prerelease_prepared?
           return true if release_prepared?
 
           unless package_path.exist?
@@ -28,7 +28,7 @@ module Mamiya
             return false
           end
 
-          unless prerelease_path.exist?
+          unless prerelease_prepared?
             new_chain = ['switch'] + (task['_chain'] || [])
             logger.info "Package not prepared, enqueueing prepare task with #{new_chain.inspect}"
             task_queue.enqueue(
@@ -43,10 +43,10 @@ module Mamiya
 
         def run
           case
-          when prerelease_path.exist? && release_path.exist? && !release_path.join('.mamiya.prepared').exist?
+          when prerelease_prepared? && release_path.exist? && !release_path.join('.mamiya.prepared').exist?
             logger.info "Removing existing release (not prepared)"
             FileUtils.remove_entry_secure release_path
-          when !prerelease_path.exist? && prelease_path.exist? && !release_path.join('.mamiya.prepared').exist?
+          when !prerelease_prepared? && prelease_path.exist? && !release_path.join('.mamiya.prepared').exist?
             # this condition may be a bug
             logger.error "Existing release is not prepared but prerelease doesn't exist"
             raise PrereleaseMissing, "Existing release is not prepared but prerelease doesn't exist"
@@ -103,6 +103,10 @@ module Mamiya
 
         def release_prepared?
           release_path.exist? && release_path.join('.mamiya.prepared').exist?
+        end
+
+        def prerelease_prepared?
+          prerelease_path.exist? && prerelease_path.join('.mamiya.prepared').exist?
         end
 
         def labels
