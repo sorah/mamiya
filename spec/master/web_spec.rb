@@ -219,7 +219,7 @@ describe Mamiya::Master::Web do
 
   describe "POST /packages/:application/:package/switch" do
     it "dispatchs switch request" do
-      expect(master).to receive(:switch).with('myapp', 'mypackage', labels: nil, no_release: false)
+      expect(master).to receive(:switch).with('myapp', 'mypackage', labels: nil, no_release: false, do_release: false)
 
       post '/packages/myapp/mypackage/switch'
 
@@ -228,7 +228,7 @@ describe Mamiya::Master::Web do
 
     context "with no_release" do
       it "dispatchs switch request" do
-        expect(master).to receive(:switch).with('myapp', 'mypackage', labels: nil, no_release: true)
+        expect(master).to receive(:switch).with('myapp', 'mypackage', labels: nil, no_release: true, do_release: false)
 
         post '/packages/myapp/mypackage/switch',
           {'no_release' => true}.to_json,
@@ -240,7 +240,7 @@ describe Mamiya::Master::Web do
 
     context "with labels" do
       it "dispatchs prepare request with labels" do
-        expect(master).to receive(:switch).with('myapp', 'mypackage', labels: ['foo'], no_release: false)
+        expect(master).to receive(:switch).with('myapp', 'mypackage', labels: ['foo'], no_release: false, do_release: false)
 
         post '/packages/myapp/mypackage/switch',
           {'labels' =>  ["foo"]}.to_json,

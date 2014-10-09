@@ -18,8 +18,8 @@ module Mamiya
         order_task('prepare', app: application, pkg: package, labels: labels)
       end
 
-      def switch(application, package, labels: nil, no_release: false)
-        order_task('switch', app: application, pkg: package, labels: labels, no_release: no_release)
+      def switch(application, package, labels: nil, no_release: false, do_release: false)
+        order_task('switch', app: application, pkg: package, labels: labels, no_release: no_release, do_release: do_release)
       end
 
       def ping

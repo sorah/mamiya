@@ -57,23 +57,30 @@ describe Mamiya::Agent::Actions do
 
   describe "#switch" do
     it "sends switch request" do
-      expect(agent).to receive(:trigger).with('task', task: 'switch', app: 'myapp', pkg: 'mypkg', coalesce: false, no_release: false)
+      expect(agent).to receive(:trigger).with('task', task: 'switch', app: 'myapp', pkg: 'mypkg', coalesce: false, no_release: false, do_release: false)
 
       agent.switch('myapp', 'mypkg')
     end
 
     context "with no_release" do
       it "sends switch request" do
-        expect(agent).to receive(:trigger).with('task', task: 'switch', app: 'myapp', pkg: 'mypkg', coalesce: false, no_release: true)
+        expect(agent).to receive(:trigger).with('task', task: 'switch', app: 'myapp', pkg: 'mypkg', coalesce: false, no_release: true, do_release: false)
 
         agent.switch('myapp', 'mypkg', no_release: true)
       end
+    end
 
+    context "with no_release" do
+      it "sends switch request" do
+        expect(agent).to receive(:trigger).with('task', task: 'switch', app: 'myapp', pkg: 'mypkg', coalesce: false, no_release: false, do_release: true)
+
+        agent.switch('myapp', 'mypkg', do_release: true)
+      end
     end
 
     context "with labels" do
       it "adds _labels on task" do
-        expect(agent).to receive(:trigger).with('task', task: 'switch', app: 'myapp', pkg: 'mypkg', _labels: ['foo'], coalesce: false, no_release: false)
+        expect(agent).to receive(:trigger).with('task', task: 'switch', app: 'myapp', pkg: 'mypkg', _labels: ['foo'], coalesce: false, no_release: false, do_release: false)
 
         agent.switch('myapp', 'mypkg', labels: ['foo'])
       end

@@ -110,7 +110,7 @@ module Mamiya
       post '/packages/:application/:package/switch' do
         if storage(params[:application]).meta(params[:package])
           status 204
-          master.switch(params[:application], params[:package], labels: params['labels'], no_release: !!(params['no_release'] || params[:no_release]))
+          master.switch(params[:application], params[:package], labels: params['labels'], no_release: !!(params['no_release'] || params[:no_release]), do_release: !!(params['do_release'] || params[:do_release]))
         else
           status 404
           content_type :json

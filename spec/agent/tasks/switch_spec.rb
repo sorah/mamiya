@@ -138,6 +138,7 @@ describe Mamiya::Agent::Tasks::Switch do
             target: deploy_to.join('releases', 'mypkg'),
             labels: [:foo, :bar],
             no_release: false,
+            do_release: false,
             config: config,
             logger: task.logger,
           ).and_return(switch_step)
@@ -165,6 +166,7 @@ describe Mamiya::Agent::Tasks::Switch do
           target: deploy_to.join('releases', 'mypkg'),
           labels: [:foo, :bar],
           no_release: false,
+          do_release: false,
           config: config,
           logger: task.logger,
         ).and_return(switch_step)
@@ -220,6 +222,26 @@ describe Mamiya::Agent::Tasks::Switch do
             target: deploy_to.join('releases', 'mypkg'),
             labels: [:foo, :bar],
             no_release: true,
+            do_release: false,
+            config: config,
+            logger: task.logger,
+          ).and_return(switch_step)
+
+          expect(switch_step).to receive(:run!)
+
+          task.execute
+        end
+      end
+
+      context "with do_release" do
+        let(:job) { {'app' => 'myapp', 'pkg' => 'mypkg', 'do_release' => true} }
+
+        it "calls switch step with no_release" do
+          expect(Mamiya::Steps::Switch).to receive(:new).with(
+            target: deploy_to.join('releases', 'mypkg'),
+            labels: [:foo, :bar],
+            no_release: false,
+            do_release: true,
             config: config,
             logger: task.logger,
           ).and_return(switch_step)
