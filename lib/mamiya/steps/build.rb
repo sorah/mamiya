@@ -20,8 +20,6 @@ module Mamiya
           raise ApplicationNotSpecified, ":application should be specified in your script file"
         end
 
-        logger.info "Initiating package build"
-
         run_before_build
         run_prepare_build
         run_build
@@ -48,7 +46,9 @@ module Mamiya
         logger.info "Running script.after_build"
         script.after_build[@exception]
 
-        logger.info "DONE!" unless @exception
+        unless @exception
+          logger.info "DONE: #{package_name} built at #{package.path}"
+        end
       end
 
       private
@@ -72,7 +72,7 @@ module Mamiya
         begin
           # Using without block because chdir in block shows warning
           Dir.chdir(script.build_from)
-          logger.info "Running script.build ..."
+          logger.info "Running script.build"
           logger.debug "pwd=#{Dir.pwd}"
           script.build[]
         ensure
@@ -82,7 +82,7 @@ module Mamiya
 
       def copy_deploy_scripts
         # XXX: TODO: move to another class?
-        logger.info "Copying script files..."
+        logger.info "Copying script files"
 
         if script_dest.exist?
           logger.warn "Removing existing .mamiya.script"
@@ -90,7 +90,7 @@ module Mamiya
         end
         script_dest.mkdir
 
-        logger.info "- #{script_file} -> #{script_dest}"
+        logger.debug "- #{script_file} -> #{script_dest}"
         FileUtils.cp script_file, script_dest
 
         if script.script_additionals
@@ -98,7 +98,7 @@ module Mamiya
           script.script_additionals.each do |additional|
             src = script_dir.join(additional)
             dst = script_dest.join(additional)
-            logger.info "- #{src} -> #{dst}"
+            logger.debug "- #{src} -> #{dst}"
             FileUtils.mkdir_p dst.dirname
             FileUtils.cp_r src, dst
           end
@@ -114,7 +114,7 @@ module Mamiya
       end
 
       def build_package
-        logger.info "Packaging to: #{package.path}"
+        logger.debug "Packaging to: #{package.path}"
         logger.debug "meta=#{package.meta.inspect}"
         package.build!(script.build_from,
            exclude_from_package: script.exclude_from_package || [],
@@ -131,7 +131,7 @@ module Mamiya
               [Time.now.strftime("%Y%m%d%H%M%S"), script.application]
             ].join('-')
           }
-          logger.info "Package name determined: #{name}"
+          logger.debug "Package name determined: #{name}"
           name
         end
       end
