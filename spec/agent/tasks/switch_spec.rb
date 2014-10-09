@@ -102,26 +102,51 @@ describe Mamiya::Agent::Tasks::Switch do
         # no .mamiya.prepare
         prerelease = prereleases_app_dir.join('mypkg').tap(&:mkpath)
         File.write prerelease.join('hello'), "hola\n"
-
-        expect(Mamiya::Steps::Switch).not_to receive(:new)
       end
 
-      it "enqueues prepare task and finish" do
-        expect(task_queue).to receive(:enqueue).with(
-          :prepare, job.merge('task' => 'switch', '_chain' => ['switch'])
-        )
-
-        task.execute
-      end
-
-      context "with _chain-ed job" do
-        let(:job) { {'app' => 'myapp', 'pkg' => 'mypkg', '_chain' => ['next']} }
+      context "without task.incomplete" do
+        before do
+          expect(Mamiya::Steps::Switch).not_to receive(:new)
+        end
 
         it "enqueues prepare task and finish" do
           expect(task_queue).to receive(:enqueue).with(
-            :prepare, job.merge('task' => 'switch', '_chain' => ['switch', 'next'])
+            :prepare, job.merge('task' => 'switch', '_chain' => ['switch'])
           )
 
+          task.execute
+        end
+
+        context "with _chain-ed job" do
+          let(:job) { {'app' => 'myapp', 'pkg' => 'mypkg', '_chain' => ['next']} }
+
+          it "enqueues prepare task and finish" do
+            expect(task_queue).to receive(:enqueue).with(
+              :prepare, job.merge('task' => 'switch', '_chain' => ['switch', 'next'])
+            )
+
+            task.execute
+          end
+        end
+      end
+
+      context "with task.incomplete=true" do
+        let(:job) { {'app' => 'myapp', 'pkg' => 'mypkg', 'incomplete' => true} }
+
+        before do
+          allow(Mamiya::Steps::Switch).to receive(:new).with(
+            target: deploy_to.join('releases', 'mypkg'),
+            labels: [:foo, :bar],
+            no_release: false,
+            config: config,
+            logger: task.logger,
+          ).and_return(switch_step)
+        end
+
+        it "calls switch step" do
+          expect(switch_step).to receive(:run!) do
+            expect(deploy_to.join('releases', 'mypkg', 'hello')).to be_exist
+          end
           task.execute
         end
       end

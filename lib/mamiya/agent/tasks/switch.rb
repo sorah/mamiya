@@ -15,6 +15,7 @@ module Mamiya
         end
 
         def check
+          return true if ignore_incompletion? && (prerelease_path.exist? || release_path.exist?)
           return true if prerelease_prepared?
           return true if release_prepared?
 
@@ -46,6 +47,8 @@ module Mamiya
           when prerelease_prepared? && release_path.exist? && !release_path.join('.mamiya.prepared').exist?
             logger.info "Removing existing release (not prepared)"
             FileUtils.remove_entry_secure release_path
+          when ignore_incompletion? && (prerelease_path.exist? || release_path.exist?)
+            logger.warn "Using incomplete release or prereleases"
           when !prerelease_prepared? && prerelease_path.exist? && !release_path.join('.mamiya.prepared').exist?
             # this condition may be a bug
             logger.error "Existing release is not prepared but prerelease doesn't exist"
@@ -71,6 +74,10 @@ module Mamiya
 
         def package
           task['pkg']
+        end
+
+        def ignore_incompletion?
+          task['allow_incomplete'] || task['allow_incompletion'] || task['incomplete']
         end
 
         def release_name
