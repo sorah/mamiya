@@ -46,7 +46,7 @@ module Mamiya
           when prerelease_prepared? && release_path.exist? && !release_path.join('.mamiya.prepared').exist?
             logger.info "Removing existing release (not prepared)"
             FileUtils.remove_entry_secure release_path
-          when !prerelease_prepared? && prelease_path.exist? && !release_path.join('.mamiya.prepared').exist?
+          when !prerelease_prepared? && prerelease_path.exist? && !release_path.join('.mamiya.prepared').exist?
             # this condition may be a bug
             logger.error "Existing release is not prepared but prerelease doesn't exist"
             raise PrereleaseMissing, "Existing release is not prepared but prerelease doesn't exist"
