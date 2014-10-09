@@ -163,12 +163,7 @@ not distributed: #{dist['not_distributed_count']} agents
       method_option :labels, type: :string
       method_option :no_release, type: :boolean, default: false
       def switch(package)
-        params = {no_release: options[:no_release]}
-        if options[:labels]
-          params[:labels] = Mamiya::Util::LabelMatcher.parse_string_expr(options[:labels])
-        end
-
-        p master_post("/packages/#{application}/#{package}/switch", params.merge(type: :json))
+        switch_(package, no_release: options[:no_release])
       end
 
       desc "refresh", "order refreshing agent status"
@@ -181,11 +176,15 @@ not distributed: #{dist['not_distributed_count']} agents
       method_option :no_release, type: :boolean, default: false
       method_option :config, aliases: '-C', type: :string
       method_option :no_switch, type: :boolean, default: false
+      method_option :synced_release, type: :boolean, default: false
       def deploy(package)
         @deploy_exception = nil
+        synced_release = options[:synced_release] || (config && config.synced_release)
+
         # TODO: move this run on master node side
         puts "=> Deploying #{application}/#{package}"
         puts " * onto agents which labeled: #{options[:labels].inspect}" if options[:labels] && !options[:labels].empty?
+        puts " * releasing will be synced in all agents" if synced_release
 
         show_package(package)
 
@@ -220,10 +219,11 @@ not distributed: #{dist['not_distributed_count']} agents
         end
 
         ###
+        #
 
         unless options[:no_switch]
           puts "=> Switching..."
-          switch(package)
+          switch_(package, no_release: synced_release)
 
           puts " * Wait until switch"
           puts ""
@@ -232,6 +232,13 @@ not distributed: #{dist['not_distributed_count']} agents
             puts ""
             break if s['participants_count'] == s['switch']['done'].size
             sleep 2
+          end
+
+          if synced_release
+            puts "=> Releasing..."
+            switch_(package, do_release: true)
+
+            puts " * due to current implementation's limitation, releasing will be untracked."
           end
         end
       rescue Exception => e
@@ -347,6 +354,15 @@ not distributed: #{dist['not_distributed_count']} agents
       rescue Net::HTTPExceptions => e
         puts response.body rescue nil
         raise e
+      end
+
+      def switch_(package, no_release: false, do_release: false)
+        params = {no_release: no_release, do_release: do_release}
+        if options[:labels]
+          params[:labels] = Mamiya::Util::LabelMatcher.parse_string_expr(options[:labels])
+        end
+
+        p master_post("/packages/#{application}/#{package}/switch", params.merge(type: :json))
       end
 
       def master_http

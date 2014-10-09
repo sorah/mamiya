@@ -26,6 +26,7 @@ module Mamiya
     # master
     set_default :master, {monitor: {refresh_interval: nil}} # TODO: don't nest
     set_default :web, {port: 7761, bind: '0.0.0.0', environment: :development} # TODO: IPv6
+    set_default :synced_release, false
 
     add_hook :labels, chain: true
 
