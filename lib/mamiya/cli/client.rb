@@ -178,86 +178,16 @@ not distributed: #{dist['not_distributed_count']} agents
       method_option :no_switch, type: :boolean, default: false
       method_option :synced_release, type: :boolean, default: false
       def deploy(package)
-        @deploy_exception = nil
-        synced_release = options[:synced_release] || (config && config.synced_release)
-
-        # TODO: move this run on master node side
-        puts "=> Deploying #{application}/#{package}"
-        puts " * onto agents which labeled: #{options[:labels].inspect}" if options[:labels] && !options[:labels].empty?
-        puts " * releasing will be synced in all agents" if synced_release
-
-        show_package(package)
-
-        if config
-          config.set :application, application
-          config.set :package_name, package
-          config.set :package, @meta
-
-          config.before_deploy_or_rollback[]
-          config.before_deploy[]
-        end
-
-        do_prep = -> do
-          puts "=> Preparing..."
-          prepare(package)
-        end
-
-        do_prep[]
-
-        puts " * Wait until prepared"
-        puts ""
-
-        i = 0
-        loop do
-          i += 1
-          do_prep[] if i % 25 == 0
-
-          s = pkg_status(package, :short)
-          puts ""
-          break if 0 < s['participants_count'] && s['non_participants'].empty? && s['participants_count'] == s['prepare']['done'].size
-          sleep 2
-        end
-
-        ###
-        #
-
-        unless options[:no_switch]
-          puts "=> Switching..."
-          switch_(package, no_release: synced_release)
-
-          puts " * Wait until switch"
-          puts ""
-          loop do
-            s = pkg_status(package, :short)
-            puts ""
-            break if s['participants_count'] == s['switch']['done'].size
-            sleep 2
-          end
-
-          if synced_release
-            puts "=> Releasing..."
-            switch_(package, do_release: true)
-
-            puts " * due to current implementation's limitation, releasing will be untracked."
-          end
-        end
-      rescue Exception => e
-        @deploy_exception = e
-        $stderr.puts "ERROR: #{e.inspect}"
-        $stderr.puts "\t#{e.backtrace.join("\n\t")}"
-      ensure
-        config.after_deploy[@deploy_exception] if config
-        config.after_deploy_or_rollback[@deploy_exception] if config
-        puts "=> Done."
+        deploy_or_rollback(:deploy, package)
       end
 
-      desc "rollback", "Switch back to previous release then finalize"
+      desc "rollback", "Switch back to previous release"
       method_option :labels, type: :string
       method_option :no_release, type: :boolean, default: false
       method_option :config, aliases: '-C', type: :string
+      method_option :no_switch, type: :boolean, default: false
+      method_option :synced_release, type: :boolean, default: false
       def rollback
-        @deploy_exception = nil
-        # TODO: move this run on master node side
         appstatus = master_get("/applications/#{application}/status", options[:labels] ? {labels: options[:labels]} : {})
         package = appstatus['common_previous_release']
 
@@ -265,37 +195,7 @@ not distributed: #{dist['not_distributed_count']} agents
           raise 'there is no common_previous_release for specified application'
         end
 
-        puts "=> Rolling back #{application} to #{package}"
-        puts " * with labels: #{options[:labels].inspect}" if options[:labels] && !options[:labels].empty?
-
-        show_package(package)
-
-        if config
-          config.set :application, application
-          config.set :package_name, package
-          config.set :package, @meta
-
-          config.before_deploy_or_rollback[]
-          config.before_rollback[]
-        end
-
-        switch(package)
-
-        puts " * Wait until switch"
-        puts ""
-        loop do
-          s = pkg_status(package, :short)
-          puts ""
-          break if 0 < s['participants_count'] && s['participants_count'] == s['switch']['done'].size
-          sleep 2
-        end
-      rescue Exception => e
-        @deploy_exception = e
-        raise e
-      ensure
-        config.after_rollback[@deploy_exception] if config
-        config.after_deploy_or_rollback[@deploy_exception] if config
-        puts "=> Done."
+        deploy_or_rollback(:rollback, package)
       end
 
       desc "join HOST", "let serf to join to HOST"
@@ -363,6 +263,88 @@ not distributed: #{dist['not_distributed_count']} agents
         end
 
         p master_post("/packages/#{application}/#{package}/switch", params.merge(type: :json))
+      end
+
+      def deploy_or_rollback(type, package)
+        @deploy_exception = nil
+        synced_release = options[:synced_release] || (config && config.synced_release)
+
+        # TODO: move this run on master node side
+        if type == :deploy
+          puts "=> Deploying #{application}/#{package}"
+        else
+          puts "=> Rolling back #{application} to #{package}"
+        end
+        puts " * onto agents which labeled: #{options[:labels].inspect}" if options[:labels] && !options[:labels].empty?
+        puts " * releasing will be synced in all agents" if synced_release
+
+        show_package(package)
+
+        if config
+          config.set :application, application
+          config.set :package_name, package
+          config.set :package, @meta
+
+          config.before_deploy_or_rollback[]
+          (type == :deploy ? config.before_deploy : config.before_rollback)[]
+        end
+
+        if type == :deploy
+          do_prep = -> do
+            puts "=> Preparing..."
+            prepare(package)
+          end
+
+          do_prep[]
+
+          puts " * Wait until prepared"
+          puts ""
+
+          i = 0
+          loop do
+            i += 1
+            do_prep[] if i % 25 == 0
+
+            s = pkg_status(package, :short)
+            puts ""
+            break if 0 < s['participants_count'] && s['non_participants'].empty? && s['participants_count'] == s['prepare']['done'].size
+            sleep 2
+          end
+        end
+
+        ###
+        #
+
+        unless options[:no_switch]
+          puts "=> Switching..."
+          switch_(package, no_release: synced_release)
+
+          puts " * Wait until switch"
+          puts ""
+          loop do
+            s = pkg_status(package, :short)
+            puts ""
+            break if s['participants_count'] == s['switch']['done'].size
+            sleep 2
+          end
+
+          if synced_release
+            puts "=> Releasing..."
+            switch_(package, do_release: true)
+
+            puts " * due to current implementation's limitation, releasing will be untracked."
+          end
+        end
+      rescue Exception => e
+        @deploy_exception = e
+        $stderr.puts "ERROR: #{e.inspect}"
+        $stderr.puts "\t#{e.backtrace.join("\n\t")}"
+      ensure
+
+        (type == :deploy ? config.after_deploy : config.after_rollback)[@deploy_exception] if config
+        config.after_deploy_or_rollback[@deploy_exception] if config
+        puts "=> Done."
+
       end
 
       def master_http
