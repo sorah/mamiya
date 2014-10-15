@@ -211,7 +211,11 @@ not distributed: #{dist['not_distributed_count']} agents
       end
 
       def application
-        options[:application] or fatal!('specify application')
+        @_application ||=
+          ENV['MAMIYA_APP'] \
+          || ENV['MAMIYA_APPLICATION'] \
+          || options[:application] \
+          or fatal!('specify application')
       end
 
       def config

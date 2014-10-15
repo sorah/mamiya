@@ -303,7 +303,12 @@ module Mamiya
     end
 
     def application
-      options[:application] || config[:application] || script.application
+      @_application ||=
+        options[:application] \
+        || ENV['MAMIYA_APP'] \
+        || ENV['MAMIYA_APPLICATION'] \
+        || config[:application] \
+        || script.application
     end
 
     def storage
