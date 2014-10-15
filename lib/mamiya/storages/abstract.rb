@@ -39,7 +39,7 @@ module Mamiya
 
       def prune(nums_to_keep)
         packages = self.packages()
-        (packages - packages.last(nums_to_keep)).each do |package|
+        packages[0...-nums_to_keep].each do |package|
           self.remove(package)
         end
       end
