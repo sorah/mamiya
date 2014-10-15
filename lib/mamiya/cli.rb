@@ -124,6 +124,16 @@ module Mamiya
       ).run!
     end
 
+    desc "prune NUMS_TO_KEEP", "Delete old packages, but keep last $NUMS_TO_KEEP packages"
+    def prune(nums_to_keep)
+      puts "Pruning packages from #{application} (keeping last #{nums_to_keep.to_i} packages)..."
+
+      removed = storage.prune(nums_to_keep.to_i)
+
+      puts "Pruned #{removed.size} packages:"
+      puts removed.join(?\n)
+    end
+
     desc "fetch PACKAGE DESTINATION", "Retrieve package from storage"
     def fetch(package_atom, destination)
       Mamiya::Steps::Fetch.new(
