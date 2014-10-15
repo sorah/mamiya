@@ -75,8 +75,12 @@ module Mamiya
       def task___switch__finish(status, task)
         status['currents'] ||= {}
         status['currents'][task['app']] = task['pkg']
-      end
 
+        status['releases'] ||= {}
+        status['releases'][task['app']] ||= []
+        status['releases'][task['app']].push task['pkg']
+        status['releases'][task['app']].uniq!
+      end
 
       def pkg__remove(status, payload, event)
         status['packages'] ||= {}

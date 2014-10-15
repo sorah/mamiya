@@ -714,7 +714,7 @@ describe Mamiya::Master::AgentMonitor do
       describe "switch" do
         describe "success" do
           let(:status) do
-            {currents: {}}
+            {currents: {}, releases: {}}
           end
 
           it "updates current" do
@@ -722,6 +722,40 @@ describe Mamiya::Master::AgentMonitor do
                    task: {task: 'switch', app: 'myapp', pkg: 'pkg'})
 
             expect(new_status["currents"]['myapp']).to eq "pkg"
+          end
+
+          it "adds release" do
+            commit('mamiya:task:finish',
+                   task: {task: 'switch', app: 'myapp', pkg: 'pkg'})
+
+            expect(new_status["releases"]['myapp']).to eq ["pkg"]
+          end
+
+          context "with existing release" do
+            let(:status) do
+              {currents: {}, releases: {'myapp' => ['pkg2']}}
+            end
+
+            it "adds release" do
+              commit('mamiya:task:finish',
+                     task: {task: 'switch', app: 'myapp', pkg: 'pkg'})
+
+              expect(new_status["releases"]['myapp']).to eq ["pkg2", 'pkg']
+            end
+          end
+
+
+          context "with release with same name" do
+            let(:status) do
+              {currents: {}, releases: {'myapp' => ['pkg2', 'pkg']}}
+            end
+
+            it "adds release" do
+              commit('mamiya:task:finish',
+                     task: {task: 'switch', app: 'myapp', pkg: 'pkg'})
+
+              expect(new_status["releases"]['myapp']).to eq ["pkg2", "pkg"]
+            end
           end
 
           context "with existing current" do
