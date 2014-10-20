@@ -257,7 +257,7 @@ describe Mamiya::Storages::S3 do
     end
 
     it "removes specified package from S3" do
-      expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}])
+      expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', delete: {objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}]})
       remove
     end
 
@@ -265,7 +265,7 @@ describe Mamiya::Storages::S3 do
       let(:package_name) { 'test.tar.gz' }
 
       it "removes specified package from S3" do
-        expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}])
+        expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', delete: {objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}]})
         remove
       end
     end
@@ -274,7 +274,7 @@ describe Mamiya::Storages::S3 do
       let(:package_name) { 'test.json' }
 
       it "removes specified package from S3" do
-        expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}])
+        expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', delete: {objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}]})
         remove
       end
     end

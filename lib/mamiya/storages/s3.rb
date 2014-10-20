@@ -96,7 +96,7 @@ module Mamiya
         }.compact
         raise NotFound if objs_to_delete.empty?
 
-        s3.delete_objects(bucket: @config[:bucket], objects: objs_to_delete)
+        s3.delete_objects(bucket: @config[:bucket], delete: {objects: objs_to_delete})
       end
 
       def self.initiate_s3_with_config(config) # :nodoc:
