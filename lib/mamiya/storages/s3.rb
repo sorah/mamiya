@@ -6,6 +6,18 @@ require 'json'
 module Mamiya
   module Storages
     class S3 < Mamiya::Storages::Abstract
+      class MultipleObjectsDeletionError < StandardError
+        attr_accessor :errors
+
+        def initialize(errors)
+          message = errors.map do |error|
+            "#{error.code}: #{error.message} (key=#{error.key})"
+          end.join(', ')
+          super(message)
+          @errors = errors
+        end
+      end
+
       def self.find(config={})
         s3 = initiate_s3_with_config(config)
         Hash[s3.list_objects(bucket: config[:bucket], delimiter: '/').common_prefixes.map { |prefix|
@@ -96,7 +108,10 @@ module Mamiya
         }.compact
         raise NotFound if objs_to_delete.empty?
 
-        s3.delete_objects(bucket: @config[:bucket], delete: {objects: objs_to_delete})
+        result = s3.delete_objects(bucket: @config[:bucket], delete: {objects: objs_to_delete})
+        unless result.errors.empty?
+          raise MultipleObjectsDeletionError.new(result.errors)
+        end
       end
 
       def self.initiate_s3_with_config(config) # :nodoc:

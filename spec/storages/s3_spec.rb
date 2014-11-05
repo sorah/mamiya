@@ -250,6 +250,7 @@ describe Mamiya::Storages::S3 do
 
   describe "#remove(package_name)" do
     let(:package_name) { 'test' }
+    let(:s3_delete_response) { double('response for POST /?delete', errors: []) }
     subject(:remove) { storage.remove(package_name) }
 
     before do
@@ -257,7 +258,7 @@ describe Mamiya::Storages::S3 do
     end
 
     it "removes specified package from S3" do
-      expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', delete: {objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}]})
+      expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', delete: {objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}]}).and_return(s3_delete_response)
       remove
     end
 
@@ -265,7 +266,7 @@ describe Mamiya::Storages::S3 do
       let(:package_name) { 'test.tar.gz' }
 
       it "removes specified package from S3" do
-        expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', delete: {objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}]})
+        expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', delete: {objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}]}).and_return(s3_delete_response)
         remove
       end
     end
@@ -274,7 +275,7 @@ describe Mamiya::Storages::S3 do
       let(:package_name) { 'test.json' }
 
       it "removes specified package from S3" do
-        expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', delete: {objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}]})
+        expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', delete: {objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}]}).and_return(s3_delete_response)
         remove
       end
     end
@@ -286,6 +287,21 @@ describe Mamiya::Storages::S3 do
 
       it "raises error" do
         expect { storage.remove('test') }.to raise_error(Mamiya::Storages::Abstract::NotFound)
+      end
+    end
+
+    context "when delete_objects fails" do
+      let(:errors) do
+        [
+          double('Aws::S3::Errors::InteranlError', code: 'InteranlError', message: 'Internal Error', key: 'myapp/test.tar.gz'),
+          double('Aws::S3::Errors::AccessDenied', code: 'AccessDenied', message: 'Access Denied', key: 'myapp/test.json'),
+        ]
+      end
+      let(:s3_delete_response) { double('response for POST /?delete', errors: errors) }
+
+      it "raises error" do
+        expect(s3).to receive(:delete_objects).with(bucket: 'testbucket', delete: {objects: [{key: 'myapp/test.tar.gz'}, {key: 'myapp/test.json'}]}).and_return(s3_delete_response)
+        expect { remove }.to raise_error(Mamiya::Storages::S3::MultipleObjectsDeletionError, /Access Denied/)
       end
     end
   end
