@@ -7,6 +7,16 @@ Build application package on CI or somewhere, then distribute earlier (before yo
 
 Also, this free you from SSH and RSync problems.
 
+## Concepts
+
+- __Package__ is a tarball contains your application.
+- __Storage__ is a place to store package.
+- __Script__ is a Ruby script that defines how to deploy (prepare, restart, etc) your application.
+
+- __CI (or, somewhere)__ builds packages and push them on _Storage_
+- __Master__ controls the cluster of _Agents_
+- __Agent__ receives deployment and do it.
+
 ## Prepare master and agent
 
 Run `sudo gem install mamiya` to install mamiya on your systems.
@@ -99,4 +109,16 @@ set :keep_prereleases, 3
 mamiya master -c /etc/mamiya/config.rb
 ```
 
-##
+### Confirm both working
+
+Use `mamiya client` command family to communicate with master process. By default `http://localhost:7761/` is used. You can change by `-m`, `--master` option or `$MAMIYA_MASTER_URL` environment variable.
+
+```
+master $ mamiya client list-agents
+AGENT_NAME	alive
+```
+
+## Prepare deploy script
+
+```
+```
