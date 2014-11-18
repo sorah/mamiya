@@ -101,6 +101,12 @@ set :prereleases_dir, '/tmp/mamiya/prereleases'
 # And how many you want to keep them?
 set :keep_packages, 3
 set :keep_prereleases, 3
+
+# Label your agent. Block will be called every time when referencing labels.
+# (Recommend to implement thread or timeout for periodically fetch...)
+labels do
+  %i(app production active)
+end
 ```
 
 #### Run it
