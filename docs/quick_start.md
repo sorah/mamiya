@@ -167,3 +167,46 @@ release 'reload unicorn', only [:app] do
   run 'pkill', '-HUP', '-f', 'unicorn'
 end
 ```
+
+## Build your first package and push it
+
+Have all agents and master node run? Okay, let's build your first package!
+
+```
+$ mamiya build -S ./deploy.rb
+11/18 09:37:01   INFO  [Build] Running script.before_build
+11/18 09:37:01   INFO  [Build] Running script.prepare_build
+11/18 09:37:01   INFO  [Build] Running script.build
+11/18 09:37:01   INFO  [Build] Copying script files
+11/18 09:37:01   INFO  [Build] Packed.
+11/18 09:37:01   INFO  [Build] Running script.after_build
+11/18 09:37:01   INFO  [Build] DONE: 20141118093701-myapp built at .../builds/20141118093701-myapp.tar.gz
+```
+
+(`-S`,` --script` specifies where the script is. More options available; see `mamiya help build`)
+
+Great! You can unpack using `tar xf` to confirm what has packed, if you want.
+
+You have to push it onto storage to make available for agents.
+
+```
+$ mamiya push -C ./config.rb
+11/18 09:42:43   INFO  [Push] Pushing builds/20141118093701-myapp.tar.gz to storage(app=myapp)...
+11/18 09:42:43   INFO  [Push] DONE!
+```
+
+(`-C`, `--config` specifies where configuration file is... to find `:storage` configuration.)
+
+## Deploy it
+
+`mamiya client deploy <PACKAGE>` prepares the package then release it after all nodes get ready.
+
+```
+$ export MAMIYA_APP=myapp
+$ mamiya client list-packages
+20141118093701-myapp
+$ mamiya client deploy 20141118093701-myapp
+```
+
+(You can use `-a`, `--application` option instead of `$MAMIYA_APP`)
+
