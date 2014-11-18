@@ -128,6 +128,8 @@ AGENT_NAME	alive
 
 _Script_ should have required operations and configurations for an application being deployed.
 
+Script is used for package building and deployments. It'll be copied into a package during package build, then deliver, used on agents.
+
 ```
 set :application, 'myapp'
 
