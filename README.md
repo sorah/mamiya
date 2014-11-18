@@ -2,23 +2,17 @@
 
 [![Build Status](https://travis-ci.org/sorah/mamiya.png?branch=master)](https://travis-ci.org/sorah/mamiya)
 
+
+## What's mamiya?
+
 Mamiya allows you to deploy using without ssh -- using tarballs, some storages (S3, etc), and [Serf](http://www.serfdom.io/).
+Build application package on CI or somewhere, then distribute earlier (before you say "Deploy!"). You can switch to an new application quickly, when you're saying "deploy."
 
-## Installation
+Mamiya uses similar directory structure with Capistrano 'deploy_to' -- you can try this easy.
 
-(Detailed documentation coming soon)
+## Quick Start
 
-1. Install gem (`gem install mamiya`, or bundling by `gem 'mamiya'`)
-2. Prepare master node for `mamiya master` process
-  - master has HTTP API to allow control the cluster via HTTP
-  - master watches agents in the cluster
-3. Then install `mamiya agent` in your deployment target hosts
-4. Write deploy script for your own
-  - how to build package, how to prepare release, how to release, etc.
-5. Build then push package
-  - `mamiya build`
-  - `mamiya push path/to/package.tar.gz`
-6. Time to deploy: `mamiya client deploy -a app package`
+See [./docs/quick_start.md](./docs/quick_start.md).
 
 ### Example configuration
 
