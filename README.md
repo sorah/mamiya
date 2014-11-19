@@ -5,8 +5,8 @@
 
 ## What's mamiya?
 
-Mamiya allows you to deploy using without ssh -- using tarballs, some storages (S3, etc), and [Serf](http://www.serfdom.io/).
-Build application package on CI or somewhere, then distribute earlier (before you say "Deploy!"). You can switch to an new application quickly, when you're saying "deploy."
+Mamiya allows you to deploy without ssh -- using tarballs, some storages (S3, etc), and [Serf](http://www.serfdom.io/).
+Build application package on CI or somewhere, then distribute earlier (before you say "Deploy!"). You can switch to a new application quickly, when you're saying "deploy."
 
 Mamiya uses similar directory structure with Capistrano 'deploy_to' -- you can try this easy.
 
@@ -24,7 +24,7 @@ Try Mamiya in your local machine: `foreman start`
 Existing major deploy tools (capistrano, mina, ...) use SSH to operate servers.
 But connecting to lot of servers via SSH makes deployment slow.
 
-This solves such problem by using [Serf](http://www.serfdom.io/) and tarball on one storage (Amazon S3).
+Mamiya solves such problem by using [Serf](http://www.serfdom.io/) and tarball on one storage (Amazon S3).
 
 Also, I'm planning to allow to distribute files before the deploy command. I guess this can skip or shorten
 file transferring phase in deploy.
