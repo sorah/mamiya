@@ -295,19 +295,17 @@ not distributed: #{dist['not_distributed_count']} agents
 
         if type == :deploy
           do_prep = -> do
-            puts "=> Preparing..."
+            puts " * sending prepare request"
             prepare(package)
           end
 
-          do_prep[]
-
-          puts " * Wait until prepared"
+          puts "=> Wait agents to have prepared"
           puts ""
 
           i = 0
           loop do
             i += 1
-            do_prep[] if i % 25 == 0
+            do_prep[] if i == 2 || i % 25 == 0
 
             s = pkg_status(package, :short)
             puts ""
