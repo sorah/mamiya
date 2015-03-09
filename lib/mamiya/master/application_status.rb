@@ -36,10 +36,10 @@ module Mamiya
           (status['prereleases'] && status['prereleases'][application]) || \
           (status['packages']    && status['packages'][application])    || \
 
-          status['queues'].any? { |_, q|
+          (status['queues'] && status['queues'].any? { |_, q|
             (q['working'] && q['working']['app'] == application) || \
             (q['queue']   && q['queue'].any? { |t| t['app'] == application })
-          }
+          })
         end]
       end
 
