@@ -285,6 +285,7 @@ not distributed: #{dist['not_distributed_count']} agents
         show_package(package)
 
         if config
+          config.set :deploy_options, options
           config.set :application, application
           config.set :package_name, package
           config.set :package, @meta
