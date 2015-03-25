@@ -45,7 +45,7 @@ prepare_build do |update|
   if !update && !self.repository
     logger.warn 'Skipping cloning repository because script.repository not set'
   elsif !update
-    run "git", "clone", self.repository, self.build_from
+    run "git", "clone", self.repository, self.build_from.to_s
   end
 
   Dir.chdir(self.build_from) do
