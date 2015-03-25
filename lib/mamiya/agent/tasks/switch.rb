@@ -125,7 +125,6 @@ module Mamiya
             target: release_path,
             config: config,
             logger: logger,
-            config: config,
             labels: agent.labels,
             no_release: !!task['no_release'],
             do_release: !!task['do_release'],
