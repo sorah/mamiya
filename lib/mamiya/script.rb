@@ -65,7 +65,7 @@ module Mamiya
         err_r, err_w = IO.pipe
         out_r, out_w = IO.pipe
 
-        pid = spawn(*args, out: out_w, err: err_w)
+        pid = spawn(*args.map(&:to_s), out: out_w, err: err_w)
 
         [out_w, err_w].each(&:close)
 
