@@ -88,6 +88,7 @@ module Mamiya
     method_option :build_to, aliases: %w(--destination -t), type: :string
     method_option :skip_prepare_build, aliases: %w(--no-prepare-build -P), type: :boolean
     method_option :force_prepare_build, aliases: %w(--prepare-build -p), type: :boolean
+    method_option :push, aliases: %w(--push), type: :boolean
     def build
       # TODO: overriding name
       %i(build_from build_to).each { |k| script.set(k, File.expand_path(options[k])) if options[k] }
@@ -105,7 +106,10 @@ module Mamiya
         script.set :skip_prepare_build, true
       end
 
-      Mamiya::Steps::Build.new(script: script, logger: logger).run!
+      package_name = Mamiya::Steps::Build.new(script: script, logger: logger).run!
+      if options[:push] && package_name
+        push(package_name)
+      end
     end
 
     desc "push PACKAGE", "Upload built packages to storage."
