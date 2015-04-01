@@ -51,6 +51,10 @@ module Mamiya
         end
       end
 
+      def built_package
+        package
+      end
+
       private
 
       def run_before_build
