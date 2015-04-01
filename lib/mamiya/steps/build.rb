@@ -48,8 +48,11 @@ module Mamiya
 
         unless @exception
           logger.info "DONE: #{package_name} built at #{package.path}"
-          return package_name
         end
+      end
+
+      def built_package
+        package
       end
 
       private

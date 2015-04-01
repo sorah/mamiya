@@ -106,9 +106,12 @@ module Mamiya
         script.set :skip_prepare_build, true
       end
 
-      package_name = Mamiya::Steps::Build.new(script: script, logger: logger).run!
-      if options[:push] && package_name
-        push(package_name)
+      builder = Mamiya::Steps::Build.new(script: script, logger: logger)
+      builder.run!
+
+      if options[:push]
+        package = builder.built_package
+        push(package.name)
       end
     end
 
