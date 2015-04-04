@@ -110,7 +110,7 @@ module Mamiya
       builder.run!
 
       if options[:push]
-        package = builder.built_package
+        package = builder.package
         push(package.name)
       end
     end

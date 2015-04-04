@@ -51,8 +51,8 @@ module Mamiya
         end
       end
 
-      def built_package
-        package
+      def package
+        @package ||= Mamiya::Package.new(package_path)
       end
 
       private
@@ -142,10 +142,6 @@ module Mamiya
 
       def package_path
         @package_path ||= File.join(script.build_to, package_name)
-      end
-
-      def package
-        @package ||= Mamiya::Package.new(package_path)
       end
 
       def script_file
