@@ -90,7 +90,13 @@ module Mamiya
           return self
         end
 
+        if task['_agents'] && !task['_agents'].include?(agent.name)
+          @logger.debug "skipping enqueue #{task_name.inspect}, #{task.inspect}, because agent name doesn't match"
+          return self
+        end
+
         task.delete '_labels'
+        task.delete '_agents'
         task.delete 'task'
         task['task'] = task_name
 

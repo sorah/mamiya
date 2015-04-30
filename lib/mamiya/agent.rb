@@ -39,6 +39,10 @@ module Mamiya
 
     attr_reader :config, :serf, :logger
 
+    def name
+      serf.name
+    end
+
     def task_queue
       @task_queue ||= Mamiya::Agent::TaskQueue.new(self, logger: logger, task_classes: [
         Mamiya::Agent::Tasks::Fetch,

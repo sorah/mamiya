@@ -142,6 +142,42 @@ describe Mamiya::Agent::TaskQueue do
       end
     end
 
+    describe "(task with _agants)" do
+      it "runs on matched agent" do
+        queue.start!
+        allow(agent).to receive(:name).and_return('bar')
+
+        queue.enqueue(:a, 'foo' => '1', '_agents' => ['foo', 'bar'])
+
+        100.times { break if task_class_a.runs.size == 1; sleep 0.01 }
+        expect(task_class_a.runs.size).to eq 1
+        expect(task_class_a.runs[0]['foo']).to eq '1'
+      end
+
+      it "doesn't run on not matched agent" do
+        queue.start!
+        allow(agent).to receive(:name).and_return('baz')
+
+        queue.enqueue(:a, 'foo' => '1', '_agents' => ['foo', 'bar'])
+        queue.enqueue(:a, 'foo' => '2')
+
+        100.times { break if task_class_a.runs.size == 1; sleep 0.01 }
+        expect(task_class_a.runs.size).to eq 1
+        expect(task_class_a.runs[0]['foo']).to eq '2'
+      end
+
+      it "removes _agents from task on run" do
+        queue.start!
+        allow(agent).to receive(:name).and_return('foo')
+
+        queue.enqueue(:a, 'foo' => '1', '_agents' => ['foo', 'bar'])
+
+        100.times { break if task_class_a.runs.size == 1; sleep 0.01 }
+        expect(task_class_a.runs.size).to eq 1
+        expect(task_class_a.runs[0].key?('_agents')).to be_false
+      end
+    end
+
     describe "#working?" do
       it "returns true if there're any working tasks" do
         queue.start!
