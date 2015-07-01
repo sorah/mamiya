@@ -37,6 +37,11 @@ describe Mamiya::Script do
         .from(false).to(true)
     end
 
+    it "runs command with environment variables" do
+      output =  script.run("env", { "foo" => "bar" })
+      expect(output).to include("foo=bar")
+    end
+
     context "when the command failed" do
       it "logs error" do
         begin

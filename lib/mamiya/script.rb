@@ -60,12 +60,14 @@ module Mamiya
         run_id = generate_run_id()
         logger = self.logger["run:#{run_id}"]
 
+        env = args.last.is_a?(Hash) ? args.pop : {}
+
         logger.info("$ #{args.shelljoin}")
 
         err_r, err_w = IO.pipe
         out_r, out_w = IO.pipe
 
-        pid = spawn(*args.map(&:to_s), out: out_w, err: err_w)
+        pid = spawn(env, *args.map(&:to_s), out: out_w, err: err_w)
 
         [out_w, err_w].each(&:close)
 
