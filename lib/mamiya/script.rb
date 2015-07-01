@@ -61,8 +61,9 @@ module Mamiya
         logger = self.logger["run:#{run_id}"]
 
         env = args.last.is_a?(Hash) ? args.pop : {}
+        shellenv = env.any? ? escape_env(env) + " " : ""
 
-        logger.info("$ #{args.shelljoin}")
+        logger.info("$ #{shellenv}#{args.shelljoin}")
 
         err_r, err_w = IO.pipe
         out_r, out_w = IO.pipe
@@ -178,6 +179,12 @@ module Mamiya
         @last_run_id_time = t
         id
       end
+    end
+
+    def escape_env(hash)
+      hash.map { |key, value|
+        [key.to_s.shellescape, value.to_s.shellescape].join("=")
+      }.join(" ")
     end
   end
 end
