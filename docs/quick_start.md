@@ -112,7 +112,7 @@ end
 #### Run it
 
 ```
-mamiya master -c /etc/mamiya/config.rb
+mamiya agent -c /etc/mamiya/config.rb
 ```
 
 ### Confirm both working
