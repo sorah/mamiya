@@ -57,7 +57,7 @@ set :web, {
 #### Run it
 
 ```
-mamiya master -c /etc/mamiya/config.rb
+mamiya master -C /etc/mamiya/config.rb
 ```
 
 ### Agent
@@ -112,7 +112,7 @@ end
 #### Run it
 
 ```
-mamiya agent -c /etc/mamiya/config.rb
+mamiya agent -C /etc/mamiya/config.rb
 ```
 
 ### Confirm both working
@@ -163,7 +163,7 @@ end
 # Step `release` run when Release is required. Usually for restarting app process, etc.
 # Also these step declaration accepts labels for `only` and `except` key to limit agents to run on.
 # (Labels can be set by agent's configuration)
-release 'reload unicorn', only [:app] do
+release 'reload unicorn', only: [:app] do
   run 'pkill', '-HUP', '-f', 'unicorn'
 end
 ```
@@ -190,7 +190,7 @@ Great! You can unpack using `tar xf` to confirm what has packed, if you want.
 You have to push it onto storage to make available for agents.
 
 ```
-$ mamiya push -C ./config.rb
+$ mamiya push -C ./config.rb builds/20141118093701-myapp.tar.gz
 11/18 09:42:43   INFO  [Push] Pushing builds/20141118093701-myapp.tar.gz to storage(app=myapp)...
 11/18 09:42:43   INFO  [Push] DONE!
 ```
