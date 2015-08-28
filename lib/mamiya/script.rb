@@ -98,7 +98,7 @@ module Mamiya
         timekeeper_th.kill if timekeeper_th.alive?
 
         begin
-          timeout(3) { ths.each(&:join) }
+          Timeout.timeout(3) { ths.each(&:join) }
         rescue Timeout::Error
         end
         ths.each { |_| _.alive? && _.kill }
