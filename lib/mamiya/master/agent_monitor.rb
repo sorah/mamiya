@@ -39,24 +39,21 @@ module Mamiya
 
       attr_reader :agents, :failed_agents, :last_refresh_at
 
-      def statuses(labels: nil)
-        if labels
+      def statuses(labels: nil, agents: nil)
           @statuses.select { |name, status|
-            status['labels'] &&
+            (labels ? status['labels'] &&
               Mamiya::Util::LabelMatcher::Simple.new(status['labels']).
-              match?(labels)
+              match?(labels) : true) &&
+            (agents ? agents.include?(name) : true)
           }
-        else
-          @statuses
-        end
       end
 
-      def package_status(app, pkg, labels: nil)
-        PackageStatus.new(self, app, pkg, labels: labels)
+      def package_status(app, pkg, labels: nil, agents: nil)
+        PackageStatus.new(self, app, pkg, labels: labels, agents: nil)
       end
 
-      def application_status(app, labels: nil)
-        ApplicationStatus.new(self, app, labels: labels)
+      def application_status(app, labels: nil, agents: nil)
+        ApplicationStatus.new(self, app, labels: labels, agents: nil)
       end
 
       def start!

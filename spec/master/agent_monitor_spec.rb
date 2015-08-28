@@ -94,6 +94,14 @@ describe Mamiya::Master::AgentMonitor do
         expect(agent_monitor.statuses(labels: ['baz']).keys.sort).to eq ['b']
       end
     end
+
+    context "with agents" do
+      it "can filter agents by agent name" do
+        expect(agent_monitor.statuses(agents: %w(a)).keys.sort).to eq ['a']
+        expect(agent_monitor.statuses(agents: %w(b)).keys.sort).to eq ['b']
+        expect(agent_monitor.statuses(agents: %w(a b)).keys.sort).to eq ['a', 'b']
+      end
+    end
   end
 
   describe "#refresh" do

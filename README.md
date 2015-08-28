@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/sorah/mamiya.png?branch=master)](https://travis-ci.org/sorah/mamiya)
 
-
 ## What's mamiya?
 
 Mamiya allows you to deploy without ssh -- using tarballs, some storages (S3, etc), and [Serf](http://www.serfdom.io/).

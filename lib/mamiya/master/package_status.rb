@@ -5,7 +5,7 @@ module Mamiya
     ##
     # This class determines distribution and releasing status of given package using given AgentMonitor.
     class PackageStatus
-      def initialize(agent_monitor, application, package, labels: nil)
+      def initialize(agent_monitor, application, package, labels: nil, agents: nil)
         @application = application
         @package = package
         @labels = labels

@@ -5,10 +5,10 @@ module Mamiya
     ##
     # This class determines application cluster's status (what's majority package active, etc).
     class ApplicationStatus
-      def initialize(agent_monitor, application, labels: nil)
+      def initialize(agent_monitor, application, labels: nil, agents: nil)
         @application = application
         @labels = labels
-        @agents = agent_monitor.statuses(labels: labels).reject { |_, s| s['master'] }
+        @agents = agent_monitor.statuses(labels: labels, agents: agents).reject { |_, s| s['master'] }
       end
 
       attr_reader :labels, :application, :agents
