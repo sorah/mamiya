@@ -61,7 +61,7 @@ module Mamiya
         logger = self.logger["run:#{run_id}"]
 
         env = args.last.is_a?(Hash) ? args.pop : {}
-        shellenv = env.any? ? escape_env(env) + " " : ""
+        shellenv = env.empty? ? nil : "#{escape_env(env)} "
 
         logger.info("$ #{shellenv}#{args.shelljoin}")
 
