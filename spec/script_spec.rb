@@ -80,12 +80,12 @@ describe Mamiya::Script do
 
     it "logs stdout as info" do
       script.run("echo", "foo")
-      expect(log).to include([:info, "foo"])
+      expect(log).to include([:info, "  foo"])
     end
 
     it "logs stderr as warn" do
       script.run("ruby", "-e", "warn 'bar'")
-      expect(log).to include([:warn, "bar"])
+      expect(log).to include([:warn, "  bar"])
     end
 
     it "returns captured output as String" do
