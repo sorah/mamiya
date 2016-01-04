@@ -44,6 +44,7 @@ module Mamiya
             logger.debug line
           end
         end
+        exit 1
       end
     end
 
