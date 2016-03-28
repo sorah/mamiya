@@ -35,8 +35,9 @@ module Mamiya
         @switched = true
         script.before_switch(labels)[]
 
-        File.unlink script.current_path if script.current_path.symlink?
-        script.current_path.make_symlink(target.realpath)
+        next_path = script.release_path.parent.join(script.current_path.basename)
+        next_path.make_symlink(target.realpath)
+        FileUtils.mv(next_path, script.current_path)
       end
 
       def release
