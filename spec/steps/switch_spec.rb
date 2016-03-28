@@ -30,6 +30,7 @@ describe Mamiya::Steps::Switch do
       release: proc {},
       after_switch: proc {},
       current_path: current_path,
+      release_path: release_path,
     )
   end
 
