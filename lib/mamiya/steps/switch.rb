@@ -37,7 +37,7 @@ module Mamiya
 
         next_path = script.release_path.parent.join(script.current_path.basename)
         next_path.make_symlink(target.realpath)
-        FileUtils.mv(next_path, script.current_path)
+        File.rename(next_path, script.current_path)
       end
 
       def release
