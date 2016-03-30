@@ -157,8 +157,10 @@ describe Mamiya::Steps::Switch do
     end
 
     context "when current already exists" do
+      let(:previous_release_path) { releases_dir.join('20140515000707').tap(&:mkdir) }
+
       before do
-          current_path.make_symlink('releases/20140515000707')
+        current_path.make_symlink(previous_release_path)
       end
 
       it "links current to release_path" do
