@@ -3,6 +3,14 @@ require 'mamiya/storages/abstract'
 require 'aws-sdk-core'
 require 'json'
 
+PART_SIZE=1024*1024*100
+
+class File
+  def each_part(part_size=PART_SIZE)
+    yield read(part_size) until eof?
+  end
+end
+
 module Mamiya
   module Storages
     class S3 < Mamiya::Storages::Abstract
@@ -46,9 +54,45 @@ module Mamiya
           raise AlreadyExists if key_exists_in_s3?(key)
         end
 
-        open(package.path, 'rb') do |io|
-          s3.put_object(bucket: @config[:bucket], key: package_key, body: io)
+		File.open(package.path, 'rb') do |file|
+                input_opts = {
+                        bucket: @config[:bucket],
+                        key:    package_key,
+                }
+
+                mpu_create_response = s3.create_multipart_upload(input_opts)
+                current_part = 1
+
+                file.each_part do |part|
+                        part_response = s3.upload_part({
+                                body:        part,
+                                bucket:      @config[:bucket],
+                                key:         package_key,
+                                part_number: current_part,
+                                upload_id:   mpu_create_response.upload_id,
+                        })
+                        current_part = current_part + 1
+                end
+
+                input_opts = input_opts.merge({
+                        :upload_id   => mpu_create_response.upload_id,
+                })
+
+                parts_resp = s3.list_parts(input_opts)
+
+                input_opts = input_opts.merge(
+                        :multipart_upload => {
+                        :parts =>
+                                parts_resp.parts.map do |part|
+                                        { :part_number => part.part_number,
+                                        :etag        => part.etag }
+                                end
+                        }
+                )
+
+                mpu_complete_response = s3.complete_multipart_upload(input_opts)
         end
+
         open(package.meta_path, 'rb') do |io|
           s3.put_object(bucket: @config[:bucket], key: meta_key, body: io)
         end
