@@ -53,7 +53,7 @@ module Mamiya
         [package_key, meta_key].each do |key|
           raise AlreadyExists if key_exists_in_s3?(key)
         end
-
+		
 		File.open(package.path, 'rb') do |file|
                 input_opts = {
                         bucket: @config[:bucket],
