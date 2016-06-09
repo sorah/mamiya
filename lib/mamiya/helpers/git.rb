@@ -50,11 +50,7 @@ prepare_build do |update|
 
   Dir.chdir(self.build_from) do
     logger.info Dir.pwd
-    run "git", "fetch", self.git_remote
-    run "git", "remote", "prune", self.git_remote, allow_failure: true
-    run "git", "fetch", "--tags", self.git_remote
-
-    run "git", "reset", "--hard", self.commit
+	run "git", "pull",self.git_remote,"master"
   end
 end
 
