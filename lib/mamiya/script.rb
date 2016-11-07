@@ -90,7 +90,7 @@ module Mamiya
           l = logger['timekeeper']
           loop do
             if 90 < (Time.now - last_out)
-              l.warn "pid #! {pid} still running; since #{started_at}"
+              l.warn "! pid #{pid} still running; since #{started_at}"
             end
             sleep 60
           end
