@@ -189,6 +189,7 @@ module Mamiya
       payload_str = payload.merge(name: self.serf.name).to_json
 
       @trigger_lock.synchronize do
+        logger.debug "Send serf event #{name}(coalesce=#{coalesce}): #{payload_str}"
         serf.event(name, payload_str, coalesce: coalesce)
       end
     end
