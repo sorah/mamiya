@@ -124,18 +124,18 @@ describe Mamiya::Storages::S3 do
       expect(options[:bucket]).to eq 'testbucket'
       expect(options[:key]).to eq "myapp/test.tar.gz"
       expect(send_options[:target]).to be_a_kind_of(File)
-      expect(send_options[:target].path).to eq tarball
+      expect(send_options[:target].path).to eq("#{tarball}.fetching")
 
       options, send_options = requests.shift
       expect(options[:bucket]).to eq 'testbucket'
       expect(options[:key]).to eq "myapp/test.json"
       expect(send_options[:target]).to be_a_kind_of(File)
-      expect(send_options[:target].path).to eq metafile
+      expect(send_options[:target].path).to eq("#{metafile}.fetching")
     end
 
     it "returns Mamiya::Package" do
       allow(s3).to receive(:get_object) do
-        File.write metafile, "{}\n"
+        File.write "#{metafile}.fetching", "{}\n"
       end
 
       expect(fetch).to be_a_kind_of(Mamiya::Package)
@@ -184,7 +184,7 @@ describe Mamiya::Storages::S3 do
           hash_including(bucket: 'testbucket', key: 'myapp/test.tar.gz'), hash_including(target: an_instance_of(File)))
         expect(s3).to receive(:get_object).with(
           hash_including(bucket: 'testbucket', key: 'myapp/test.json'), hash_including(target: an_instance_of(File))) do
-          File.write metafile, "{}\n"
+          File.write "#{metafile}.fetching", "{}\n"
         end
 
         fetch
@@ -199,7 +199,7 @@ describe Mamiya::Storages::S3 do
           hash_including(bucket: 'testbucket', key: 'myapp/test.tar.gz'), hash_including(target: an_instance_of(File)))
         expect(s3).to receive(:get_object).with(
           hash_including(bucket: 'testbucket', key: 'myapp/test.json'), hash_including(target: an_instance_of(File))) do
-          File.write metafile, "{}\n"
+          File.write "#{metafile}.fetching", "{}\n"
         end
 
         fetch
