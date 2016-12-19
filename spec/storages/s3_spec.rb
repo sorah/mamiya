@@ -8,14 +8,6 @@ require 'fileutils'
 require 'stringio'
 
 describe Mamiya::Storages::S3 do
-  before(:suite) do
-    %w(AWS_ACCESS_KEY AWS_ACCESS_KEY_ID AMAZON_ACCESS_KEY_ID
-       AWS_SECRET_KEY AWS_SECRET_ACCESS_KEY AMAZON_SECRET_ACCESS_KEY
-       AWS_SESSION_TOKEN AMAZON_SESSION_TOKEN).each do |key|
-      ENV.delete key
-    end
-  end
-
   let(:bucket) { 'testbucket' }
   let(:config) do
     {
