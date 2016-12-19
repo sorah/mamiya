@@ -49,8 +49,8 @@ describe Mamiya::Master::PackageStatus do
         }
       end
 
-      it { should include(:distributing) }
-      it { should include(:partially_distributed) }
+      it { is_expected.to include(:distributing) }
+      it { is_expected.to include(:partially_distributed) }
     end
 
     context "if there's queued agents" do
@@ -83,8 +83,8 @@ describe Mamiya::Master::PackageStatus do
         }
       end
 
-      it { should include(:distributing) }
-      it { should include(:partially_distributed) }
+      it { is_expected.to include(:distributing) }
+      it { is_expected.to include(:partially_distributed) }
     end
 
     context "if any agents have the package" do
@@ -112,7 +112,7 @@ describe Mamiya::Master::PackageStatus do
         }
       end
 
-      it { should include(:partially_distributed) }
+      it { is_expected.to include(:partially_distributed) }
     end
 
     context "if all agents have the package" do
@@ -141,7 +141,7 @@ describe Mamiya::Master::PackageStatus do
         }
       end
 
-      it { should include(:distributed) }
+      it { is_expected.to include(:distributed) }
     end
 
     context "if no agents relate to the package" do
@@ -168,7 +168,7 @@ describe Mamiya::Master::PackageStatus do
         }
       end
 
-      it { should eq [:unknown] }
+      it { is_expected.to eq [:unknown] }
     end
   end
 

@@ -48,26 +48,26 @@ describe Mamiya::Package do
 
   describe "#path" do
     subject { package.path }
-    it { should eq Pathname.new(package_path) }
+    it { is_expected.to eq Pathname.new(package_path) }
 
     context "without file extension" do
       let(:arg) { 'test' }
-      it { should eq Pathname.new('test.tar.gz') }
+      it { is_expected.to eq Pathname.new('test.tar.gz') }
     end
 
     context "with .tar.gz" do
       let(:arg) { 'test.tar.gz' }
-      it { should eq Pathname.new('test.tar.gz') }
+      it { is_expected.to eq Pathname.new('test.tar.gz') }
     end
 
     context "with .json" do
       let(:arg) { 'test.json' }
-      it { should eq Pathname.new('test.tar.gz') }
+      it { is_expected.to eq Pathname.new('test.tar.gz') }
     end
 
     context "with filename containing dot" do
       let(:arg) { 'a.b' }
-      it { should eq Pathname.new('a.b.tar.gz') }
+      it { is_expected.to eq Pathname.new('a.b.tar.gz') }
     end
   end
 
@@ -76,22 +76,22 @@ describe Mamiya::Package do
 
     context "without file extension" do
       let(:arg) { 'test' }
-      it { should eq Pathname.new('test.json') }
+      it { is_expected.to eq Pathname.new('test.json') }
     end
 
     context "with .tar.gz" do
       let(:arg) { 'test.tar.gz' }
-      it { should eq Pathname.new('test.json') }
+      it { is_expected.to eq Pathname.new('test.json') }
     end
 
     context "with .json" do
       let(:arg) { 'test.json' }
-      it { should eq Pathname.new('test.json') }
+      it { is_expected.to eq Pathname.new('test.json') }
     end
 
     context "with filename containing dot" do
       let(:arg) { 'a.b' }
-      it { should eq Pathname.new('a.b.json') }
+      it { is_expected.to eq Pathname.new('a.b.json') }
     end
   end
 
@@ -155,7 +155,7 @@ describe Mamiya::Package do
         File.write(meta_path, {"checksum" => Digest::SHA2.hexdigest("test\n")}.to_json + "\n")
       end
 
-      it { should be_true }
+      it { is_expected.to be true }
     end
 
     context "when checksum is incorrect" do
@@ -164,7 +164,7 @@ describe Mamiya::Package do
         File.write(meta_path, {"checksum" => Digest::SHA2.hexdigest("text\n")}.to_json + "\n")
       end
 
-      it { should be_false }
+      it { is_expected.to be false }
     end
 
     context "when package not exists" do
@@ -187,42 +187,42 @@ describe Mamiya::Package do
   describe "#name" do
     subject { package.name }
 
-    it { should eq 'test' }
+    it { is_expected.to eq 'test' }
 
     context "when meta['name'] exists" do
       before do
         package.meta['name'] = 'pack'
       end
 
-      it { should eq 'pack' }
+      it { is_expected.to eq 'pack' }
     end
   end
 
   describe "#application" do
     subject { package.application }
 
-    it { should eq nil }
+    it { is_expected.to eq nil }
 
     context "when meta['application'] exists" do
       before do
         package.meta['application'] = 'app'
       end
 
-      it { should eq 'app' }
+      it { is_expected.to eq 'app' }
     end
   end
 
   describe "#checksum" do
     subject { package.checksum }
 
-    it { should be_nil }
+    it { is_expected.to be_nil }
 
     context "when package exists" do
       before do
         File.write package_path, "text\n"
       end
 
-      it { should eq Digest::SHA2.hexdigest("text\n") }
+      it { is_expected.to eq Digest::SHA2.hexdigest("text\n") }
     end
   end
 
@@ -234,7 +234,7 @@ describe Mamiya::Package do
         File.write package_path, ''
       end
 
-      it { should be_true }
+      it { is_expected.to be true }
     end
 
     context "when package not exists" do
@@ -242,7 +242,7 @@ describe Mamiya::Package do
         File.unlink(package_path) if File.exists?(package_path)
       end
 
-      it { should be_false }
+      it { is_expected.to be false }
     end
   end
 

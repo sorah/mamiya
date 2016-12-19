@@ -128,7 +128,7 @@ describe Mamiya::Storages::Filesystem do
           fetch
         rescue Mamiya::Storages::Abstract::AlreadyFetched; end
 
-        expect(File.exist?(metafile)).to be_true
+        expect(File.exist?(metafile)).to be true
       end
     end
 

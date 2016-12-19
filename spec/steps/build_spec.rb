@@ -114,7 +114,7 @@ describe Mamiya::Steps::Build do
               package_under: 'foo',
             )
           ) {
-        expect(built).to be_true
+        expect(built).to be true
       }
 
       build_step.run!

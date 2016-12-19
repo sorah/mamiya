@@ -14,9 +14,9 @@ describe Mamiya::Script do
 
   let(:logger) {
     double("logger").tap do |_|
-      _.stub(:[]) { _ }
+      allow(_).to receive(:[]) { _ }
       %i(info warn debug error).each do |severity|
-        _.stub(severity) { |*args| log << [severity, *args]; _ }
+        allow(_).to receive(severity) { |*args| log << [severity, *args]; _ }
       end
     end
   }

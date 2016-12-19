@@ -324,7 +324,7 @@ describe Mamiya::Master::Web do
             }
           end
 
-          it { should eq 'distributing' }
+          it { is_expected.to eq 'distributing' }
         end
 
         context "if there's queued agents" do
@@ -357,7 +357,7 @@ describe Mamiya::Master::Web do
             }
           end
 
-          it { should eq 'distributing' }
+          it { is_expected.to eq 'distributing' }
         end
 
         context "if any agents have the package" do
@@ -385,7 +385,7 @@ describe Mamiya::Master::Web do
             }
           end
 
-          it { should eq 'partially_distributed' }
+          it { is_expected.to eq 'partially_distributed' }
         end
 
         context "if all agents have the package" do
@@ -414,7 +414,7 @@ describe Mamiya::Master::Web do
             }
           end
 
-          it { should eq 'distributed' }
+          it { is_expected.to eq 'distributed' }
         end
 
         context "if no agents relate to the package" do
@@ -441,7 +441,7 @@ describe Mamiya::Master::Web do
             }
           end
 
-          it { should eq 'unknown' }
+          it { is_expected.to eq 'unknown' }
         end
       end
 

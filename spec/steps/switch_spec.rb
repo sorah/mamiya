@@ -132,7 +132,7 @@ describe Mamiya::Steps::Switch do
         allow(script).to receive(:after_switch).and_return(proc { called = true })
         step.run!
 
-        expect(called).to be_false
+        expect(called).to be false
       end
 
       context "with do_release" do
@@ -182,7 +182,7 @@ describe Mamiya::Steps::Switch do
         allow(script).to receive(:release).and_return(proc { called = true })
         step.run!
 
-        expect(called).to be_false
+        expect(called).to be false
       end
     end
   end
