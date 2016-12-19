@@ -133,7 +133,7 @@ describe Mamiya::Master::ApplicationStatus do
       }
     end
 
-    it { should eq('a' => %w(agent1 agent3), 'b' => %w(agent2)) }
+    it { is_expected.to eq('a' => %w(agent1 agent3), 'b' => %w(agent2)) }
   end
 
   describe "#major_current" do
@@ -153,7 +153,7 @@ describe Mamiya::Master::ApplicationStatus do
       }
     end
 
-    it { should eq 'a' }
+    it { is_expected.to eq 'a' }
   end
 
   describe "#common_releases" do
@@ -173,7 +173,7 @@ describe Mamiya::Master::ApplicationStatus do
       }
     end
 
-    it { should eq %w(b c) }
+    it { is_expected.to eq %w(b c) }
   end
 
   describe "#common_previous_release" do
@@ -196,6 +196,6 @@ describe Mamiya::Master::ApplicationStatus do
       }
     end
 
-    it { should eq ?b }
+    it { is_expected.to eq ?b }
   end
 end

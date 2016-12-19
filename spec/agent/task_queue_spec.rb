@@ -75,15 +75,15 @@ describe Mamiya::Agent::TaskQueue do
       expect(queue).to be_running
 
       expect(queue.worker_threads).to be_a_kind_of(Hash)
-      expect(queue.worker_threads.values.all? { |v| v.kind_of?(Thread) }).to be_true
-      expect(queue.worker_threads.values.all? { |v| v.alive? }).to be_true
+      expect(queue.worker_threads.values.all? { |v| v.kind_of?(Thread) }).to be true
+      expect(queue.worker_threads.values.all? { |v| v.alive? }).to be true
       threads = queue.worker_threads.dup
 
       queue.stop!
 
       expect(queue).not_to be_running
       expect(queue.worker_threads).to be_nil
-      expect(threads.each_value.all? { |v| !v.alive? }).to be_true
+      expect(threads.each_value.all? { |v| !v.alive? }).to be true
     end
 
     it "can stop gracefully"
@@ -138,7 +138,7 @@ describe Mamiya::Agent::TaskQueue do
 
         100.times { break if task_class_a.runs.size == 1; sleep 0.01 }
         expect(task_class_a.runs.size).to eq 1
-        expect(task_class_a.runs[0].key?('_labels')).to be_false
+        expect(task_class_a.runs[0].key?('_labels')).to be false
       end
     end
 

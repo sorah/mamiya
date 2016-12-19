@@ -27,7 +27,8 @@ unless ENV["ENABLE_LOG"]
 end
 
 RSpec.configure do |config|
-  config.treat_symbols_as_metadata_keys_with_true_values = true
+  config.raise_errors_for_deprecations!
+
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
 
@@ -39,5 +40,13 @@ RSpec.configure do |config|
 
   config.after(:each) do
     Mamiya::Storages::Mock.clear
+  end
+
+  config.before(:suite) do
+    %w(AWS_ACCESS_KEY AWS_ACCESS_KEY_ID AMAZON_ACCESS_KEY_ID
+       AWS_SECRET_KEY AWS_SECRET_ACCESS_KEY AMAZON_SECRET_ACCESS_KEY
+       AWS_SESSION_TOKEN AMAZON_SESSION_TOKEN).each do |key|
+      ENV.delete key
+    end
   end
 end

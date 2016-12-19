@@ -140,19 +140,19 @@ describe Mamiya::Agent do
       subject(:status) { agent.status(packages: false) }
 
       it "doesn't include existing packages" do
-        expect(status.has_key?(:packages)).to be_false
+        expect(status.has_key?(:packages)).to be false
       end
 
       it "doesn't include existing prereleases" do
-        expect(status.has_key?(:prereleases)).to be_false
+        expect(status.has_key?(:prereleases)).to be false
       end
 
       it "doesn't include existing releases" do
-        expect(status.has_key?(:releases)).to be_false
+        expect(status.has_key?(:releases)).to be false
       end
 
       it "doesn't include existing currents" do
-        expect(status.has_key?(:currents)).to be_false
+        expect(status.has_key?(:currents)).to be false
       end
     end
 

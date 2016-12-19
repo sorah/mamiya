@@ -103,7 +103,7 @@ describe Mamiya::Steps::Prepare do
 
     it "calls hook in :target (pwd)" do
       pwd = nil
-      script.stub(prepare: proc { pwd = Dir.pwd })
+      allow(script).to receive_messages(prepare: proc { pwd = Dir.pwd })
 
       expect {
         step.run!

@@ -8,7 +8,7 @@ describe Mamiya::DSL do
 
   describe ".set_default" do
     it "sets default" do
-      expect { dsl.testvar }.to raise_error
+      expect { dsl.testvar }.to raise_error(NoMethodError, /\btestvar\b/)
       klass.set_default :testvar, 1
       expect(dsl.testvar).to eq 1
     end
@@ -16,7 +16,7 @@ describe Mamiya::DSL do
 
   describe ".add_hook" do
     it "adds hook" do
-      expect { dsl.testhook }.to raise_error
+      expect { dsl.testhook }.to raise_error(NoMethodError, /\btesthook\b/)
       klass.add_hook :testhook
       expect(dsl.testhook).to be_a(Proc)
     end
@@ -98,7 +98,7 @@ describe Mamiya::DSL do
 
   describe "#set" do
     it "sets variable" do
-      expect{ dsl.foo }.to raise_error
+      expect{ dsl.foo }.to raise_error(NoMethodError, /\bfoo\b/)
       dsl.set :foo, 100
       expect(dsl.foo).to eq 100
       expect(dsl[:foo]).to eq 100
@@ -157,7 +157,7 @@ describe Mamiya::DSL do
       it "raises error" do
         expect {
           dsl.invoke :nul
-        }.to raise_error
+        }.to raise_error(Mamiya::DSL::TaskNotDefinedError)
       end
     end
   end

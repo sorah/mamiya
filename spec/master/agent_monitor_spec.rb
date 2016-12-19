@@ -243,7 +243,7 @@ describe Mamiya::Master::AgentMonitor do
     end
 
     context "with argument" do
-      it "passes args to serf query", pending: 'stub_serf_queries cannot handle kwarg' do
+      it "passes args to serf query", skip: 'stub_serf_queries cannot handle kwarg' do
         stub_serf_queries(expected_kwargs: {node: 'foo'})
         agent_monitor.refresh(node: 'foo')
       end
