@@ -3,9 +3,9 @@ require 'thread'
 
 module Mamiya
 
-  @chdir_mutex = Thread::Mutex.new
+  @chdir_monitor = Monitor.new
   def self.chdir(dir, &block)
-    @chdir_mutex.synchronize do
+    @chdir_monitor.synchronize do
       Dir.chdir(dir, &block)
     end
   end
