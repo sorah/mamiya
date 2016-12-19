@@ -1,4 +1,5 @@
 require 'time'
+require 'mamiya'
 
 set_default :git_remote, 'origin'
 set_default :commit, "#{self.git_remote}/HEAD"
@@ -48,7 +49,7 @@ prepare_build do |update|
     run "git", "clone", self.repository, self.build_from
   end
 
-  Dir.chdir(self.build_from) do
+  Mamiya.chdir(self.build_from) do
     logger.info Dir.pwd
     run "git", "fetch", self.git_remote
     run "git", "remote", "prune", self.git_remote, allow_failure: true
@@ -81,7 +82,7 @@ end
 options[:manage_script] = true unless options.key?(:manage_script)
 options[:script_auto_additionals] = true unless options.key?(:script_auto_additionals)
 if options[:manage_script] && _file
-  Dir.chdir(File.dirname(_file)) do
+  Mamiya.chdir(File.dirname(_file)) do
     break unless git_managed?
 
     script_git_head = git_head()

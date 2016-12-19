@@ -1,3 +1,4 @@
+require 'mamiya'
 require 'mamiya/steps/abstract'
 require 'mamiya/package'
 
@@ -72,15 +73,12 @@ module Mamiya
       end
 
       def run_build
-        old_pwd = Dir.pwd
-        begin
-          # Using without block because chdir in block shows warning
-          Dir.chdir(script.build_from)
+        # FIXME: This could show warning saying "conflicting chdir during another chdir block".
+        # Do not use `Dir.chdir` without block anyware.
+        Mamiya.chdir(script.build_from) do
           logger.info "Running script.build"
           logger.debug "pwd=#{Dir.pwd}"
           script.build[]
-        ensure
-          Dir.chdir old_pwd
         end
       end
 
@@ -112,7 +110,7 @@ module Mamiya
       def set_metadata
         package.meta[:application] = script.application
         package.meta[:script] = File.basename(script_file)
-        Dir.chdir(script.build_from) do
+        Mamiya.chdir(script.build_from) do
           package.meta.replace script.package_meta[package.meta]
         end
       end
@@ -130,7 +128,7 @@ module Mamiya
       def package_name
         @package_name ||= begin
           logger.debug "Determining package name..."
-          name = Dir.chdir(script.build_from) {
+          name = Mamiya.chdir(script.build_from) {
             script.package_name[
               [Time.now.strftime("%Y%m%d%H%M%S"), script.application]
             ].join('-')

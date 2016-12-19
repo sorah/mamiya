@@ -1,3 +1,4 @@
+require 'mamiya'
 require 'mamiya/steps/abstract'
 
 module Mamiya
@@ -44,14 +45,11 @@ module Mamiya
         # TODO: link with relative if available?
         # TODO: Restore this if FAILED
 
-        old_pwd = Dir.pwd
-        Dir.chdir(target)
+        Mamiya.chdir(target) do
+          logger.info "Releasing..."
 
-        logger.info "Releasing..."
-
-        script.release(labels)[@exception]
-      ensure
-        Dir.chdir old_pwd if old_pwd
+          script.release(labels)[@exception]
+        end
       end
 
       # XXX: dupe with prepare step. modulize?
