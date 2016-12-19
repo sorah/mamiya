@@ -65,8 +65,8 @@ module Mamiya
           raise AlreadyFetched
         end
 
-        tmp_package_path = "#{package_path}.fetching"
-        tmp_meta_path = "#{meta_path}.fetching"
+        tmp_package_path = "#{package_path}.progress"
+        tmp_meta_path = "#{meta_path}.progress"
         open(tmp_package_path, 'wb+') do |io|
           s3.get_object({bucket: @config[:bucket], key: package_key}, target: io)
         end

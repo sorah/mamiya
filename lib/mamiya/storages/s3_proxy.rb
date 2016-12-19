@@ -23,8 +23,8 @@ module Mamiya
           raise AlreadyFetched
         end
 
-        tmp_package_path = "#{package_path}.fetching"
-        tmp_meta_path = "#{meta_path}.fetching"
+        tmp_package_path = "#{package_path}.progress"
+        tmp_meta_path = "#{meta_path}.progress"
         open(tmp_package_path, 'wb+') do |io|
           proxy_get(package_key, io)
         end
