@@ -1,6 +1,7 @@
 require 'mamiya/package'
 require 'mamiya/storages/abstract'
 require 'aws-sdk-core'
+require 'fileutils'
 require 'json'
 
 module Mamiya
@@ -64,12 +65,16 @@ module Mamiya
           raise AlreadyFetched
         end
 
-        open(package_path, 'wb+') do |io|
+        tmp_package_path = "#{package_path}.progress"
+        tmp_meta_path = "#{meta_path}.progress"
+        open(tmp_package_path, 'wb+') do |io|
           s3.get_object({bucket: @config[:bucket], key: package_key}, target: io)
         end
-        open(meta_path, 'wb+') do |io|
+        open(tmp_meta_path, 'wb+') do |io|
           s3.get_object({bucket: @config[:bucket], key: meta_key}, target: io)
         end
+        FileUtils.mv(tmp_package_path, package_path)
+        FileUtils.mv(tmp_meta_path, meta_path)
 
         return Mamiya::Package.new(package_path)
 

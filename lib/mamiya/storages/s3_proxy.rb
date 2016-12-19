@@ -1,5 +1,6 @@
 require 'mamiya/package'
 require 'mamiya/storages/s3'
+require 'fileutils'
 
 module Mamiya
   module Storages
@@ -22,12 +23,16 @@ module Mamiya
           raise AlreadyFetched
         end
 
-        open(package_path, 'wb+') do |io|
+        tmp_package_path = "#{package_path}.progress"
+        tmp_meta_path = "#{meta_path}.progress"
+        open(tmp_package_path, 'wb+') do |io|
           proxy_get(package_key, io)
         end
-        open(meta_path, 'wb+') do |io|
+        open(tmp_meta_path, 'wb+') do |io|
           proxy_get(meta_key, io)
         end
+        FileUtils.mv(tmp_package_path, package_path)
+        FileUtils.mv(tmp_meta_path, meta_path)
 
         return Mamiya::Package.new(package_path)
 
