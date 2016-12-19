@@ -88,7 +88,7 @@ describe Mamiya::Steps::Switch do
 
     it "calls hook in :target (pwd)" do
       pwd = nil
-      script.stub(release: proc { pwd = Dir.pwd })
+      allow(script).to receive_messages(release: proc { pwd = Dir.pwd })
 
       expect {
         step.run!

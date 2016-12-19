@@ -76,7 +76,7 @@ describe Mamiya::Storages::S3 do
 
     context "when not built" do
       before do
-        package.stub(:exists? => false)
+        allow(package).to receive_messages(:exists? => false)
       end
 
       it "raises error" do

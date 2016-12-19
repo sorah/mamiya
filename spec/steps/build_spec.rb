@@ -88,7 +88,7 @@ describe Mamiya::Steps::Build do
 
     it "calls build hook in :build_from (pwd)" do
       pwd = nil
-      script.stub(build: proc { pwd = Dir.pwd })
+      allow(script).to receive_messages(build: proc { pwd = Dir.pwd })
 
       expect {
         build_step.run!
