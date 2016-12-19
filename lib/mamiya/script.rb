@@ -135,6 +135,7 @@ module Mamiya
 
     def cd(*args)
       logger.info "$ cd #{args[0]}"
+      # FIXME: This could make conflict with other threads
       Dir.chdir *args
     end
 

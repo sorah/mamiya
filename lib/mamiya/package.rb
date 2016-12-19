@@ -1,3 +1,4 @@
+require 'mamiya'
 require 'mamiya/logger'
 
 require 'pathname'
@@ -76,7 +77,7 @@ module Mamiya
       meta['name'] = self.name
       File.write meta_in_build, self.meta.to_json
 
-      Dir.chdir(build_dir) do
+      Mamiya.chdir(build_dir) do
         excludes = exclude_from_package.flat_map { |exclude| ['--exclude', exclude] }
         dereference = dereference_symlinks ? ['-h'] : []
 
