@@ -26,7 +26,7 @@ $ bundle exec mamiya build
 09/09 09:41:00   INFO | [Build] Running script.after_build
 09/09 09:41:00   INFO | [Build] DONE!
 
-$ tree packages
+$ tree builds
 builds
 ├── 2014-09-09_09.41.00-myapp.json
 └── 2014-09-09_09.41.00-myapp.tar.gz
