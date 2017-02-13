@@ -189,13 +189,19 @@ not distributed: #{dist['not_distributed_count']} agents
       method_option :synced_release, type: :boolean, default: false
       def rollback
         appstatus = master_get("/applications/#{application}/status", options[:labels] ? {labels: options[:labels]} : {})
+        bad_package = appstatus['major_current']
         package = appstatus['common_previous_release']
+        params = options[:labels] ?  {labels: Mamiya::Util::LabelMatcher.parse_string_expr(options[:labels])} : {}
 
         unless package
           raise 'there is no common_previous_release for specified application'
         end
 
         deploy_or_rollback(:rollback, package)
+        if bad_package
+          puts "=> Removing bad package #{bad_package}"
+          p master_post("/packages/#{application}/#{bad_package}/remove", params.merge(type: :json))
+        end
       end
 
       desc "join HOST", "let serf to join to HOST"

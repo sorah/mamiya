@@ -118,6 +118,11 @@ module Mamiya
         end
       end
 
+      post '/packages/:application/:package/remove' do
+        status 204
+        master.remove(params[:application], params[:package], labels: params['labels'])
+      end
+
       get '/packages/:application/:package/status' do
         content_type :json
         meta = storage(params[:application]).meta(params[:package])
