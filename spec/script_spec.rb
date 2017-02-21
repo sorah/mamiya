@@ -27,14 +27,15 @@ describe Mamiya::Script do
 
   describe "#run" do
     it "runs command" do
-      tmpdir = Dir.mktmpdir('akane-script-spec')
-      testee = File.join(tmpdir, 'test')
+      Dir.mktmpdir('mamiya-script-spec') do |tmpdir|
+        testee = File.join(tmpdir, 'test')
 
-      expect {
-        script.run("touch", testee)
-      } \
-        .to change { File.exists?(testee) } \
-        .from(false).to(true)
+        expect {
+          script.run("touch", testee)
+        } \
+          .to change { File.exists?(testee) } \
+          .from(false).to(true)
+      end
     end
 
     context "when given environment variables" do
