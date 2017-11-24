@@ -90,7 +90,7 @@ module Mamiya
           app: self.web,
           Port: options[:port] ? options[:port].to_i : 7761,
           Host: options[:bind] || '0.0.0.0', # TODO: IPv6
-          environment: options[:environment] || :development,
+          environment: options[:environment] || 'development',
           server: options[:server],
           Logger: logger['web']
         }
