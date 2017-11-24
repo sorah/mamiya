@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'aws-sdk-core'
 require 'mamiya/package'
 require 'mamiya/storages/abstract'
 require 'mamiya/storages/s3_proxy'
