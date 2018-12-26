@@ -17,7 +17,7 @@ def git_ignored_files
     raise "`git clean -ndx` doesn't return line starting with 'Would remove' or 'Would skip'"
   end
 
-  excludes = git_clean_out.grep(prefix).map{ |_| _.sub(prefix, '').chomp }
+  excludes = git_clean_out.grep(prefix).map{ |_| _.sub(prefix, '').chomp.chomp('/') }
   if package_under
     excludes.grep(/^#{Regexp.escape(package_under)}/).map{ |_| _.sub(/^#{Regexp.escape(package_under)}\/?/, '') }
   else
