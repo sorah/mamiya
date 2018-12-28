@@ -1,6 +1,6 @@
 require 'mamiya/package'
 require 'mamiya/storages/abstract'
-require 'aws-sdk'
+require 'aws-sdk-s3'
 require 'fileutils'
 require 'json'
 

@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency "thor", ">= 0.18.1"
-  spec.add_runtime_dependency "aws-sdk", ">= 2.0.0"
+  spec.add_runtime_dependency "aws-sdk-s3", ">= 1"
   spec.add_runtime_dependency "term-ansicolor", ">= 1.3.0"
   unless ENV["MAMIYA_VILLEIN_PATH"]
     spec.add_runtime_dependency "villein", ">= 0.5.0"
