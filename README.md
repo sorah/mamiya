@@ -31,7 +31,7 @@ file transferring phase in deploy.
 
 ## In the production
 
-- [Cookpad](https://info.cookpad.com/en) is using Mamiya in production of [cookpad.com](http://cookpad.com).
+- [Cookpad](https://info.cookpad.com) was using Mamiya in production of [cookpad.com](http://cookpad.com). (until it migrates to full-containerized environment)
 
 ## Misc.
 
