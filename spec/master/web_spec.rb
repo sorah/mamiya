@@ -258,6 +258,28 @@ describe Mamiya::Master::Web do
     end
   end
 
+  describe "POST /packages/:application/:package/remove" do
+    it "dispatches remove request" do
+      expect(master).to receive(:remove).with('myapp', 'mypackage', labels: nil)
+
+      post '/packages/myapp/mypackage/remove'
+
+      expect(last_response.status).to eq 204
+    end
+
+    context "with labels" do
+      it "dispatchs remove request with labels" do
+        expect(master).to receive(:remove).with('myapp', 'mypackage', labels: ['foo'])
+
+        post '/packages/myapp/mypackage/remove',
+          {'labels' =>  ["foo"]}.to_json,
+          'CONTENT_TYPE' => 'application/json'
+
+        expect(last_response.status).to eq 204
+      end
+    end
+  end
+
   describe "GET /package/:application/:package/status" do
     subject(:status) do
       res = get('/packages/myapp/mypackage/status')

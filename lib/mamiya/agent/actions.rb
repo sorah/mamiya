@@ -22,6 +22,10 @@ module Mamiya
         order_task('switch', app: application, pkg: package, labels: labels, no_release: no_release, do_release: do_release)
       end
 
+      def remove(application, package, labels: nil)
+        order_task('remove', app: application, pkg: package, labels: labels)
+      end
+
       def ping
         order_task('ping')
       end
